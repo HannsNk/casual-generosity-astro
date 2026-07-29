@@ -1,6 +1,6 @@
 ---
 const { a } = Astro.props;
-const url = `${a.slug}.html`;
+const url = `${import.meta.env.BASE_URL}${a.slug}.html`;
 const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
 ---
 <div

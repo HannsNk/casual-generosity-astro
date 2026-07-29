@@ -27,14 +27,13 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
 <Base title={`${a.title} — Casual Generosity`} description={a.hook}>
   <div class={`wrap detail t-${a.tier}`}>
     <div class="detail-top">
-      <a class="back" href="index.html">← All activities</a>
-      <button
+      <a class="back" href={`${import.meta.env.BASE_URL}index.html`}>← All activities</a>      <button
         class="share-btn labeled"
         type="button"
         data-share
         data-title={a.title}
         data-text={shareText}
-        data-url={`${a.slug}.html`}
+        data-url={`${import.meta.env.BASE_URL}${a.slug}.html`}
       >
         <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="18" cy="5" r="3"></circle>
@@ -88,5 +87,162 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
         {a.tags.map((t) => <span>{t}</span>)}
       </div>
     </section>
+
+    <section class="stories" id="stories" data-slug={a.slug}>
+      <h2>Have you done this?</h2>
+
+      <p class="story-counts" id="story-counts">
+        <b id="count-did">0</b> did it · <b id="count-want">0</b> want to try
+      </p>
+
+      <form class="story-form" id="story-form">
+        <div class="story-status" role="group" aria-label="Have you done this?">
+          <button type="button" class="chip tier story-chip" data-status="Did it 🎉" aria-pressed="false">Did it 🎉</button>
+          <button type="button" class="chip tier story-chip" data-status="Want to try" aria-pressed="false">Want to try</button>
+        </div>
+
+        <div class="story-field" id="story-story-field" hidden>
+          <label for="story-text">Your story <span>(optional, 500 characters max)</span></label>
+          <textarea id="story-text" maxlength="500" rows="3" placeholder="What happened?"></textarea>
+        </div>
+
+        <div class="story-field">
+          <label for="story-name">Name <span>(optional)</span></label>
+          <input id="story-name" type="text" maxlength="60" placeholder="Anonymous" />
+        </div>
+
+        <p class="story-error" id="story-error" hidden>Pick "Did it" or "Want to try" first.</p>
+
+        <button type="submit" class="story-submit">Add mine</button>
+      </form>
+
+      <ul class="story-list" id="story-list"></ul>
+      <p class="story-empty" id="story-empty" hidden>Be the first to try this one.</p>
+    </section>
   </div>
 </Base>
+
+<script>
+  import {
+    collection, addDoc, getDocs, query, where, orderBy, limit, serverTimestamp,
+  } from 'firebase/firestore';
+  import { db } from '../lib/firebase.js';
+
+  const section = document.getElementById('stories') as HTMLElement;
+  const slug = section.dataset.slug ?? '';
+
+  const chips = [...section.querySelectorAll<HTMLButtonElement>('.story-chip')];
+  const storyField = document.getElementById('story-story-field') as HTMLElement;
+  const storyInput = document.getElementById('story-text') as HTMLTextAreaElement;
+  const nameInput = document.getElementById('story-name') as HTMLInputElement;
+  const form = document.getElementById('story-form') as HTMLFormElement;
+  const submitBtn = form.querySelector('.story-submit') as HTMLButtonElement;
+  const errorMsg = document.getElementById('story-error') as HTMLElement;
+  const list = document.getElementById('story-list') as HTMLElement;
+  const empty = document.getElementById('story-empty') as HTMLElement;
+  const countDid = document.getElementById('count-did') as HTMLElement;
+  const countWant = document.getElementById('count-want') as HTMLElement;
+
+  const DID_IT = 'Did it 🎉';
+  const WANT_TO = 'Want to try';
+
+  let status = '';
+  const tally: Record<string, number> = { [DID_IT]: 0, [WANT_TO]: 0 };
+
+  const updateCounts = () => {
+    countDid.textContent = String(tally[DID_IT]);
+    countWant.textContent = String(tally[WANT_TO]);
+  };
+
+  const renderStory = (data: { status: string; story: string }, prepend = false) => {
+    const li = document.createElement('li');
+    li.className = 'story-item';
+
+    const stamp = document.createElement('span');
+    stamp.className = 'stamp';
+    stamp.textContent = data.status;
+    li.append(stamp);
+
+    if (data.story) {
+      const p = document.createElement('p');
+      p.textContent = data.story;
+      li.append(p);
+    }
+
+    prepend ? list.prepend(li) : list.append(li);
+    empty.hidden = true;
+  };
+
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const value = chip.dataset.status ?? '';
+      status = status === value ? '' : value;
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.status === status)));
+      storyField.hidden = status !== DID_IT;
+      errorMsg.hidden = true;
+    });
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!status) {
+      errorMsg.textContent = 'Pick "Did it" or "Want to try" first.';
+      errorMsg.hidden = false;
+      return;
+    }
+
+    const story = status === DID_IT ? storyInput.value.trim().slice(0, 500) : '';
+    const name = nameInput.value.trim().slice(0, 60);
+
+    submitBtn.disabled = true;
+    try {
+      await addDoc(collection(db, 'stories'), {
+        activity: slug,
+        status,
+        story,
+        name,
+        createdAt: serverTimestamp(),
+      });
+
+      renderStory({ status, story }, true);
+      tally[status] = (tally[status] ?? 0) + 1;
+      updateCounts();
+
+      form.reset();
+      status = '';
+      chips.forEach((c) => c.setAttribute('aria-pressed', 'false'));
+      storyField.hidden = true;
+      errorMsg.hidden = true;
+    } catch {
+      errorMsg.textContent = "Couldn't save that — try again.";
+      errorMsg.hidden = false;
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  (async () => {
+    const q = query(
+      collection(db, 'stories'),
+      where('activity', '==', slug),
+      orderBy('createdAt', 'desc'),
+      limit(20)
+    );
+    try {
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        empty.hidden = false;
+        return;
+      }
+      snap.forEach((doc) => {
+        const data = doc.data() as { status: string; story: string };
+        renderStory(data);
+        tally[data.status] = (tally[data.status] ?? 0) + 1;
+      });
+      updateCounts();
+    } catch {
+      empty.hidden = false;
+      empty.textContent = "Couldn't load stories right now.";
+    }
+  })();
+</script>

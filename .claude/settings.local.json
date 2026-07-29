@@ -16,7 +16,12 @@
       "Bash(cp /tmp/check.mjs check-tmp.mjs)",
       "Bash(node check-tmp.mjs)",
       "Bash(node verify3.mjs)",
-      "Bash(node shot2.mjs)"
+      "Bash(node shot2.mjs)",
+      "Bash(npm view *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(git status *)",
+      "Bash(awk '{print $1}')"
     ]
   }
 }
