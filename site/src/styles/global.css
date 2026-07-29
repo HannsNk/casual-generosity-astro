@@ -288,18 +288,26 @@ a { color: inherit; }
   flex-direction: column;
   background: var(--card);
   border: var(--edge) solid var(--ink);
-  text-decoration: none;
   /* the misregistered second pass */
   box-shadow: 8px 8px 0 var(--tier);
   transition: transform .14s ease, box-shadow .14s ease;
 }
 .card:hover,
-.card:focus-visible {
+.card:has(:focus-visible) {
   transform: translate(6px, 6px);
   box-shadow: 2px 2px 0 var(--tier);
 }
-.card:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
 .card[hidden] { display: none; }
+
+/* Invisible overlay spanning the whole card — the actual click target,
+   so the share button can sit alongside it without nesting interactive
+   elements inside an <a> (invalid HTML and unreliable for click/keyboard). */
+.card-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.card-link:focus-visible { outline: 3px solid var(--ink); outline-offset: -3px; }
 
 .card-top {
   display: flex;
@@ -332,6 +340,15 @@ a { color: inherit; }
 
 .card-body { padding: .65rem 1rem 1.1rem; display: flex; flex-direction: column; flex: 1; }
 
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-bottom: .5rem;
+}
+.card-head .stamp { margin-bottom: 0; }
+
 .stamp {
   font-family: var(--mono);
   font-size: .62rem;
@@ -342,6 +359,55 @@ a { color: inherit; }
   color: #fff;
   padding: .32em .6em;
   margin-bottom: .5rem;
+}
+
+/* ---------- share button ---------- */
+.share-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4em;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--mono);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.share-btn:hover { background: var(--paper-deep); }
+.share-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.share-btn svg { flex: 0 0 auto; }
+
+/* sits above .card-link (z-index: 1) so clicks land on the button, not the
+   card's whole-card overlay link */
+.share-btn.icon-only {
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+}
+
+.share-btn.labeled {
+  padding: .55em 1em;
+  font-size: .72rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.share-btn.shared::after {
+  content: attr(data-feedback);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: .62rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: .4em .65em;
+  pointer-events: none;
 }
 
 .card h2 {
@@ -380,6 +446,12 @@ a { color: inherit; }
 }
 
 /* ---------- detail page ---------- */
+.detail-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
 .back {
   font-family: var(--mono);
   font-size: .72rem;

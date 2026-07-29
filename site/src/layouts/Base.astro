@@ -35,3 +35,42 @@ const { title, description } = Astro.props;
     </footer>
   </body>
 </html>
+
+<script>
+  // One delegated listener handles every [data-share] button on the page —
+  // there can be dozens on the index grid, so we avoid per-button listeners.
+  const timers = new WeakMap<HTMLButtonElement, number>();
+
+  const flash = (btn: HTMLButtonElement, message: string) => {
+    btn.dataset.feedback = message;
+    btn.classList.add('shared');
+    const prev = timers.get(btn);
+    if (prev) window.clearTimeout(prev);
+    timers.set(btn, window.setTimeout(() => btn.classList.remove('shared'), 1600));
+  };
+
+  document.addEventListener('click', async (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-share]');
+    if (!btn) return;
+
+    const url = new URL(btn.dataset.url ?? '', location.href).href;
+    const title = btn.dataset.title ?? document.title;
+    const text = btn.dataset.text ?? '';
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+      } catch {
+        // user backed out of the share sheet — nothing to do
+      }
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      flash(btn, 'Copied!');
+    } catch {
+      flash(btn, 'Copy failed');
+    }
+  });
+</script>

@@ -12,7 +12,11 @@
       "Bash(npm uninstall *)",
       "Bash(lsof -ti:4322 -sTCP:LISTEN)",
       "Bash(xargs -r kill)",
-      "Bash(powershell -NoProfile -Command 'Get-CimInstance Win32_Process -Filter \"Name='\\\\''node.exe'\\\\''\" | Where-Object { $_.CommandLine -like '\\\\''*astro*'\\\\'' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force; \"killed $\\($_.ProcessId\\)\" }')"
+      "Bash(powershell -NoProfile -Command 'Get-CimInstance Win32_Process -Filter \"Name='\\\\''node.exe'\\\\''\" | Where-Object { $_.CommandLine -like '\\\\''*astro*'\\\\'' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force; \"killed $\\($_.ProcessId\\)\" }')",
+      "Bash(cp /tmp/check.mjs check-tmp.mjs)",
+      "Bash(node check-tmp.mjs)",
+      "Bash(node verify3.mjs)",
+      "Bash(node shot2.mjs)"
     ]
   }
 }

@@ -21,10 +21,31 @@ const blocks = a.instructions.split(/\n\s*\n/).map((raw) => {
 const href = a.link && !a.link.startsWith('Search:')
   ? (a.link.startsWith('http') ? a.link : `https://${a.link}`)
   : null;
+
+const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
 ---
 <Base title={`${a.title} — Casual Generosity`} description={a.hook}>
   <div class={`wrap detail t-${a.tier}`}>
-    <a class="back" href="index.html">← All activities</a>
+    <div class="detail-top">
+      <a class="back" href="index.html">← All activities</a>
+      <button
+        class="share-btn labeled"
+        type="button"
+        data-share
+        data-title={a.title}
+        data-text={shareText}
+        data-url={`${a.slug}.html`}
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"></circle>
+          <circle cx="6" cy="12" r="3"></circle>
+          <circle cx="18" cy="19" r="3"></circle>
+          <line x1="8.6" y1="10.6" x2="15.4" y2="6.4"></line>
+          <line x1="8.6" y1="13.4" x2="15.4" y2="17.6"></line>
+        </svg>
+        <span>Share</span>
+      </button>
+    </div>
 
     <div class="detail-head">
       <span class="stamp">{a.tier}</span>
