@@ -18,8 +18,7 @@ jobs:
         with:
           package-manager: npm
           path: ./site
-          custom-build-command: chmod +x ./node_modules/.bin/astro && npm run build
-
+          build-cmd: chmod +x ./node_modules/.bin/astro && npm run build
   deploy:
     needs: build
     runs-on: ubuntu-latest
