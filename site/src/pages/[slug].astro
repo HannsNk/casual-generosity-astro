@@ -1,0 +1,71 @@
+---
+import Base from '../layouts/Base.astro';
+import activities from '../data/activities.json';
+
+export function getStaticPaths() {
+  return activities.map((a) => ({ params: { slug: a.slug }, props: { a } }));
+}
+
+const { a } = Astro.props;
+
+// Instructions arrive as plain text: blank lines separate blocks, and a block
+// whose lines all begin with "- " is a list.
+const blocks = a.instructions.split(/\n\s*\n/).map((raw) => {
+  const lines = raw.split('\n').map((l) => l.trim()).filter(Boolean);
+  const isList = lines.length > 0 && lines.every((l) => l.startsWith('- '));
+  return isList
+    ? { type: 'ul' as const, items: lines.map((l) => l.slice(2)) }
+    : { type: 'p' as const, text: lines.join(' ') };
+});
+
+const href = a.link && !a.link.startsWith('Search:')
+  ? (a.link.startsWith('http') ? a.link : `https://${a.link}`)
+  : null;
+---
+<Base title={`${a.title} — Casual Generosity`} description={a.hook}>
+  <div class={`wrap detail t-${a.tier}`}>
+    <a class="back" href="index.html">← All activities</a>
+
+    <div class="detail-head">
+      <span class="stamp">{a.tier}</span>
+      <h1>{a.title}</h1>
+      <p class="detail-hook">{a.hook}</p>
+    </div>
+
+    {a.image && <img class="hero" src={a.image} alt="" />}
+
+    <dl class="spec">
+      <div><dt>Cost</dt><dd>{a.cost.join(' / ')}</dd></div>
+      <div><dt>Time</dt><dd>{a.time}</dd></div>
+      <div><dt>People</dt><dd>{a.groupSize.join(', ')}</dd></div>
+      <div><dt>Where</dt><dd>{a.location.join(', ')}</dd></div>
+      <div><dt>Bring</dt><dd>{a.needs || 'Nothing in particular'}</dd></div>
+    </dl>
+
+    <section class="why">
+      <h2>Why this matters</h2>
+      <p>{a.why}</p>
+    </section>
+
+    <section class="howto">
+      <h2>How to do it</h2>
+      {blocks.map((b) =>
+        b.type === 'ul'
+          ? <ul>{b.items.map((i) => <li>{i}</li>)}</ul>
+          : <p>{b.text}</p>
+      )}
+
+      {a.link && (
+        <p>
+          {href
+            ? <a class="orglink" href={href} target="_blank" rel="noopener">{a.link} ↗</a>
+            : <span class="orglink">{a.link}</span>}
+        </p>
+      )}
+
+      <div class="taglist">
+        {a.tags.map((t) => <span>{t}</span>)}
+      </div>
+    </section>
+  </div>
+</Base>

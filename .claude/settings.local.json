@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(pwd; cat *)",
+      "Read(//tmp/**)",
+      "Bash(chromium-cli --help)",
+      "Bash(node -e \"require.resolve\\('playwright'\\)\")",
+      "Bash(npx --no-install playwright --version)",
+      "Bash(node verify2.mjs)",
+      "Bash(rm -f verify.mjs verify2.mjs verify-*.png)",
+      "Bash(npm uninstall *)",
+      "Bash(lsof -ti:4322 -sTCP:LISTEN)",
+      "Bash(xargs -r kill)",
+      "Bash(powershell -NoProfile -Command 'Get-CimInstance Win32_Process -Filter \"Name='\\\\''node.exe'\\\\''\" | Where-Object { $_.CommandLine -like '\\\\''*astro*'\\\\'' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force; \"killed $\\($_.ProcessId\\)\" }')"
+    ]
+  }
+}

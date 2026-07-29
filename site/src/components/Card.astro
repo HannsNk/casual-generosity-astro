@@ -1,0 +1,28 @@
+---
+const { a } = Astro.props;
+---
+<a
+  class:list={['card', `t-${a.tier}`]}
+  href={`${a.slug}.html`}
+  data-tier={a.tier}
+  data-cost={a.cost.join('|')}
+  data-group={a.groupSize.join('|')}
+  data-time={a.timeBucket}
+>
+  <div class="card-top">
+    {a.image
+      ? <img class="card-img" src={a.image} alt="" loading="lazy" decoding="async" />
+      : <div class="card-img placeholder">no photo</div>}
+    <div class="meta">
+      <span>{a.cost[0]}</span>
+      <span>{a.time}</span>
+      <span>{a.groupSize[0]}</span>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <span class="stamp">{a.tier}</span>
+    <h2>{a.title}</h2>
+    <p>{a.hook}</p>
+  </div>
+</a>
