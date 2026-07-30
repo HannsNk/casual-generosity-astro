@@ -23,32 +23,26 @@ const featured = featuredSlugs
 const dateFmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' });
 const latestNotes = (await getCollection('notes'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 2);
+  .slice(0, 3);
 
 const INTENTS = [
   {
     tier: 'Spontaneous',
     href: `${base}activities.html?tier=Spontaneous`,
-    label: 'Do something right now',
+    label: 'Do something right now, alone or as a group',
     sub: 'No planning, no cost, just today.',
   },
   {
     tier: 'Planned',
     href: `${base}activities.html?tier=Planned`,
-    label: 'Plan something together',
+    label: 'Plan something together for an evening or weekend',
     sub: 'A bit of coordinating, worth the effort.',
   },
   {
     tier: null,
-    href: `${base}activities.html?tags=Preparedness`,
-    label: 'Get ready to help later',
-    sub: 'Skills and habits that sit ready until you need them.',
-  },
-  {
-    tier: null,
-    href: `${base}activities.html`,
-    label: 'See everything',
-    sub: 'Browse the full list, filter as you go.',
+    href: `${base}notes/preparedness-evening.html`,
+    label: 'Organise a preparedness evening with friends',
+    sub: 'My notes on being prepared to be generous in various situations, and a few activities to try alongside it.',
   },
 ];
 ---
@@ -81,31 +75,35 @@ const INTENTS = [
       <!-- <p class="stats-counter"><b>{thingsDone}</b> things done so far</p>-->
     </section>
 
-    {featured.length > 0 && (
-      <section class="wrap landing-section">
-        <p class="intent-label">Where to start</p>
-        <p class="landing-pitch">A few I'd genuinely recommend.</p>
-        <div class="grid">
-          {featured.map((a) => <Card a={a} />)}
-        </div>
-      </section>
-    )}
+    {(featured.length > 0 || latestNotes.length > 0) && (
+      <section class="wrap landing-section landing-columns">
+        {featured.length > 0 && (
+          <div class="landing-col">
+            <p class="intent-label">Where to start</p>
+            <p class="landing-pitch">A few I'd genuinely recommend.</p>
+            <div class="grid">
+              {featured.map((a) => <Card a={a} />)}
+            </div>
+          </div>
+        )}
 
-    {latestNotes.length > 0 && (
-      <section class="wrap landing-section">
-        <p class="intent-label">Notes</p>
-        <p class="landing-pitch">Occasional writing, with a few activities worth trying alongside it.</p>
-        <ul class="notes-index">
-          {latestNotes.map((post) => (
-            <li class="notes-index-item">
-              <a href={`${base}notes/${post.id}.html`}>
-                <span class="notes-index-date">{dateFmt.format(post.data.date)}</span>
-                <h2>{post.data.title}</h2>
-                {post.data.description && <p>{post.data.description}</p>}
-              </a>
-            </li>
-          ))}
-        </ul>
+        {latestNotes.length > 0 && (
+          <div class="landing-col">
+            <p class="intent-label">Notes</p>
+            <p class="landing-pitch">Occasional writing, with a few activities worth trying alongside it.</p>
+            <ul class="notes-index">
+              {latestNotes.map((post) => (
+                <li class="notes-index-item">
+                  <a href={`${base}notes/${post.id}.html`}>
+                    <span class="notes-index-date">{dateFmt.format(post.data.date)}</span>
+                    <h2>{post.data.title}</h2>
+                    {post.data.description && <p>{post.data.description}</p>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
     )}
 

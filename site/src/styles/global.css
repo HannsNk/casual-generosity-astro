@@ -243,6 +243,27 @@ a { color: inherit; }
 }
 .landing-section .landing-pitch { margin-bottom: 2rem; }
 
+.landing-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+@media (min-width: 800px) {
+  .landing-columns { grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+}
+
+/* A bordered box, not a hard-shadow card (that look is reserved for
+   .card/.intent-card) — enough to visually separate the two columns.
+   Grid stretches items to the row's height by default, so both boxes
+   match height even when one has more content than the other. */
+.landing-col {
+  border: var(--edge) solid var(--ink);
+  padding: 1.75rem 1.75rem 2rem;
+}
+.landing-col .grid { padding: 0; gap: 1.5rem; }
+.landing-col .notes-index { max-width: none; }
+.landing-col .notes-index-item:last-child { border-bottom: none; }
+
 @media (max-width: 640px) {
   .landing { --gutter: 1.5rem; }
   .landing .masthead { padding: 2rem 0 1.5rem; }
@@ -254,6 +275,8 @@ a { color: inherit; }
   .landing .landing-section .landing-pitch { margin-bottom: 1.25rem; }
   .landing .grid { padding: 1.5rem 0 2rem; gap: 1.25rem 1rem; }
   .landing .notes-index-item a { padding: 1rem 0; }
+  .landing-col { padding: 1.5rem 1.5rem 1.75rem; }
+  .landing-col .grid { padding: 0; gap: 1.25rem; }
   .landing-why { padding-bottom: 3rem; }
 }
 
