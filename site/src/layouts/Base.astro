@@ -38,7 +38,7 @@ const isCurrent = (match: string) => path.includes(`/${match}`);
   <body>
     <nav class="sitenav">
       <div class="wrap sitenav-inner">
-        <a class="sitenav-word" href={base}>Casual Generosity</a>
+        <a class="sitenav-word" href={base}>CasuallyGenerous</a>
         <div class="sitenav-links">
           {NAV_LINKS.map((l) => (
             <a href={l.href} aria-current={isCurrent(l.match) ? 'page' : undefined}>{l.label}</a>
@@ -50,7 +50,7 @@ const isCurrent = (match: string) => path.includes(`/${match}`);
     <footer class="foot">
       <div class="wrap">
         <p>
-          Casual Generosity — a directory of small, mostly free things worth doing
+          CasuallyGenerous — a directory of small, mostly free things worth doing
           with the people you're already seeing.<br />
           Inspired by <em>Infectious Generosity</em> by Chris Anderson.
         </p>

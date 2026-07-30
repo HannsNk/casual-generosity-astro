@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------
-   Casual Generosity — "riso noticeboard"
+   CasuallyGenerous — "riso noticeboard"
    Flat spot inks on uncoated paper. The signature device is the
    misregistered second print pass: a hard, blur-free offset shadow
    in each tier's ink, which snaps into place on hover.
@@ -102,7 +102,6 @@ a { color: inherit; }
 
 /* ---------- masthead ---------- */
 .masthead {
-  padding: clamp(3rem, 8vw, 6rem) 0 2.5rem;
   border-bottom: var(--edge) solid var(--ink);
 }
 

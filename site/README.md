@@ -1,4 +1,4 @@
-# Casual Generosity
+# CasuallyGenerous
 
 A static directory of 98 activities. Astro, no framework, ~1KB of JavaScript
 on the page (the filter bar). Every activity is its own static HTML page.

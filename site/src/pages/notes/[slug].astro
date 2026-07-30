@@ -19,7 +19,7 @@ const featured = (post.data.featuredActivities ?? [])
   .map((slug) => activities.find((a) => a.slug === slug))
   .filter((a) => a !== undefined);
 ---
-<Base title={`${post.data.title} — Casual Generosity`} description={post.data.description ?? post.data.title}>
+<Base title={`${post.data.title} — CasuallyGenerous`} description={post.data.description ?? post.data.title}>
   <div class="wrap detail t-Planned">
     <div class="detail-top">
       <a class="back" href={`${base}notes.html`}>← All notes</a>
