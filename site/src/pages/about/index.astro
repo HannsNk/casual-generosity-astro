@@ -1,0 +1,38 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+<Base
+  title="About — Casual Generosity"
+  description="What Casual Generosity is, why it exists, and who built it."
+>
+  <div class="wrap detail t-Planned">
+    <div class="detail-top">
+      <a class="back" href={base}>← Home</a>
+    </div>
+
+    <div class="detail-head">
+      <h1>About</h1>
+      <p class="detail-hook">[PLACEHOLDER: core pitch — one or two sentences describing what Casual Generosity is]</p>
+    </div>
+
+    <section class="howto">
+      <h2>Why this exists</h2>
+      <p>[PLACEHOLDER: the Infectious Generosity framing — why this exists, 2-3 sentences]</p>
+
+      <h2>What this isn't</h2>
+      <p>[PLACEHOLDER: what this deliberately isn't — how it differs from volunteering platforms and donation platforms]</p>
+
+      <h2>Who built this</h2>
+      <p>[PLACEHOLDER: two lines about who built it]</p>
+
+      <h2>More</h2>
+      <p>
+        [PLACEHOLDER: closing pointer sentence] Read the
+        <a class="orglink" href={`${base}notes.html`}>notes</a> or
+        [PLACEHOLDER: contact method].
+      </p>
+    </section>
+  </div>
+</Base>

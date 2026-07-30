@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const base = import.meta.env.BASE_URL;
+
+const posts = (await getCollection('notes')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const dateFmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' });
+---
+<Base title="Notes — Casual Generosity" description="Notes and updates from Casual Generosity.">
+  <header class="masthead">
+    <div class="wrap">
+      <h1 class="wordmark">Notes</h1>
+      <p class="landing-pitch">[PLACEHOLDER: one-line pitch for the notes section]</p>
+    </div>
+  </header>
+
+  <main class="wrap notes-list">
+    <ul class="notes-index">
+      {posts.map((post) => (
+        <li class="notes-index-item">
+          <a href={`${base}notes/${post.id}.html`}>
+            <span class="notes-index-date">{dateFmt.format(post.data.date)}</span>
+            <h2>{post.data.title}</h2>
+            {post.data.description && <p>{post.data.description}</p>}
+          </a>
+        </li>
+      ))}
+      {posts.length === 0 && <p class="empty">No notes yet.</p>}
+    </ul>
+  </main>
+</Base>

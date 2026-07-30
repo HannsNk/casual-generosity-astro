@@ -14,6 +14,6 @@ Astro.response.status = 404;
       That link's broken, or the page has moved. Nothing to worry about —
       there's still a whole list of things to do.
     </p>
-    <a class="back" href="index.html">← Back to all activities</a>
+    <a class="back" href={`${import.meta.env.BASE_URL}activities.html`}>← Back to all activities</a>
   </div>
 </Base>

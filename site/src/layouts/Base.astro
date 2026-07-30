@@ -2,6 +2,18 @@
 import '../styles/global.css';
 
 const { title, description } = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+const path = Astro.url.pathname;
+
+const NAV_LINKS = [
+  { href: `${base}activities.html`, label: 'Explore', match: 'activities' },
+  { href: `${base}about.html`, label: 'About', match: 'about' },
+  { href: `${base}notes.html`, label: 'Notes', match: 'notes' },
+];
+
+// Simple current-page check: does the path contain the section's segment?
+const isCurrent = (match: string) => path.includes(`/${match}`);
 ---
 <!doctype html>
 <html lang="en">
@@ -21,9 +33,19 @@ const { title, description } = Astro.props;
     <!-- Cloudflare Web Analytics -->
     <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "53dea8d7396246feaac67d970365e537"}'></script>
     <!-- End Cloudflare Web Analytics -->
-    
+
   </head>
   <body>
+    <nav class="sitenav">
+      <div class="wrap sitenav-inner">
+        <a class="sitenav-word" href={base}>Casual Generosity</a>
+        <div class="sitenav-links">
+          {NAV_LINKS.map((l) => (
+            <a href={l.href} aria-current={isCurrent(l.match) ? 'page' : undefined}>{l.label}</a>
+          ))}
+        </div>
+      </div>
+    </nav>
     <slot />
     <footer class="foot">
       <div class="wrap">

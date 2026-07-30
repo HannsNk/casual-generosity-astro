@@ -2,230 +2,121 @@
 import Base from '../layouts/Base.astro';
 import Card from '../components/Card.astro';
 import activities from '../data/activities.json';
+import { getCollection } from 'astro:content';
 
-const TIERS = ['Spontaneous', 'Planned', 'Committed'];
-const COSTS = ['Free', 'Under £20pp', '£20+pp'];
-const GROUPS = ['Solo / Duo', 'Small Group (3-6)', 'Large Group (7+)'];
-const TIMES = ['Under 30 min', '30-90 min', '90-120 min', 'Half-day'];
+const base = import.meta.env.BASE_URL;
 
-const TIER_NOTE = {
-  Spontaneous: 'Do it today. Nothing to book, nothing to arrange.',
-  Planned: 'Needs a date in the diary and a bit of coordinating.',
-  Committed: 'Sign up, apply or train first — then it stays available to you.',
-};
+// Placeholder until a live Firestore count query replaces it.
+const thingsDone = 0;
+
+// Hand-picked, not derived from any ranking — update this list manually
+// whenever you want to change what the homepage recommends.
+const featuredSlugs = [
+  'write-an-appreciation-email-to-an-old-teacher',
+  'donate-blood-together',
+  'do-a-first-aid-course-together',
+];
+const featured = featuredSlugs
+  .map((slug) => activities.find((a) => a.slug === slug))
+  .filter((a) => a !== undefined);
+
+const dateFmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' });
+const latestNotes = (await getCollection('notes'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 2);
+
+const INTENTS = [
+  {
+    tier: 'Spontaneous',
+    href: `${base}activities.html?tier=Spontaneous`,
+    label: 'Do something right now',
+    sub: 'No planning, no cost, just today.',
+  },
+  {
+    tier: 'Planned',
+    href: `${base}activities.html?tier=Planned`,
+    label: 'Plan something together',
+    sub: 'A bit of coordinating, worth the effort.',
+  },
+  {
+    tier: null,
+    href: `${base}activities.html?tags=Preparedness`,
+    label: 'Get ready to help later',
+    sub: 'Skills and habits that sit ready until you need them.',
+  },
+  {
+    tier: null,
+    href: `${base}activities.html`,
+    label: 'See everything',
+    sub: 'Browse the full list, filter as you go.',
+  },
+];
 ---
 <Base
   title="Casual Generosity — easy, good things to do with people you're already seeing"
-  description="A directory of 98 low-effort, mostly free ways to do something meaningful while hanging out with friends or a partner."
+  description="A directory of low-effort, mostly free ways to do something meaningful while hanging out with friends or a partner."
 >
   <header class="masthead">
     <div class="wrap">
-      <h1 class="wordmark">Casual<br />Generosity</h1>
-
-      <p class="standfirst">
-        Easy, genuinely fun ways to do something meaningful with the people you're
-        already hanging out with — <strong>most of it completely free.</strong>
+      <h1 class="wordmark">WorkingTitle</h1>
+      <p class="landing-pitch"><strong>Casually generous.</strong></p>
+      <p class="landing-pitch">
+        Small, mostly free things worth doing with the people you're already
+        seeing this week. Pick what fits your moment.
       </p>
-      <p class="standfirst">
-        Inspired by Chris Anderson's <em>Infectious Generosity</em>, this is a
-        browsable list of specific, low-effort things you can actually do this
-        weekend. No planning, no big commitment. And it's not just a nice feeling:
-        research consistently links doing things for others with real gains in
-        happiness and life satisfaction. Pick one based on how much time or money
-        you've actually got, and go.
-      </p>
-
-      <ul class="legend">
-        {TIERS.map((t) => (
-          <li class={`t-${t}`}>
-            <b>{t}</b>
-            <span>{TIER_NOTE[t]}</span>
-          </li>
-        ))}
-      </ul>
     </div>
   </header>
 
-  <div class="filters">
-    <div class="wrap filters-inner">
-      <details class="filters-panel" id="filters-panel">
-        <summary class="filters-toggle">Filters</summary>
-        <div class="filters-body">
-          <div class="fgroup">
-            <span class="flabel">Effort</span>
-            <div class="chip-row">
-              {TIERS.map((t) => (
-                <button class={`chip tier t-${t}`} data-facet="tier" data-value={t} aria-pressed="false">{t}</button>
-              ))}
-            </div>
-            <select class="fselect" data-facet="tier" aria-label="Filter by effort">
-              <option value="">All effort</option>
-              {TIERS.map((t) => <option value={t}>{t}</option>)}
-            </select>
-          </div>
-          <div class="fgroup">
-            <span class="flabel">Cost</span>
-            <div class="chip-row">
-              {COSTS.map((c) => (
-                <button class="chip" data-facet="cost" data-value={c} aria-pressed="false">{c}</button>
-              ))}
-            </div>
-            <select class="fselect" data-facet="cost" aria-label="Filter by cost">
-              <option value="">All cost</option>
-              {COSTS.map((c) => <option value={c}>{c}</option>)}
-            </select>
-          </div>
-          <div class="fgroup">
-            <span class="flabel">Time</span>
-            <div class="chip-row">
-              {TIMES.map((t) => (
-                <button class="chip" data-facet="time" data-value={t} aria-pressed="false">{t}</button>
-              ))}
-            </div>
-            <select class="fselect" data-facet="time" aria-label="Filter by time">
-              <option value="">All time</option>
-              {TIMES.map((t) => <option value={t}>{t}</option>)}
-            </select>
-          </div>
-          <div class="fgroup">
-            <span class="flabel">People</span>
-            <div class="chip-row">
-              {GROUPS.map((g) => (
-                <button class="chip" data-facet="group" data-value={g} aria-pressed="false">{g.replace(/ \(.*\)/, '')}</button>
-              ))}
-            </div>
-            <select class="fselect" data-facet="group" aria-label="Filter by group size">
-              <option value="">All group sizes</option>
-              {GROUPS.map((g) => <option value={g}>{g}</option>)}
-            </select>
-          </div>
-          <div class="fgroup">
-            <span class="flabel">View</span>
-            <select class="cols-select" id="cols-select" aria-label="Grid columns">
-              <option value="">Auto</option>
-              <option value="2">2-wide</option>
-              <option value="3">3-wide</option>
-              <option value="4">4-wide</option>
-            </select>
-          </div>
-        </div>
-      </details>
-      <button class="reset" id="reset" hidden>Clear all</button>
-      <output class="count" id="count">{activities.length} things to do</output>
+  <section class="intent wrap">
+    <p class="intent-label">Where do you want to start?</p>
+    <div class="intent-grid">
+      {INTENTS.map((i) => (
+        <a class:list={['intent-card', i.tier ? `t-${i.tier}` : 'neutral']} href={i.href}>
+          <span class="intent-card-label">{i.label}</span>
+          <span class="intent-card-sub">{i.sub}</span>
+          <span class="intent-card-arrow">→</span>
+        </a>
+      ))}
     </div>
-  </div>
+    <p class="stats-counter"><b>{thingsDone}</b> things done so far</p>
+  </section>
 
-  <main class="wrap">
-    <div class="grid" id="grid">
-      {activities.map((a) => <Card a={a} />)}
-      <p class="empty" id="empty" hidden>
-        Nothing matches all of those at once. Try clearing one filter.
-      </p>
-    </div>
-  </main>
+  {featured.length > 0 && (
+    <section class="wrap landing-section">
+      <p class="intent-label">Where to start</p>
+      <p class="landing-pitch">A few we'd genuinely recommend.</p>
+      <div class="grid">
+        {featured.map((a) => <Card a={a} />)}
+      </div>
+    </section>
+  )}
+
+  {latestNotes.length > 0 && (
+    <section class="wrap landing-section">
+      <p class="intent-label">Notes</p>
+      <p class="landing-pitch">Occasional writing, with a few activities worth trying alongside it.</p>
+      <ul class="notes-index">
+        {latestNotes.map((post) => (
+          <li class="notes-index-item">
+            <a href={`${base}notes/${post.id}.html`}>
+              <span class="notes-index-date">{dateFmt.format(post.data.date)}</span>
+              <h2>{post.data.title}</h2>
+              {post.data.description && <p>{post.data.description}</p>}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="landing-why wrap">
+    <h2>Why this exists</h2>
+    <p>
+      This isn't volunteering, and it isn't a donation platform — plenty of
+      good options exist for both. This is something else: the small,
+      overlooked, mostly free stuff that fits into a life you're already
+      living.
+    </p>
+    <a href={`${base}about.html`}>More on why →</a>
+  </section>
 </Base>
-
-<script>
-  // Plain DOM filtering — no framework, ~1KB of JS on an otherwise static page.
-  const chips = [...document.querySelectorAll<HTMLButtonElement>('.chip')];
-  const selects = [...document.querySelectorAll<HTMLSelectElement>('.fselect')];
-  const cards = [...document.querySelectorAll<HTMLElement>('.card')];
-  const count = document.getElementById('count')!;
-  const empty = document.getElementById('empty')!;
-  const reset = document.getElementById('reset') as HTMLButtonElement;
-  const grid = document.getElementById('grid')!;
-  const colsSelect = document.getElementById('cols-select') as HTMLSelectElement;
-
-  const active: Record<string, Set<string>> = {
-    tier: new Set(), cost: new Set(), time: new Set(), group: new Set(),
-  };
-
-  const matches = (card: HTMLElement) => {
-    for (const facet of Object.keys(active)) {
-      const wanted = active[facet];
-      if (!wanted.size) continue;
-      const raw = card.dataset[facet] ?? '';
-      const has = raw.split('|').some((v) => wanted.has(v));
-      if (!has) return false;
-    }
-    return true;
-  };
-
-  // Keep chips and the mobile <select> for the same facet in sync, since
-  // either can be used to change the filter depending on viewport width.
-  const syncControls = () => {
-    chips.forEach((chip) => {
-      const { facet, value } = chip.dataset as { facet: string; value: string };
-      chip.setAttribute('aria-pressed', String(active[facet].has(value)));
-    });
-    selects.forEach((select) => {
-      const facet = select.dataset.facet!;
-      const set = active[facet];
-      select.value = set.size ? [...set][set.size - 1] : '';
-    });
-  };
-
-  const apply = () => {
-    let shown = 0;
-    for (const card of cards) {
-      const ok = matches(card);
-      card.hidden = !ok;
-      if (ok) shown++;
-    }
-    count.textContent = shown === cards.length
-      ? `${shown} things to do`
-      : `${shown} of ${cards.length}`;
-    empty.hidden = shown !== 0;
-    const any = Object.values(active).some((s) => s.size > 0);
-    reset.hidden = !any;
-  };
-
-  chips.forEach((chip) => {
-    chip.addEventListener('click', () => {
-      const { facet, value } = chip.dataset as { facet: string; value: string };
-      const set = active[facet];
-      const on = set.has(value);
-      on ? set.delete(value) : set.add(value);
-      syncControls();
-      apply();
-    });
-  });
-
-  const filtersPanel = document.getElementById('filters-panel') as HTMLDetailsElement;
-  const isMobile = () => window.matchMedia('(max-width: 640px)').matches;
-
-  selects.forEach((select) => {
-    select.addEventListener('change', () => {
-      const facet = select.dataset.facet!;
-      active[facet].clear();
-      if (select.value) active[facet].add(select.value);
-      syncControls();
-      apply();
-      // On mobile the panel is a dropdown overlay — collapse it back to a
-      // single "Filters" row as soon as a choice is made, so results show.
-      if (isMobile()) filtersPanel.open = false;
-    });
-  });
-
-  reset.addEventListener('click', () => {
-    Object.values(active).forEach((s) => s.clear());
-    syncControls();
-    apply();
-  });
-
-  // Grid column count: 2/3/4-wide, remembered across visits.
-  const COLS_KEY = 'cg-grid-cols';
-  const savedCols = localStorage.getItem(COLS_KEY) ?? '';
-  colsSelect.value = savedCols;
-  grid.classList.toggle('cols-2', savedCols === '2');
-  grid.classList.toggle('cols-3', savedCols === '3');
-  grid.classList.toggle('cols-4', savedCols === '4');
-
-  colsSelect.addEventListener('change', () => {
-    const v = colsSelect.value;
-    grid.classList.toggle('cols-2', v === '2');
-    grid.classList.toggle('cols-3', v === '3');
-    grid.classList.toggle('cols-4', v === '4');
-    localStorage.setItem(COLS_KEY, v);
-  });
-</script>

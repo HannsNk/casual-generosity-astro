@@ -1,0 +1,47 @@
+---
+import Base from '../../layouts/Base.astro';
+import Card from '../../components/Card.astro';
+import activities from '../../data/activities.json';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('notes');
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const base = import.meta.env.BASE_URL;
+const dateFmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' });
+
+const featured = (post.data.featuredActivities ?? [])
+  .map((slug) => activities.find((a) => a.slug === slug))
+  .filter((a) => a !== undefined);
+---
+<Base title={`${post.data.title} — Casual Generosity`} description={post.data.description ?? post.data.title}>
+  <div class="wrap detail t-Planned">
+    <div class="detail-top">
+      <a class="back" href={`${base}notes.html`}>← All notes</a>
+    </div>
+
+    <div class="detail-head">
+      <span class="notes-index-date">{dateFmt.format(post.data.date)}</span>
+      <h1>{post.data.title}</h1>
+      {post.data.description && <p class="detail-hook">{post.data.description}</p>}
+    </div>
+
+    <section class="howto">
+      <Content />
+    </section>
+
+    {featured.length > 0 && (
+      <section class="notes-featured">
+        <h2>Featured activities</h2>
+        <div class="grid">
+          {featured.map((a) => <Card a={a} />)}
+        </div>
+      </section>
+    )}
+  </div>
+</Base>
