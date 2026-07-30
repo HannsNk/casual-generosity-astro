@@ -1,10 +1,16 @@
 ---
 import '../styles/global.css';
 
-const { title, description } = Astro.props;
+const { title, description, image } = Astro.props;
 
 const base = import.meta.env.BASE_URL;
 const path = Astro.url.pathname;
+
+// `image` may be an absolute external URL (activity photos) or left unset,
+// in which case we fall back to a site-relative default — that one needs
+// BASE_URL prepended since the site is served from a GitHub Pages subpath;
+// an already-absolute URL passed to `image` is returned as-is by `new URL()`.
+const shareImage = new URL(image ?? `${base}default-share-image.jpg`, Astro.site);
 
 const NAV_LINKS = [
   { href: base, label: 'Home', match: '' },
@@ -26,6 +32,15 @@ const isCurrent = (match: string) =>
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:image" content={shareImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={shareImage} />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9D%A4%EF%B8%8F</text></svg>" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+
 const { a } = Astro.props;
 const url = `${import.meta.env.BASE_URL}${a.slug}.html`;
 const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
@@ -15,7 +17,7 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
 
   <div class="card-top">
     {a.image
-      ? <img class="card-img" src={a.image} alt="" loading="lazy" decoding="async" />
+      ? <Image class="card-img" src={a.image} inferSize alt="" loading="lazy" />
       : <div class="card-img placeholder">no photo</div>}
     <div class="meta">
       <span>{a.cost.join(' / ')}</span>
