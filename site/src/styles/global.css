@@ -301,7 +301,8 @@ a { color: inherit; }
   align-items: center;
   gap: .5rem 1.25rem;
 }
-.fgroup { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.fgroup { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; width: max-content; }
+.chip-row { display: flex; flex-wrap: wrap; gap: .35rem; }
 .fgroup > .flabel {
   font-family: var(--mono);
   font-size: .65rem;
@@ -393,10 +394,25 @@ a { color: inherit; }
 }
 .reset[hidden] { display: none; }
 
-/* Desktop/tablet: the <details> wrapper is purely structural — flatten it
-   so its children lay out directly in the .filters-inner flex row. */
-.filters-panel,
-.filters-body { display: contents; }
+/* Desktop/tablet: the <details> markup ships permanently `open` (see the
+   filter script) so it never hits the native "closed <details> hides
+   everything but <summary>" behaviour — that let us drop display:contents
+   here entirely. display:contents on deeply nested elements like this chip
+   markup was silently failing to paint in testing (correct layout geometry,
+   nothing actually drawn), so .filters-panel stays a normal block box that
+   sizes into the .filters-inner flex row, and .filters-body just flexes
+   its own children inside that box. */
+.filters-panel {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.filters-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem 1.25rem;
+}
 .filters-toggle { display: none; }
 
 @media (max-width: 640px) {

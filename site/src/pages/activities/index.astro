@@ -33,7 +33,7 @@ const TIER_NOTE = {
 
   <div class="filters">
     <div class="wrap filters-inner">
-      <details class="filters-panel" id="filters-panel">
+      <details class="filters-panel" id="filters-panel" open>
         <summary class="filters-toggle">Filters</summary>
         <div class="filters-body">
           <div class="fgroup">
@@ -213,6 +213,12 @@ const TIER_NOTE = {
 
   const filtersPanel = document.getElementById('filters-panel') as HTMLDetailsElement;
   const isMobile = () => window.matchMedia('(max-width: 640px)').matches;
+
+  // The <details> markup ships permanently `open` — desktop relies on that
+  // (its content must never be collapsed, and closing a <details> natively
+  // hides everything but the <summary>, which desktop can't tolerate) — so
+  // mobile has to close it itself on load instead of via a default state.
+  if (isMobile()) filtersPanel.open = false;
 
   selects.forEach((select) => {
     select.addEventListener('change', () => {
