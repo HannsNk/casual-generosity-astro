@@ -34,10 +34,69 @@ Importantly, this is a fun project I am building for everyone else, as much as m
       <h2>More</h2>
       <p>
         Read the
-        <a class="orglink" href={`${base}notes.html`}>notes</a> for occasional writing on how this is going, or drop me a note on [PLACEHOLDER] if you've got an idea worth adding, a correction, or just want to say hello.
-I’ll need all the ideas, input, feedback and advice I can get to grow this.
-
+        <a class="orglink" href={`${base}notes.html`}>notes</a> for occasional writing on how this is going, or send a note below if you've got an idea worth adding, a correction, or just want to say hello.
+        I'll need all the ideas, input, feedback and advice I can get to grow this.
       </p>
+
+      <form class="story-form" id="contact-form">
+        <div class="story-field">
+          <label for="contact-name">Name <span>(optional)</span></label>
+          <input id="contact-name" name="name" type="text" maxlength="80" placeholder="Your name" />
+        </div>
+
+        <div class="story-field">
+          <label for="contact-email">Email</label>
+          <input id="contact-email" name="email" type="email" required maxlength="120" placeholder="you@example.com" />
+        </div>
+
+        <div class="story-field">
+          <label for="contact-message">Message</label>
+          <textarea id="contact-message" name="message" rows="4" required maxlength="2000" placeholder="What's on your mind?"></textarea>
+        </div>
+
+        <input
+          type="text"
+          name="_gotcha"
+          tabindex="-1"
+          autocomplete="off"
+          aria-hidden="true"
+          style="position:absolute; left:-9999px; width:1px; height:1px;"
+        />
+
+        <p class="story-error" id="contact-error" hidden>Couldn't send that — try again, or nothing's lost, just retry in a moment.</p>
+
+        <button type="submit" class="story-submit" id="contact-submit">Send</button>
+      </form>
+      <p class="story-empty" id="contact-success" hidden>Thanks — I'll get back to you.</p>
     </section>
   </div>
 </Base>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const submitBtn = document.getElementById('contact-submit') as HTMLButtonElement;
+  const errorMsg = document.getElementById('contact-error') as HTMLElement;
+  const success = document.getElementById('contact-success') as HTMLElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.hidden = true;
+    submitBtn.disabled = true;
+
+    try {
+      const res = await fetch('https://formspree.io/f/mbdnejwy', {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: new FormData(form),
+      });
+
+      if (!res.ok) throw new Error('Request failed');
+
+      form.hidden = true;
+      success.hidden = false;
+    } catch {
+      errorMsg.hidden = false;
+      submitBtn.disabled = false;
+    }
+  });
+</script>
