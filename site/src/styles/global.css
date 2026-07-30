@@ -694,7 +694,6 @@ a { color: inherit; }
 .back:hover { border-bottom-color: var(--ink); }
 
 .detail { padding-bottom: 6rem; }
-.detail-head { max-width: 46rem; }
 .detail h1 {
   font-family: var(--display);
   font-weight: 800;
@@ -708,7 +707,6 @@ a { color: inherit; }
   line-height: 1.45;
   color: var(--ink-soft);
   margin: 0 0 2rem;
-  max-width: 40ch;
 }
 
 .hero {
@@ -767,7 +765,6 @@ a { color: inherit; }
   line-height: 1.5;
 }
 
-.howto { max-width: 40rem; }
 .howto > h2 {
   font-family: var(--mono);
   font-weight: 400;
@@ -966,6 +963,7 @@ a { color: inherit; }
   color: var(--ink-soft);
 }
 .foot a { text-decoration-thickness: 1px; }
+.foot-credit { margin-top: 1.5rem; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
