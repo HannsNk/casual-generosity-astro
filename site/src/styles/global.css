@@ -166,7 +166,9 @@ a { color: inherit; }
 }
 
 .intent {
-  padding: clamp(2.5rem, 6vw, 4rem) 0;
+  /* padding-block, not the padding shorthand — .intent shares this element
+     with .wrap, and a shorthand here would zero out .wrap's padding-inline. */
+  padding-block: clamp(2.5rem, 6vw, 4rem);
 }
 .intent-label {
   font-family: var(--mono);
@@ -237,13 +239,29 @@ a { color: inherit; }
 
 .landing-section {
   border-top: var(--edge) solid var(--ink);
-  padding: clamp(2.5rem, 6vw, 4rem) 0;
+  /* padding-block: same reasoning as .intent above. */
+  padding-block: clamp(2.5rem, 6vw, 4rem);
 }
 .landing-section .landing-pitch { margin-bottom: 2rem; }
 
+@media (max-width: 640px) {
+  .landing { --gutter: 1.5rem; }
+  .landing .masthead { padding: 2rem 0 1.5rem; }
+  .landing .intent { padding-block: 0.5rem; }
+  .landing .intent-grid { gap: .9rem; }
+  .landing .intent-card { padding: 1rem 1.1rem; }
+  .landing .stats-counter { margin-top: 1.25rem; }
+  .landing .landing-section { padding-block: 1.5rem; }
+  .landing .landing-section .landing-pitch { margin-bottom: 1.25rem; }
+  .landing .grid { padding: 1.5rem 0 2rem; gap: 1.25rem 1rem; }
+  .landing .notes-index-item a { padding: 1rem 0; }
+  .landing-why { padding-bottom: 3rem; }
+}
+
 .landing-why {
   border-top: var(--edge) solid var(--ink);
-  padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(3rem, 8vw, 5rem);
+  /* padding-block: same reasoning as .intent above. */
+  padding-block: clamp(2.5rem, 6vw, 4rem) clamp(3rem, 8vw, 5rem);
 }
 .landing-why h2 {
   font-family: var(--mono);
@@ -602,7 +620,9 @@ a { color: inherit; }
 }
 
 /* ---------- notes ---------- */
-.notes-list { padding: 3rem 0 5rem; }
+/* padding-block, not the padding shorthand — .notes-list shares this
+   element with .wrap, and a shorthand here would zero its padding-inline. */
+.notes-list { padding-block: 3rem 5rem; }
 .notes-index {
   list-style: none;
   margin: 0;
@@ -906,7 +926,9 @@ a { color: inherit; }
 
 /* ---------- 404 ---------- */
 .not-found {
-  padding: clamp(4rem, 12vw, 8rem) 0;
+  /* padding-block, not the padding shorthand — .not-found shares this
+     element with .wrap, and a shorthand here would zero its padding-inline. */
+  padding-block: clamp(4rem, 12vw, 8rem);
   text-align: center;
   max-width: 40rem;
 }

@@ -56,67 +56,69 @@ const INTENTS = [
   title="Casual Generosity — easy, good things to do with people you're already seeing"
   description="A directory of low-effort, mostly free ways to do something meaningful while hanging out with friends or a partner."
 >
-  <header class="masthead">
-    <div class="wrap">
-      <h1 class="wordmark">WorkingTitle</h1>
-      <p class="landing-pitch"><strong>Casually generous.</strong></p>
-      <p class="landing-pitch">
-        Small, mostly free things worth doing with the people you're already
-        seeing this week. Pick what fits your moment.
-      </p>
-    </div>
-  </header>
-
-  <section class="intent wrap">
-    <p class="intent-label">Where do you want to start?</p>
-    <div class="intent-grid">
-      {INTENTS.map((i) => (
-        <a class:list={['intent-card', i.tier ? `t-${i.tier}` : 'neutral']} href={i.href}>
-          <span class="intent-card-label">{i.label}</span>
-          <span class="intent-card-sub">{i.sub}</span>
-          <span class="intent-card-arrow">→</span>
-        </a>
-      ))}
-    </div>
-    <p class="stats-counter"><b>{thingsDone}</b> things done so far</p>
-  </section>
-
-  {featured.length > 0 && (
-    <section class="wrap landing-section">
-      <p class="intent-label">Where to start</p>
-      <p class="landing-pitch">A few we'd genuinely recommend.</p>
-      <div class="grid">
-        {featured.map((a) => <Card a={a} />)}
+  <div class="landing">
+    <header class="masthead">
+      <div class="wrap">
+        <h1 class="wordmark">WorkingTitle</h1>
+        <p class="landing-pitch"><strong>Casually generous.</strong></p>
+        <p class="landing-pitch">
+          Small, mostly free things worth doing with the people you're already
+          seeing this week. Pick what fits your moment.
+        </p>
       </div>
-    </section>
-  )}
+    </header>
 
-  {latestNotes.length > 0 && (
-    <section class="wrap landing-section">
-      <p class="intent-label">Notes</p>
-      <p class="landing-pitch">Occasional writing, with a few activities worth trying alongside it.</p>
-      <ul class="notes-index">
-        {latestNotes.map((post) => (
-          <li class="notes-index-item">
-            <a href={`${base}notes/${post.id}.html`}>
-              <span class="notes-index-date">{dateFmt.format(post.data.date)}</span>
-              <h2>{post.data.title}</h2>
-              {post.data.description && <p>{post.data.description}</p>}
-            </a>
-          </li>
+    <section class="intent wrap">
+      <p class="intent-label">Where do you want to start?</p>
+      <div class="intent-grid">
+        {INTENTS.map((i) => (
+          <a class:list={['intent-card', i.tier ? `t-${i.tier}` : 'neutral']} href={i.href}>
+            <span class="intent-card-label">{i.label}</span>
+            <span class="intent-card-sub">{i.sub}</span>
+            <span class="intent-card-arrow">→</span>
+          </a>
         ))}
-      </ul>
+      </div>
+      <p class="stats-counter"><b>{thingsDone}</b> things done so far</p>
     </section>
-  )}
 
-  <section class="landing-why wrap">
-    <h2>Why this exists</h2>
-    <p>
-      This isn't volunteering, and it isn't a donation platform — plenty of
-      good options exist for both. This is something else: the small,
-      overlooked, mostly free stuff that fits into a life you're already
-      living.
-    </p>
-    <a href={`${base}about.html`}>More on why →</a>
-  </section>
+    {featured.length > 0 && (
+      <section class="wrap landing-section">
+        <p class="intent-label">Where to start</p>
+        <p class="landing-pitch">A few we'd genuinely recommend.</p>
+        <div class="grid">
+          {featured.map((a) => <Card a={a} />)}
+        </div>
+      </section>
+    )}
+
+    {latestNotes.length > 0 && (
+      <section class="wrap landing-section">
+        <p class="intent-label">Notes</p>
+        <p class="landing-pitch">Occasional writing, with a few activities worth trying alongside it.</p>
+        <ul class="notes-index">
+          {latestNotes.map((post) => (
+            <li class="notes-index-item">
+              <a href={`${base}notes/${post.id}.html`}>
+                <span class="notes-index-date">{dateFmt.format(post.data.date)}</span>
+                <h2>{post.data.title}</h2>
+                {post.data.description && <p>{post.data.description}</p>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <section class="landing-why wrap">
+      <h2>Why this exists</h2>
+      <p>
+        This isn't volunteering, and it isn't a donation platform — plenty of
+        good options exist for both. This is something else: the small,
+        overlooked, mostly free stuff that fits into a life you're already
+        living.
+      </p>
+      <a href={`${base}about.html`}>More on why →</a>
+    </section>
+  </div>
 </Base>
