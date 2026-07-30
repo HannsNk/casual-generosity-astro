@@ -67,7 +67,10 @@ a { color: inherit; }
   align-items: center;
   justify-content: space-between;
   gap: .5rem 1rem;
-  padding: .9rem 0;
+  /* padding-block, not the padding shorthand — .sitenav-inner shares this
+     element with .wrap, and a shorthand here zeroes .wrap's padding-inline,
+     which was leaving nav links flush against the viewport edge on mobile. */
+  padding-block: .9rem;
 }
 .sitenav-word {
   font-family: var(--display);
@@ -199,7 +202,10 @@ a { color: inherit; }
   border: var(--edge) solid var(--ink);
   background: var(--tier, var(--card));
   color: #fff;
-  box-shadow: 8px 8px 0 var(--ink);
+  /* darkened from the card's own fill (rather than a flat --ink shadow, or
+     the exact fill colour) so it still reads as a shadow, not a duplicate,
+     now that the fill itself is the vivid tier colour rather than cream. */
+  box-shadow: 8px 8px 0 color-mix(in srgb, var(--tier, var(--ink)) 65%, black);
   text-decoration: none;
   transition: transform .14s ease, box-shadow .14s ease;
 }
@@ -207,7 +213,7 @@ a { color: inherit; }
 .intent-card:hover,
 .intent-card:focus-visible {
   transform: translate(6px, 6px);
-  box-shadow: 2px 2px 0 var(--ink);
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--tier, var(--ink)) 65%, black);
 }
 .intent-card.neutral:hover,
 .intent-card.neutral:focus-visible { box-shadow: 2px 2px 0 var(--ink-soft); }
@@ -373,24 +379,11 @@ a { color: inherit; }
 }
 .chip:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 
-.cols-select {
-  font-family: var(--mono);
-  font-size: .68rem;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  color: var(--ink);
-  background: var(--card);
-  border: 2px solid var(--ink);
-  border-radius: 0;
-  padding: .38em 1.6em .38em .6em;
-  cursor: pointer;
-  appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%),
-    linear-gradient(135deg, var(--ink) 50%, transparent 50%);
-  background-position: right .85em center, right .6em center;
-  background-size: .3em .3em, .3em .3em;
-  background-repeat: no-repeat;
-}
+/* View toggle: a chip-row-alike, but not filtered on mobile like .chip-row
+   (it doesn't drive any facet, just the grid's column count) so it keeps
+   its own class rather than reusing .chip-row. */
+.view-toggle { display: flex; flex-wrap: wrap; gap: .35rem; }
+.view-btn { display: inline-flex; align-items: center; justify-content: center; padding: .38em .55em; }
 
 .fselect {
   display: none;
@@ -489,7 +482,7 @@ a { color: inherit; }
   .fgroup { flex-direction: column; align-items: stretch; gap: .3rem; }
   .fgroup > .flabel { margin: 0; }
   .chip-row { display: none; }
-  .fselect, .cols-select { display: block; width: 100%; }
+  .fselect { display: block; width: 100%; }
   .count { margin-left: auto; }
   .reset { flex: 0 0 auto; }
 }
@@ -536,25 +529,26 @@ a { color: inherit; }
 
 .card-top {
   display: flex;
-  align-items: flex-start;
-  gap: .85rem;
-  padding: .85rem .85rem 0;
+  flex-direction: column;
 }
 
+/* Explicit width/height/aspect-ratio/object-fit — inferSize now puts each
+   source photo's real intrinsic dimensions on the <img>, which vary wildly
+   per source, so without pinning all four here the rendered height drifted
+   per card instead of holding a consistent ratio across the grid. */
 .card-img {
-  width: 76px;
-  height: 76px;
-  aspect-ratio: 1;
-  flex: 0 0 auto;
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
   object-fit: cover;
-  border: 2px solid var(--ink);
   background: var(--paper-deep);
 }
 .card-img.placeholder {
   display: grid;
   place-items: center;
   font-family: var(--mono);
-  font-size: .55rem;
+  font-size: .6rem;
   letter-spacing: .1em;
   text-transform: uppercase;
   text-align: center;
@@ -567,7 +561,7 @@ a { color: inherit; }
 
 .card-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: .5rem;
   margin-bottom: .5rem;
@@ -593,14 +587,22 @@ a { color: inherit; }
   align-items: center;
   justify-content: center;
   gap: .4em;
-  border: 2px solid var(--ink);
+  border: var(--edge) solid var(--ink);
   background: transparent;
   color: var(--ink);
   font-family: var(--mono);
   cursor: pointer;
-  transition: background .12s, color .12s;
+  transition: background .12s, color .12s, border-color .12s;
 }
-.share-btn:hover { background: var(--paper-deep); }
+/* Same fill-on-active treatment as .chip[aria-pressed="true"], just keyed
+   to the card/page's own --tier instead of a facet selection. */
+.share-btn:hover,
+.share-btn:focus-visible,
+.share-btn.shared {
+  background: var(--tier, var(--ink));
+  border-color: var(--tier, var(--ink));
+  color: #fff;
+}
 .share-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 .share-btn svg { flex: 0 0 auto; }
 
@@ -650,7 +652,6 @@ a { color: inherit; }
   color: var(--ink-soft);
 }
 .meta {
-  flex: 1;
   min-width: 0;
   font-family: var(--mono);
   font-size: .64rem;
@@ -659,7 +660,7 @@ a { color: inherit; }
   display: flex;
   flex-direction: column;
   gap: .28rem;
-  padding-top: .1rem;
+  padding: .65rem 1rem 0;
 }
 
 .empty {
@@ -761,7 +762,9 @@ a { color: inherit; }
 }
 
 .hero {
+  display: block;
   width: 100%;
+  height: auto;
   aspect-ratio: 16 / 7;
   object-fit: cover;
   border: var(--edge) solid var(--ink);
@@ -816,6 +819,7 @@ a { color: inherit; }
   line-height: 1.5;
 }
 
+.howto { max-width: 40rem; }
 .howto > h2 {
   font-family: var(--mono);
   font-weight: 400;

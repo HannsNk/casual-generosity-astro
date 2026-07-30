@@ -86,12 +86,17 @@ const TIER_NOTE = {
           </div>
           <div class="fgroup">
             <span class="flabel">View</span>
-            <select class="cols-select" id="cols-select" aria-label="Grid columns">
-              <option value="">Auto</option>
-              <option value="2">2-wide</option>
-              <option value="3">3-wide</option>
-              <option value="4">4-wide</option>
-            </select>
+            <div class="view-toggle" id="view-toggle" role="group" aria-label="Grid columns">
+              <button type="button" class="chip view-btn" data-cols="2" aria-pressed="false" aria-label="2 columns">
+                <svg viewBox="0 0 16 14" width="16" height="14" aria-hidden="true"><rect x="0" y="0" width="7" height="14" fill="currentColor" /><rect x="9" y="0" width="7" height="14" fill="currentColor" /></svg>
+              </button>
+              <button type="button" class="chip view-btn" data-cols="3" aria-pressed="false" aria-label="3 columns">
+                <svg viewBox="0 0 16 14" width="16" height="14" aria-hidden="true"><rect x="0" y="0" width="4" height="14" fill="currentColor" /><rect x="6" y="0" width="4" height="14" fill="currentColor" /><rect x="12" y="0" width="4" height="14" fill="currentColor" /></svg>
+              </button>
+              <button type="button" class="chip view-btn" data-cols="4" aria-pressed="false" aria-label="4 columns">
+                <svg viewBox="0 0 16 14" width="16" height="14" aria-hidden="true"><rect x="0" y="0" width="2.8" height="14" fill="currentColor" /><rect x="4.4" y="0" width="2.8" height="14" fill="currentColor" /><rect x="8.8" y="0" width="2.8" height="14" fill="currentColor" /><rect x="13.2" y="0" width="2.8" height="14" fill="currentColor" /></svg>
+              </button>
+            </div>
           </div>
         </div>
       </details>
@@ -112,14 +117,16 @@ const TIER_NOTE = {
 
 <script>
   // Plain DOM filtering — no framework, ~1KB of JS on an otherwise static page.
-  const chips = [...document.querySelectorAll<HTMLButtonElement>('.chip')];
+  // .view-btn reuses .chip styling but isn't a filter facet, so it's excluded
+  // here and handled by its own click listener further down.
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('.chip:not(.view-btn)')];
   const selects = [...document.querySelectorAll<HTMLSelectElement>('.fselect')];
   const cards = [...document.querySelectorAll<HTMLElement>('.card')];
   const count = document.getElementById('count')!;
   const empty = document.getElementById('empty')!;
   const reset = document.getElementById('reset') as HTMLButtonElement;
   const grid = document.getElementById('grid')!;
-  const colsSelect = document.getElementById('cols-select') as HTMLSelectElement;
+  const viewButtons = [...document.querySelectorAll<HTMLButtonElement>('.view-btn')];
 
   const active: Record<string, Set<string>> = {
     tier: new Set(), cost: new Set(), time: new Set(), group: new Set(), tags: new Set(),
@@ -239,19 +246,25 @@ const TIER_NOTE = {
     apply();
   });
 
-  // Grid column count: 2/3/4-wide, remembered across visits.
+  // Grid column count: 2/3/4-wide, remembered across visits. A toggle group
+  // like the facet chips, not a single-select — clicking the active button
+  // again clears back to auto, same as clicking a pressed filter chip twice.
   const COLS_KEY = 'cg-grid-cols';
-  const savedCols = localStorage.getItem(COLS_KEY) ?? '';
-  colsSelect.value = savedCols;
-  grid.classList.toggle('cols-2', savedCols === '2');
-  grid.classList.toggle('cols-3', savedCols === '3');
-  grid.classList.toggle('cols-4', savedCols === '4');
-
-  colsSelect.addEventListener('change', () => {
-    const v = colsSelect.value;
+  const applyCols = (v: string) => {
     grid.classList.toggle('cols-2', v === '2');
     grid.classList.toggle('cols-3', v === '3');
     grid.classList.toggle('cols-4', v === '4');
-    localStorage.setItem(COLS_KEY, v);
+    viewButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cols === v)));
+  };
+
+  applyCols(localStorage.getItem(COLS_KEY) ?? '');
+
+  viewButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const wasActive = btn.getAttribute('aria-pressed') === 'true';
+      const v = wasActive ? '' : (btn.dataset.cols ?? '');
+      applyCols(v);
+      localStorage.setItem(COLS_KEY, v);
+    });
   });
 </script>
