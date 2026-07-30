@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: `${base}activities.html`, label: 'Explore', match: 'activities' },
   { href: `${base}about.html`, label: 'About', match: 'about' },
   { href: `${base}notes.html`, label: 'Notes', match: 'notes' },
+  { href: `${base}privacy.html`, label: 'Privacy', match: 'privacy' },
 ];
 
 // Simple current-page check: does the path contain the section's segment?
@@ -58,6 +59,7 @@ const isCurrent = (match: string) => path.includes(`/${match}`);
           Always confirm details directly with any organisation before turning up.
           Don't photograph people who haven't agreed to it.
         </p>
+        <p><a href={`${base}privacy.html`}>Privacy</a></p>
         <p class="foot-credit">Made with ❤️ by Hanns Niedermark</p>
       </div>
     </footer>

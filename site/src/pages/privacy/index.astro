@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+<Base
+  title="Privacy — CasuallyGenerous"
+  description="What personal data CasuallyGenerous collects, why, and how it's handled."
+>
+  <div class="wrap detail t-Planned">
+    <div class="detail-top">
+      <a class="back" href={base}>← Home</a>
+    </div>
+
+    <div class="detail-head">
+      <h1>Privacy</h1>
+      <p class="detail-hook">
+        This page explains what personal data this site collects, why, and how
+        it's handled. This is a small side project, not a company — if
+        anything here is unclear or you have concerns, get in touch through
+        the <a class="orglink" href={`${base}about.html`}>About</a> page.
+      </p>
+    </div>
+
+    <section class="howto">
+      <h2>What I collect</h2>
+      <ul>
+        <li>If you use the contact form: your name (optional), email address, and message</li>
+        <li>If you submit a story on an activity page: your status ("did it" / "want to try"), an optional name, and an optional written story</li>
+        <li>Aggregate, non-personal website analytics (pages visited, general location by country, referring site) — this data isn't linked to you individually and can't identify you</li>
+      </ul>
+
+      <h2>Why I collect it</h2>
+      <ul>
+        <li>Contact form data is used only to read and reply to your message</li>
+        <li>Story submissions are shown publicly on the relevant activity page, since sharing what you've done is the whole point of that feature — don't submit anything in the story text you wouldn't want public</li>
+        <li>Analytics helps me understand which parts of the site are useful and which aren't</li>
+      </ul>
+
+      <h2>Who processes it</h2>
+      <p>This site is built on a few external services, each of which processes data on my behalf:</p>
+      <ul>
+        <li>Formspree (contact form submissions) — data is retained for 30 days, then automatically deleted</li>
+        <li>Google Firebase (story submissions) — stored until I remove it</li>
+        <li>Cloudflare (site analytics) — cookieless, aggregate only</li>
+        <li>GitHub Pages (site hosting)</li>
+      </ul>
+
+      <h2>How long I keep it</h2>
+      <p>
+        Contact form messages are automatically deleted after 30 days by
+        Formspree. Story submissions remain visible until removed — I
+        periodically review these and will remove anything inappropriate, and
+        will remove your submission on request.
+      </p>
+
+      <h2>Your rights</h2>
+      <p>
+        You can ask me to show you what I hold about you, correct it, or
+        delete it, at any time, by getting in touch through the
+        <a class="orglink" href={`${base}about.html`}>About</a> page.
+      </p>
+
+      <h2>Cookies</h2>
+      <p>
+        This site doesn't use tracking or advertising cookies. The analytics
+        tool in use (Cloudflare) is cookieless by design.
+      </p>
+    </section>
+  </div>
+</Base>
