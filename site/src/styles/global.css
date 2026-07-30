@@ -63,9 +63,10 @@ a { color: inherit; }
 }
 .sitenav-inner {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: .5rem 1rem;
   padding: .9rem 0;
 }
 .sitenav-word {
@@ -78,7 +79,8 @@ a { color: inherit; }
 }
 .sitenav-links {
   display: flex;
-  gap: 1.5rem;
+  flex-wrap: wrap;
+  gap: .5rem 1.5rem;
 }
 .sitenav-links a {
   font-family: var(--mono);
@@ -97,7 +99,7 @@ a { color: inherit; }
 }
 @media (max-width: 480px) {
   .sitenav-word { font-size: .85rem; }
-  .sitenav-links { gap: 1rem; }
+  .sitenav-links { gap: .4rem .85rem; }
 }
 
 /* ---------- masthead ---------- */
@@ -113,6 +115,10 @@ a { color: inherit; }
   letter-spacing: -.035em;
   margin: 0 0 1.5rem;
   max-width: 14ch;
+  /* the wordmark is one unbroken word with no spaces to wrap at — without
+     this it overflows the viewport on narrow screens instead of breaking */
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .wordmark em {
   font-style: normal;
@@ -259,14 +265,21 @@ a { color: inherit; }
 .landing-col {
   border: var(--edge) solid var(--ink);
   padding: 1.75rem 1.75rem 2rem;
+  min-width: 0;
 }
-.landing-col .grid { padding: 0; gap: 1.5rem; }
+/* One card per row, not the activities page's auto-fill minmax(310px, 1fr)
+   — inside this narrower boxed column that 310px minimum doesn't fit on
+   small screens and was forcing the whole page to overflow horizontally. */
+.landing-col .grid { grid-template-columns: 1fr; padding: 0; gap: 1.5rem; }
 .landing-col .notes-index { max-width: none; }
 .landing-col .notes-index-item:last-child { border-bottom: none; }
 
 @media (max-width: 640px) {
   .landing { --gutter: 1.5rem; }
   .landing .masthead { padding: 2rem 0 1.5rem; }
+  /* smaller than the clamp() default so this one unbroken word fits on a
+     single line instead of breaking mid-word via overflow-wrap */
+  .landing .wordmark { font-size: 2rem; }
   .landing .intent { padding-block: 0.5rem; }
   .landing .intent-grid { gap: .9rem; }
   .landing .intent-card { padding: 1rem 1.1rem; }

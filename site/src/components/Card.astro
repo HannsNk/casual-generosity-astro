@@ -18,9 +18,9 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
       ? <img class="card-img" src={a.image} alt="" loading="lazy" decoding="async" />
       : <div class="card-img placeholder">no photo</div>}
     <div class="meta">
-      <span>{a.cost[0]}</span>
+      <span>{a.cost.join(' / ')}</span>
       <span>{a.time}</span>
-      <span>{a.groupSize[0]}</span>
+      <span>{a.groupSize.join(', ')}</span>
     </div>
   </div>
 

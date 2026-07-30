@@ -7,14 +7,16 @@ const base = import.meta.env.BASE_URL;
 const path = Astro.url.pathname;
 
 const NAV_LINKS = [
+  { href: base, label: 'Home', match: '' },
   { href: `${base}activities.html`, label: 'Explore', match: 'activities' },
   { href: `${base}about.html`, label: 'About', match: 'about' },
   { href: `${base}notes.html`, label: 'Notes', match: 'notes' },
-  { href: `${base}privacy.html`, label: 'Privacy', match: 'privacy' },
 ];
 
 // Simple current-page check: does the path contain the section's segment?
-const isCurrent = (match: string) => path.includes(`/${match}`);
+// Home has no segment of its own, so it only matches the bare root path.
+const isCurrent = (match: string) =>
+  match === '' ? (path === base || path === `${base}index.html`) : path.includes(`/${match}`);
 ---
 <!doctype html>
 <html lang="en">
@@ -24,6 +26,7 @@ const isCurrent = (match: string) => path.includes(`/${match}`);
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9D%A4%EF%B8%8F</text></svg>" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
