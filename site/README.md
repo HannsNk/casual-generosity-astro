@@ -1,125 +1,132 @@
 # CasuallyGenerous
 
-A static directory of 98 activities. Astro, no framework, ~1KB of JavaScript
-on the page (the filter bar). Every activity is its own static HTML page.
+A directory of small, mostly free things worth doing with the people you're
+already seeing — inspired by Chris Anderson's *Infectious Generosity*. Not a
+volunteering platform, not a donation platform: the space in between, for
+things that fit into a life you're already living rather than a formal
+commitment.
 
-## Run it
+Live at **[casuallygenerous](https://hannsnk.github.io/casual-generosity-astro/)**.
+
+## What's here
+
+- **`/`** — a landing page with a few intent-based entry points
+- **`/activities/`** — the full directory, filterable by effort, cost, time
+  and group size, with a client-side filter bar (~1KB of JS, no framework)
+- **`/[slug]`** — one static page per activity, each with a "have you done
+  this?" story feed
+- **`/notes/`** — an Astro content collection of longer-form posts, written
+  in Markdown, each optionally linking back to featured activities
+- **`/about/`**, **`/privacy/`** — project pages, including a contact form
+
+Visually it's a "riso noticeboard": flat spot-colour inks, hard offset
+shadows, three tier colours (Spontaneous/Planned/Committed). All of that
+lives in `src/styles/global.css` as a small set of CSS variables and
+reusable classes (`.chip`, `.card`, `.stamp`, `--tier`, `--edge`, …) — see
+[Design system](#design-system-if-youre-changing-styles) before adding new
+ones.
+
+## Stack
+
+- **[Astro](https://astro.build)** (v5), static output, no UI framework
+- **Firebase Firestore** — client-side, for the "did it / want to try"
+  stories on each activity page (config in `src/lib/firebase.js`; the API
+  key there is a public client key, not a secret — that's normal for
+  Firebase web apps)
+- **[Formspree](https://formspree.io)** — the contact form on `/about/`
+- **Cloudflare Web Analytics** — cookieless, no consent banner needed
+- Deployed to **GitHub Pages** via GitHub Actions (`.github/workflows/deploy.yml`)
+  on every push to `main`
+
+## Getting started
 
 ```bash
+cd site
 npm install
-npm run dev      # http://localhost:4321 — live reload while you edit
-npm run build    # writes the finished site to dist/
+npm run dev       # http://localhost:4321 — live reload while you edit
 ```
 
-`dist/` is a plain folder of HTML files. You can open `dist/index.html`
-directly in a browser, or drag the whole folder onto Netlify or Cloudflare
-Pages to publish it.
+Other scripts:
 
-## Where the content lives
-
-Right now: `src/data/activities.json` — 98 records, one object each.
-
-Edit that file and the site updates on the next build. That's the simplest
-setup and it needs no API keys.
-
-## Wiring it to Airtable
-
-Two ways, depending on how much you want to change.
-
-### Option A — fetch script (simplest)
-
-Keep the site reading `activities.json`, and refresh that file from Airtable
-whenever you want. Create `scripts/fetch-airtable.mjs`:
-
-```js
-const TOKEN = process.env.AIRTABLE_TOKEN;
-const BASE  = process.env.AIRTABLE_BASE_ID;
-const TABLE = 'Activities';
-
-const res = await fetch(
-  `https://api.airtable.com/v0/${BASE}/${encodeURIComponent(TABLE)}?pageSize=100`,
-  { headers: { Authorization: `Bearer ${TOKEN}` } }
-);
-const { records } = await res.json();
-
-const slug = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-const split = (v) => (v ?? '').split(',').map((s) => s.trim()).filter(Boolean);
-
-const out = records.map(({ fields: f }) => ({
-  slug: slug(f.Title),
-  title: f.Title,
-  hook: f.Hook,
-  image: f['Image URL'] ?? '',
-  tier: f.Tier,
-  cost: split(f.Cost),
-  time: f['Time Needed'],
-  timeBucket: bucket(f['Time Needed']),
-  groupSize: split(f['Group Size']),
-  location: split(f['Location Type']),
-  tags: split(f['Category Tags']),
-  needs: f['What You Need'] ?? '',
-  why: f['Why This Matters'],
-  instructions: f.Instructions,
-  link: f['Org / Link'] ?? '',
-}));
-
-await import('node:fs/promises').then((fs) =>
-  fs.writeFile('src/data/activities.json', JSON.stringify(out, null, 1))
-);
+```bash
+npm run build      # writes the finished, static site to dist/
+npm run preview    # serve dist/ locally, close to what production looks like
 ```
 
-Then `"build": "node scripts/fetch-airtable.mjs && astro build"` in
-package.json, and set `AIRTABLE_TOKEN` / `AIRTABLE_BASE_ID` as environment
-variables on your host. Every deploy pulls fresh from Airtable.
+The site is served from a subpath (`/casual-generosity-astro/`, configured
+in `astro.config.mjs`), which is why internal links go through
+`import.meta.env.BASE_URL` rather than being written as plain `/path`. Keep
+that in mind if you add new links — a bare `href="/foo.html"` will 404 once
+deployed.
 
-Note: Airtable pages at 100 records, so once you pass 100 activities you'll
-need to follow the `offset` field in the response.
+## Where content lives
 
-### Option B — Astro Content Layer loader
+**Activities** — `src/data/activities.json`, 98 records, one object per
+activity (`title`, `hook`, `image`, `tier`, `cost`, `time`, `groupSize`,
+`location`, `tags`, `needs`, `why`, `instructions`, `link`). Edit the file
+directly; the site picks it up on the next build. No CMS, no API keys.
 
-More idiomatic, gives you schema validation and TypeScript types. Create
-`src/content.config.ts`:
+**Notes** — `src/content/notes/*.md`, an Astro content collection (schema in
+`src/content.config.ts`). Frontmatter needs `title`, `date`, optionally
+`description` and `featuredActivities` (an array of activity slugs to show
+alongside the post):
 
-```ts
-import { defineCollection, z } from 'astro:content';
+```md
+---
+title: "Becoming a plastic-free champion"
+date: 2026-07-23
+description: "Four small habits that add up to a genuinely different relationship with plastic waste."
+featuredActivities:
+  - run-a-plastic-free-picnic
+---
 
-const activities = defineCollection({
-  loader: async () => {
-    const res = await fetch(
-      `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/Activities`,
-      { headers: { Authorization: `Bearer ${process.env.AIRTABLE_TOKEN}` } }
-    );
-    const { records } = await res.json();
-    return records.map((r) => ({ id: r.id, ...r.fields }));
-  },
-  schema: z.object({
-    Title: z.string(),
-    Hook: z.string().max(200),
-    Tier: z.enum(['Spontaneous', 'Planned', 'Committed']),
-    'Image URL': z.string().url().optional(),
-    // ...the rest of your fields
-  }),
-});
-
-export const collections = { activities };
+Your post body in Markdown goes here.
 ```
 
-Then swap the `import activities from '../data/activities.json'` lines for
-`await getCollection('activities')`. The schema means a bad Tier value or a
-missing Title fails the build instead of shipping a broken card.
+Drop a new file in that folder and it shows up on `/notes/` automatically,
+newest first.
 
-## Rebuilding when Airtable changes
+## Design system (if you're changing styles)
 
-Content is baked in at build time, so edits in Airtable don't appear until you
-rebuild. On Netlify or Cloudflare Pages, create a build hook (a URL), then add
-an Airtable automation: *when a record is updated → send webhook → that URL*.
-Edit a record, site updates about a minute later.
+Everything lives in `src/styles/global.css`. Before adding new CSS:
 
-## Things still to do
+- Reuse the existing variables (`--pink`/`--blue`/`--green` per tier,
+  `--ink`, `--paper`, `--edge` for border width, `--display`/`--body`/`--mono`
+  for fonts) rather than hardcoding new colours or fonts.
+- Reuse existing classes where the pattern already exists — `.chip` for
+  toggleable filter-style buttons, `.card` for the hard-shadow tier-coloured
+  box treatment, `.stamp` for the small tier label.
+- `.wrap` sets the page's horizontal gutter via `padding-inline`. If you add
+  an element that combines the `wrap` class with another class on the same
+  node, make sure that other class doesn't use the `padding` shorthand (e.g.
+  `padding: 2rem 0`) — it'll silently zero out `.wrap`'s side padding. Use
+  `padding-block` instead. This has bitten the codebase more than once.
 
-- 82 of the 98 activities have no photo. `Image URL` is blank for those and
-  the card shows a hatched placeholder.
-- Three existing image URLs aren't stock photos and should be replaced
-  (the sign-language chart, the Missing Maps infographic, the YouTube thumbnail).
-- No comments yet. Giscus is free and drops into the detail page template.
-- `Org / Link` values starting with "Search:" render as plain text, not links.
+## Known gaps
+
+- Some activities have no photo (`image` is `""`); the card falls back to a
+  hatched placeholder.
+- No comments on notes posts yet.
+- `link` values starting with `Search:` render as plain text rather than a
+  clickable link — intentional for now, since there's no single URL to point
+  to.
+
+## Contributing
+
+Issues and PRs welcome — this is a small side project, not a company, so
+there's no formal process. A few practical notes:
+
+- **New activities**: add an object to `activities.json` following the
+  existing shape; `slug` should be a lowercase, hyphenated version of the
+  title and needs to be unique.
+- **New notes**: add a Markdown file to `src/content/notes/`, following the
+  frontmatter shape above.
+- **Design changes**: see [Design system](#design-system-if-youre-changing-styles)
+  above — the whole site is built from a deliberately small set of tokens
+  and reusable classes, so new one-off styles should be a last resort.
+- Run `npm run build` before opening a PR — it catches broken content
+  (missing frontmatter fields, bad image domains, etc.) that `dev` mode
+  won't always surface.
+
+Got an idea, a correction, or just want to say hello? There's a contact form
+on [`/about/`](https://hannsnk.github.io/casual-generosity-astro/about.html).
