@@ -1,0 +1,20 @@
+---
+---
+<div id="auth-widget" class="auth-widget">
+  <button id="auth-signin" class="chip" type="button">Sign in</button>
+  <div id="auth-signedin" class="auth-signedin" hidden>
+    <span id="auth-name" class="auth-name"></span>
+    <a href="/profile/" class="chip">Profile</a>
+    <button id="auth-signout" class="chip" type="button">Sign out</button>
+  </div>
+</div>
+
+<style>
+  .auth-widget { display: flex; align-items: center; gap: 0.5rem; }
+  .auth-signedin { display: flex; align-items: center; gap: 0.5rem; }
+  .auth-name { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-soft); }
+</style>
+
+<script>
+  import '../scripts/auth-widget.js';
+</script>

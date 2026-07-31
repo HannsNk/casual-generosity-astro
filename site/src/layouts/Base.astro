@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import AuthWidget from '../components/AuthWidget.astro';
+
 
 const { title, description, image } = Astro.props;
 
@@ -62,9 +64,22 @@ const isCurrent = (match: string) =>
           {NAV_LINKS.map((l) => (
             <a href={l.href} aria-current={isCurrent(l.match) ? 'page' : undefined}>{l.label}</a>
           ))}
+          <!-- <AuthWidget /> -->
         </div>
       </div>
     </nav>
+    <script>
+      // Keeps --nav-h in sync with the sticky nav's real height, so anything
+      // that sticks below it (e.g. .filters on the activities page) can
+      // offset by the right amount instead of a guessed pixel value.
+      const nav = document.querySelector('.sitenav');
+      if (nav) {
+        const setNavHeight = () =>
+          document.documentElement.style.setProperty('--nav-h', `${nav.getBoundingClientRect().height}px`);
+        setNavHeight();
+        new ResizeObserver(setNavHeight).observe(nav);
+      }
+    </script>
     <slot />
     <footer class="foot">
       <div class="wrap">

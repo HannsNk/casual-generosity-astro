@@ -58,6 +58,9 @@ a { color: inherit; }
 
 /* ---------- site nav ---------- */
 .sitenav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   border-bottom: var(--edge) solid var(--ink);
   background: var(--paper);
 }
@@ -186,67 +189,190 @@ a { color: inherit; }
   color: var(--ink-soft);
   margin: 0 0 1.5rem;
 }
-.intent-grid {
+/* Four boxes, same visual weight: two carry a one-at-a-time carousel
+   (intents, featured activities), two are single flat CTAs (explore /
+   learn more) styled white and grey respectively. Default (stretch)
+   alignment so the two boxes in each row match height exactly. */
+.start-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem 1.75rem;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+@media (min-width: 800px) {
+  .start-grid { grid-template-columns: 1fr 1fr; gap: 1.75rem; }
 }
 
-/* Deliberately blockier and bolder than .card (full-ink-fill, no image
-   slot) so these read as calls-to-action rather than activity listings. */
-.intent-card {
+/* Bare layout box — no border/fill/padding of its own. The intents and
+   featured-activities boxes rely on their inner tile (.start-intent /
+   .card) for visual boundary instead of a second box wrapped around it;
+   only the flat CTA tiles (.start-box--cta) opt back into a bordered,
+   padded panel below. */
+.start-box {
   display: flex;
   flex-direction: column;
-  gap: .6rem;
-  padding: 1.75rem 1.5rem;
+  min-width: 0;
+}
+.start-box-label {
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 .6rem;
+}
+
+/* One slide visible at a time, sliding via transform. The slide itself
+   (the intent tile / the card) is stretched to fill the carousel's full
+   height rather than centered within it, so a short intent tile grows to
+   match a taller activities card instead of floating in empty space. */
+.carousel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.carousel-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.carousel-track {
+  display: flex;
+  height: 100%;
+  transition: transform .3s ease;
+}
+.carousel-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  height: 100%;
+}
+.carousel-slide > .card { height: 100%; }
+
+/* Prev/next live inside the tile itself, pinned to its bottom-right
+   corner, rather than in a row that would add height beyond the slide. */
+.carousel-nav-group {
+  position: absolute;
+  right: .6rem;
+  bottom: .6rem;
+  z-index: 2;
+  display: flex;
+  gap: .4rem;
+}
+.carousel-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: .8rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.carousel-nav:hover,
+.carousel-nav:focus-visible { background: var(--ink); color: var(--paper); }
+.carousel-nav:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+/* A compact restatement of the old full-width intent-card: same
+   tier-filled, hard-shadow CTA language, just sized to sit in a carousel
+   slide instead of spanning the page. */
+.start-intent {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  padding: 1.1rem 1rem;
   border: var(--edge) solid var(--ink);
   background: var(--tier, var(--card));
   color: #fff;
-  /* darkened from the card's own fill (rather than a flat --ink shadow, or
-     the exact fill colour) so it still reads as a shadow, not a duplicate,
-     now that the fill itself is the vivid tier colour rather than cream. */
-  box-shadow: 8px 8px 0 color-mix(in srgb, var(--tier, var(--ink)) 65%, black);
+  box-shadow: 6px 6px 0 color-mix(in srgb, var(--tier, var(--ink)) 65%, black);
   text-decoration: none;
   transition: transform .14s ease, box-shadow .14s ease;
 }
-.intent-card.neutral { background: var(--card); color: var(--ink); box-shadow: 8px 8px 0 var(--ink-soft); }
-.intent-card:hover,
-.intent-card:focus-visible {
-  transform: translate(6px, 6px);
+.start-intent.neutral { background: var(--card); color: var(--ink); box-shadow: 6px 6px 0 var(--ink-soft); }
+.start-intent:hover,
+.start-intent:focus-visible {
+  transform: translate(4px, 4px);
   box-shadow: 2px 2px 0 color-mix(in srgb, var(--tier, var(--ink)) 65%, black);
 }
-.intent-card.neutral:hover,
-.intent-card.neutral:focus-visible { box-shadow: 2px 2px 0 var(--ink-soft); }
-.intent-card:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.start-intent.neutral:hover,
+.start-intent.neutral:focus-visible { box-shadow: 2px 2px 0 var(--ink-soft); }
+.start-intent:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 
-.intent-card-label {
+.start-intent-label {
   font-family: var(--display);
   font-weight: 800;
-  font-size: clamp(1.25rem, 2.4vw, 1.625rem);
-  line-height: 1.1;
-  letter-spacing: -.02em;
+  font-size: clamp(1.375rem, 2.4vw, 1.75rem);
+  line-height: 1.15;
+  letter-spacing: -.015em;
 }
-.intent-card-sub {
-  font-size: .95rem;
+.start-intent-sub {
+  font-size: 1.0625rem;
   line-height: 1.5;
   opacity: .9;
 }
-.intent-card-arrow {
+.start-intent-arrow {
   font-family: var(--mono);
   font-size: .8rem;
   margin-top: auto;
-  padding-top: .5rem;
+  padding-top: .4rem;
 }
 
-.stats-counter {
-  text-align: center;
-  font-family: var(--mono);
-  font-size: .72rem;
-  letter-spacing: .04em;
-  color: var(--ink-soft);
-  margin: 2rem 0 0;
+/* Shrunk, tag-free restatement of .card for the featured-activities
+   carousel — a short fixed image, two-line-clamped hook, no meta row —
+   so a slide is roughly the same height as a .start-intent slide. */
+.card--compact { box-shadow: 6px 6px 0 var(--tier); }
+.card--compact:hover,
+.card--compact:has(:focus-visible) {
+  transform: translate(4px, 4px);
+  box-shadow: 2px 2px 0 var(--tier);
 }
-.stats-counter b { color: var(--ink); font-weight: 700; }
+/* ~20% shorter overall than a plain 3:2 card, mostly taken out of the
+   image, which is what a compact carousel slide needs least. */
+.card--compact .card-img { aspect-ratio: 16 / 5; }
+/* Extra bottom-right clearance — inside a carousel, the prev/next
+   overlay sits in that corner and would otherwise cover the hook text. */
+.card--compact .card-body { padding: .45rem .85rem 1.9rem; }
+.card--compact h2 { font-size: .95rem; margin-bottom: .25rem; }
+.card--compact p {
+  font-size: .82rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* The two plain-CTA boxes: same hard-shadow language as .start-intent,
+   just neutral-filled (white / grey) instead of tier-coloured. */
+.start-box--cta {
+  border: var(--edge) solid var(--ink);
+  padding: 1.25rem 1.5rem 1.5rem;
+  justify-content: center;
+  gap: .5rem;
+  box-shadow: 8px 8px 0 var(--ink-soft);
+  color: var(--ink);
+  text-decoration: none;
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+.start-box--cta:hover,
+.start-box--cta:focus-visible {
+  transform: translate(6px, 6px);
+  box-shadow: 2px 2px 0 var(--ink-soft);
+}
+.start-box--cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.start-box--explore { background: var(--card); }
+.start-box--about { background: var(--paper-deep); }
+.start-box-cta {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+  letter-spacing: -.02em;
+  margin: 0;
+}
 
 .landing-section {
   border-top: var(--edge) solid var(--ink);
@@ -255,28 +381,13 @@ a { color: inherit; }
 }
 .landing-section .landing-pitch { margin-bottom: 2rem; }
 
-.landing-columns {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-}
-@media (min-width: 800px) {
-  .landing-columns { grid-template-columns: 1fr 1fr; gap: 2.5rem; }
-}
-
 /* A bordered box, not a hard-shadow card (that look is reserved for
-   .card/.intent-card) — enough to visually separate the two columns.
-   Grid stretches items to the row's height by default, so both boxes
-   match height even when one has more content than the other. */
+   .card/.start-intent) — enough to visually set the notes list apart. */
 .landing-col {
   border: var(--edge) solid var(--ink);
   padding: 1.75rem 1.75rem 2rem;
   min-width: 0;
 }
-/* One card per row, not the activities page's auto-fill minmax(310px, 1fr)
-   — inside this narrower boxed column that 310px minimum doesn't fit on
-   small screens and was forcing the whole page to overflow horizontally. */
-.landing-col .grid { grid-template-columns: 1fr; padding: 0; gap: 1.5rem; }
 .landing-col .notes-index { max-width: none; }
 .landing-col .notes-index-item:last-child { border-bottom: none; }
 
@@ -287,15 +398,12 @@ a { color: inherit; }
      single line instead of breaking mid-word via overflow-wrap */
   .landing .wordmark { font-size: 2rem; }
   .landing .intent { padding-block: 0.5rem; }
-  .landing .intent-grid { gap: .9rem; }
-  .landing .intent-card { padding: 1rem 1.1rem; }
-  .landing .stats-counter { margin-top: 1.25rem; }
+  .landing .start-grid { gap: 1.1rem; }
+  .landing .start-box--cta { padding: 1.1rem 1.25rem 1.35rem; }
   .landing .landing-section { padding-block: 1.5rem; }
   .landing .landing-section .landing-pitch { margin-bottom: 1.25rem; }
-  .landing .grid { padding: 1.5rem 0 2rem; gap: 1.25rem 1rem; }
   .landing .notes-index-item a { padding: 1rem 0; }
   .landing-col { padding: 1.5rem 1.5rem 1.75rem; }
-  .landing-col .grid { padding: 0; gap: 1.25rem; }
   .landing-why { padding-bottom: 3rem; }
 }
 
@@ -328,10 +436,73 @@ a { color: inherit; }
   padding-bottom: 1px;
 }
 
+/* A quiet closing note, not a second intent grid — smaller type, no
+   shadows, tier colour used only as a thin left accent so it stays
+   secondary to the .intent-card CTAs above. */
+.landing-generous {
+  border-top: var(--edge) solid var(--ink);
+  padding-block: clamp(2rem, 5vw, 3rem) clamp(3rem, 8vw, 5rem);
+}
+.landing-generous h2 {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: .68rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 .75rem;
+}
+.landing-generous > p {
+  max-width: 52ch;
+  font-family: var(--body);
+  font-size: .92rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0 0 1.75rem;
+}
+.generous-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+@media (max-width: 640px) {
+  .generous-grid { grid-template-columns: 1fr; gap: 1rem; }
+}
+.generous-item {
+  border-left: 3px solid var(--tier);
+  padding: .15rem 0 .15rem 1rem;
+}
+.generous-item-label {
+  font-family: var(--mono);
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .01em;
+  margin: 0 0 .4rem;
+}
+.generous-item p:not(.generous-item-label) {
+  font-family: var(--body);
+  font-size: .88rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0 0 .5rem;
+}
+.generous-item a {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: .74rem;
+  border-bottom: 2px solid var(--tier);
+  text-decoration: none;
+  padding-bottom: 1px;
+}
+
 /* ---------- filter bar ---------- */
 .filters {
   position: sticky;
-  top: 0;
+  /* sits just below the sticky .sitenav, whose real height varies with
+     viewport (link wrapping, font-size breakpoints) — --nav-h is measured
+     and kept in sync from Base.astro; the px fallback covers the instant
+     before that script runs. */
+  top: var(--nav-h, 58px);
   z-index: 20;
   background: var(--paper);
   border-bottom: var(--edge) solid var(--ink);

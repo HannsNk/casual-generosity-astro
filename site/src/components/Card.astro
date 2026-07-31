@@ -1,12 +1,12 @@
 ---
 import { Image } from 'astro:assets';
 
-const { a } = Astro.props;
+const { a, compact = false } = Astro.props;
 const url = `${import.meta.env.BASE_URL}${a.slug}.html`;
 const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
 ---
 <div
-  class:list={['card', `t-${a.tier}`]}
+  class:list={['card', `t-${a.tier}`, compact && 'card--compact']}
   data-tier={a.tier}
   data-cost={a.cost.join('|')}
   data-group={a.groupSize.join('|')}
@@ -19,11 +19,13 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
     {a.image
       ? <Image class="card-img" src={a.image} inferSize alt="" loading="lazy" />
       : <div class="card-img placeholder">no photo</div>}
-    <div class="meta">
-      <span>{a.cost.join(' / ')}</span>
-      <span>{a.time}</span>
-      <span>{a.groupSize.join(', ')}</span>
-    </div>
+    {!compact && (
+      <div class="meta">
+        <span>{a.cost.join(' / ')}</span>
+        <span>{a.time}</span>
+        <span>{a.groupSize.join(', ')}</span>
+      </div>
+    )}
   </div>
 
   <div class="card-body">
