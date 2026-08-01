@@ -108,6 +108,22 @@ a { color: inherit; }
   .sitenav-links { gap: .4rem .85rem; }
 }
 
+/* Landing page: the nav bar's title is redundant with the big masthead
+   title until you scroll past it, so it starts hidden and fades in only
+   once scrolling shrinks the masthead title away (see .is-landing .wordmark
+   below) — the title merges into the nav instead of showing twice. */
+.is-landing .sitenav-word {
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.is-landing.scrolled .sitenav-word {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 /* ---------- masthead ---------- */
 .masthead {
   border-bottom: var(--edge) solid var(--ink);
@@ -130,6 +146,15 @@ a { color: inherit; }
   font-style: normal;
   display: block;
   color: var(--pink);
+}
+
+.is-landing .wordmark {
+  transition: opacity .3s ease, transform .3s ease;
+  transform-origin: left top;
+}
+.is-landing.scrolled .wordmark {
+  opacity: 0;
+  transform: scale(.55) translateY(-10px);
 }
 
 .standfirst {
