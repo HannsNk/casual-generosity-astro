@@ -119,7 +119,7 @@ const TIER_NOTE = {
   // Plain DOM filtering — no framework, ~1KB of JS on an otherwise static page.
   // .view-btn reuses .chip styling but isn't a filter facet, so it's excluded
   // here and handled by its own click listener further down.
-  const chips = [...document.querySelectorAll<HTMLButtonElement>('.chip:not(.view-btn)')];
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('.chip[data-facet]')];
   const selects = [...document.querySelectorAll<HTMLSelectElement>('.fselect')];
   const cards = [...document.querySelectorAll<HTMLElement>('.card')];
   const count = document.getElementById('count')!;
