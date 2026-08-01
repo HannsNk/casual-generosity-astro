@@ -149,6 +149,17 @@ a { color: inherit; }
   color: var(--pink);
 }
 
+/* smaller page-title variant of .wordmark, for sub-page mastheads (e.g.
+   Notes) that don't need the full landing-page-sized headline */
+.wordmark-sm {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: .95;
+  letter-spacing: -.03em;
+  margin: 0 0 .75rem;
+}
+
 .is-landing .wordmark {
   transition: opacity .3s ease, transform .3s ease;
   transform-origin: left top;
@@ -193,6 +204,18 @@ a { color: inherit; }
   line-height: 1.4;
   color: var(--ink-soft);
 }
+
+/* masthead with nothing but the legend in it (activities page) — the
+   default masthead padding is sized for a wordmark, so it leaves the
+   legend swimming in whitespace when it's the only thing there */
+.masthead-compact {
+  padding-block: 1.25rem;
+}
+.masthead-compact .legend {
+  margin-top: 0;
+  gap: 1rem 2rem;
+}
+.masthead-compact .back { padding-block: .75rem; }
 
 /* ---------- landing page ---------- */
 .landing-pitch {
