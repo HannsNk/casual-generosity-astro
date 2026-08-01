@@ -985,6 +985,30 @@ a { color: inherit; }
 .back:hover { border-bottom-color: var(--ink); }
 .detail-actions { display: flex; align-items: center; gap: .6rem; }
 
+/* Below ~480px the done count + three labeled buttons no longer fit one
+   row without crowding — drop to a 2x2 grid instead of letting them wrap
+   ragged. .detail-top needs to wrap too, so .detail-actions can claim a
+   full row of its own under the back link. */
+@media (max-width: 480px) {
+  .detail-top { flex-wrap: wrap; }
+  .detail-actions {
+    flex-basis: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+  }
+  .detail-actions .done-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .detail-actions .done-btn.labeled,
+  .detail-actions .fav-btn.labeled,
+  .detail-actions .share-btn.labeled {
+    width: 100%;
+  }
+}
+
 .detail { padding-bottom: 6rem; }
 .detail h1 {
   font-family: var(--display);
