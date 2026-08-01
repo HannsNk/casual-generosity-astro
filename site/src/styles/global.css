@@ -945,7 +945,7 @@ a { color: inherit; }
   padding-top: 2rem;
   border-top: var(--edge) solid var(--ink);
 }
-.notes-featured h2 {
+.notes-featured > h2 {
   font-family: var(--mono);
   font-weight: 400;
   font-size: .68rem;
