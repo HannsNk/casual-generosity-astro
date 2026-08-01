@@ -752,9 +752,10 @@ a { color: inherit; }
   margin-bottom: .5rem;
 }
 
-/* ---------- share & favorite buttons ---------- */
+/* ---------- share, favorite & done buttons ---------- */
 .share-btn,
-.fav-btn {
+.fav-btn,
+.done-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -773,20 +774,26 @@ a { color: inherit; }
 .share-btn:focus-visible,
 .share-btn.shared,
 .fav-btn:hover,
-.fav-btn:focus-visible {
+.fav-btn:focus-visible,
+.done-btn:hover,
+.done-btn:focus-visible {
   background: var(--tier, var(--ink));
   border-color: var(--tier, var(--ink));
   color: #fff;
 }
 .share-btn:focus-visible,
-.fav-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.fav-btn:focus-visible,
+.done-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 .share-btn svg,
-.fav-btn svg { flex: 0 0 auto; }
+.fav-btn svg,
+.done-btn svg { flex: 0 0 auto; }
+.done-btn:disabled { opacity: .6; cursor: default; }
 
 /* sits above .card-link (z-index: 1) so clicks land on the button, not the
    card's whole-card overlay link */
 .share-btn.icon-only,
-.fav-btn.icon-only {
+.fav-btn.icon-only,
+.done-btn.icon-only {
   z-index: 2;
   width: 26px;
   height: 26px;
@@ -794,12 +801,36 @@ a { color: inherit; }
 }
 
 .share-btn.labeled,
-.fav-btn.labeled {
+.fav-btn.labeled,
+.done-btn.labeled {
   padding: .55em 1em;
   font-size: .72rem;
   letter-spacing: .06em;
   text-transform: uppercase;
 }
+
+/* Done state: filled solid ink, same fixed-fill treatment as a pressed
+   .chip — no tier colour here (unlike the fav/share tier-fill hover), since
+   Done sits outside the tier system. */
+.done-btn.is-done {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.done-btn.is-done:hover,
+.done-btn.is-done:focus-visible {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.done-count {
+  font-family: var(--mono);
+  font-size: .78rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.done-count b { color: var(--ink); }
 
 .share-btn.shared::after {
   content: attr(data-feedback);
@@ -1193,6 +1224,184 @@ a { color: inherit; }
   color: var(--ink-soft);
 }
 .story-empty[hidden] { display: none; }
+
+/* ---------- done: quick-capture / share window ---------- */
+.donewin {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+.donewin[hidden] { display: none; }
+
+.donewin-backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.donewin-panel {
+  position: relative;
+  width: 100%;
+  max-width: 28rem;
+  max-height: calc(100vh - 2.5rem);
+  overflow-y: auto;
+  padding: 1.75rem;
+  background: var(--card);
+  border: var(--edge) solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ink-soft);
+}
+
+.donewin-close {
+  position: absolute;
+  top: .9rem;
+  right: .9rem;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: .75rem;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.donewin-close:hover { background: var(--ink); color: var(--paper); }
+.donewin-close:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.donewin-step h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: -.015em;
+  margin: 0 0 .5rem;
+}
+.donewin-step[hidden] { display: none; }
+
+.donewin-sub {
+  font-size: .9rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0 0 1.5rem;
+}
+
+.donewin-field { margin-bottom: 1.1rem; }
+.donewin-field label,
+.donewin-flabel {
+  display: block;
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: .45rem;
+}
+.donewin-field label span {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--body);
+}
+.donewin-field input {
+  width: 100%;
+  font-family: var(--body);
+  font-size: .95rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  padding: .6em .75em;
+}
+.donewin-field input:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.donewin-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .6rem;
+  margin-top: 1.5rem;
+}
+.donewin-skip {
+  font-family: var(--mono);
+  font-size: .72rem;
+  letter-spacing: .03em;
+  color: var(--ink-soft);
+  background: none;
+  border: none;
+  padding: .5em;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.donewin-skip:hover { color: var(--ink); }
+.donewin-continue {
+  font-family: var(--mono);
+  font-size: .72rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: .6em 1.2em;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  transition: background .12s;
+}
+.donewin-continue:hover { background: var(--ink-soft); border-color: var(--ink-soft); }
+.donewin-skip:focus-visible,
+.donewin-continue:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.donewin-caption {
+  width: 100%;
+  font-family: var(--body);
+  font-size: .95rem;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  padding: .7em .85em;
+  resize: vertical;
+  margin-bottom: 1.25rem;
+}
+.donewin-caption:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.donewin-sharebtns { display: flex; flex-wrap: wrap; gap: .5rem; }
+.donewin-action {
+  position: relative;
+  font-family: var(--mono);
+  font-size: .7rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .6em 1em;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.donewin-action:hover { background: var(--tier, var(--ink)); border-color: var(--tier, var(--ink)); color: #fff; }
+.donewin-action:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.donewin-action--primary { background: var(--ink); color: var(--paper); }
+.donewin-action--primary:hover { background: var(--tier, var(--ink)); border-color: var(--tier, var(--ink)); }
+.donewin-action.flashed::after {
+  content: attr(data-feedback);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: .62rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: .4em .65em;
+  pointer-events: none;
+}
 
 /* ---------- 404 ---------- */
 .not-found {

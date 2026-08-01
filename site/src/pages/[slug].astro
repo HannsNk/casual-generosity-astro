@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import activities from '../data/activities.json';
 import { Image } from 'astro:assets';
+import DoneButton from '../components/DoneButton.astro';
 
 export function getStaticPaths() {
   return activities.map((a) => ({ params: { slug: a.slug }, props: { a } }));
@@ -30,6 +31,10 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
     <div class="detail-top">
       <a class="back" href={`${import.meta.env.BASE_URL}activities.html`}>← All activities</a>
       <div class="detail-actions">
+        <p class="done-count">
+          <b id="done-count" data-slug={a.slug}>0</b> done this
+        </p>
+        <DoneButton a={a} url={`${import.meta.env.BASE_URL}${a.slug}.html`} />
         <button
           class="fav-btn labeled"
           type="button"

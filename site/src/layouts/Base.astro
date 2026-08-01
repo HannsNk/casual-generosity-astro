@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import AuthWidget from '../components/AuthWidget.astro';
+import ShareWindow from '../components/ShareWindow.astro';
 
 
 const { title, description, image } = Astro.props;
@@ -81,6 +82,7 @@ const isCurrent = (match: string) =>
       }
     </script>
     <slot />
+    <ShareWindow />
     <footer class="foot">
       <div class="wrap">
         <p>

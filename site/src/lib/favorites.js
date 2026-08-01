@@ -71,3 +71,10 @@ export const toggleFavorite = async (slug) => {
 
   return willFavorite;
 };
+
+// Drops a slug from the in-memory favorite set without a Firestore write —
+// used when marking an activity done, which deletes the favorite doc as
+// part of its own batch, so the heart button just needs to catch up locally.
+export const clearFavoriteLocal = (slug) => {
+  if (favSlugs.delete(slug)) notify();
+};

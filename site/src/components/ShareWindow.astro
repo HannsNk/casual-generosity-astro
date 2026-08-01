@@ -1,0 +1,64 @@
+---
+const WITH_WHO = ['Solo', 'Partner', 'Friends', 'Family', 'Kids'];
+const REACTIONS = ['Loved it', 'Would do again', 'Glad I tried it'];
+---
+<div id="donewin" class="donewin" hidden>
+  <div class="donewin-backdrop" data-donewin-close></div>
+  <div class="donewin-panel" role="dialog" aria-modal="true" aria-label="Mark done">
+    <button class="donewin-close" type="button" data-donewin-close aria-label="Close">✕</button>
+
+    <section id="donewin-capture" class="donewin-step">
+      <span class="stamp">Nice one</span>
+      <h2>Quick thoughts?</h2>
+      <p class="donewin-sub">Totally optional — helps you remember, and helps whoever you share this with.</p>
+
+      <div class="donewin-field">
+        <label for="donewin-highlight">Highlight or advice <span>(optional)</span></label>
+        <input id="donewin-highlight" type="text" maxlength="140" placeholder="Any tip for someone trying this?" />
+      </div>
+
+      <div class="donewin-field">
+        <span class="donewin-flabel">Who with</span>
+        <div class="chip-row" id="donewin-withwho" role="group" aria-label="Who with">
+          {WITH_WHO.map((v) => (
+            <button type="button" class="chip" data-value={v} aria-pressed="false">{v}</button>
+          ))}
+        </div>
+      </div>
+
+      <div class="donewin-field">
+        <span class="donewin-flabel">Reaction</span>
+        <div class="chip-row" id="donewin-reaction" role="group" aria-label="Reaction">
+          {REACTIONS.map((v) => (
+            <button type="button" class="chip" data-value={v} aria-pressed="false">{v}</button>
+          ))}
+        </div>
+      </div>
+
+      <div class="donewin-actions">
+        <button type="button" class="donewin-skip" id="donewin-skip">Skip</button>
+        <button type="button" class="donewin-continue" id="donewin-continue">Continue</button>
+      </div>
+    </section>
+
+    <section id="donewin-share" class="donewin-step" hidden>
+      <span class="stamp">Share it</span>
+      <h2>Spread the word</h2>
+      <p class="donewin-sub">Someone else might try this because you shared it — that's kind of the whole point.</p>
+
+      <textarea id="donewin-caption" class="donewin-caption" rows="4" maxlength="280"></textarea>
+
+      <div class="donewin-sharebtns">
+        <button type="button" class="donewin-action donewin-action--primary" id="donewin-native" hidden>Share</button>
+        <button type="button" class="donewin-action" id="donewin-whatsapp">WhatsApp</button>
+        <button type="button" class="donewin-action" id="donewin-x">X</button>
+        <button type="button" class="donewin-action" id="donewin-copycaption">Copy caption</button>
+        <button type="button" class="donewin-action" id="donewin-copylink">Copy link</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  import '../scripts/done.js';
+</script>
