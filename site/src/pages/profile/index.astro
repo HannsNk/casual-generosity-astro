@@ -1,0 +1,129 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+<Base
+  title="Profile — CasuallyGenerous"
+  description="Your CasuallyGenerous profile."
+>
+  <div class="wrap detail t-Committed">
+    <div class="detail-top">
+      <a class="back" href={base}>← Home</a>
+    </div>
+
+    <div class="detail-head">
+      <h1>Profile</h1>
+    </div>
+
+    <section id="profile-loading" class="profile-state">
+      <p>Loading…</p>
+    </section>
+
+    <section id="profile-signed-out" class="profile-state" hidden>
+      <p>You're not signed in. Use the sign-in button in the nav to continue.</p>
+    </section>
+
+    <section id="profile-content" class="profile-card" hidden>
+      <div id="profile-avatar" class="profile-avatar"></div>
+      <div class="profile-info">
+        <h2 id="profile-name"></h2>
+        <p id="profile-email" class="profile-email"></p>
+      </div>
+      <button id="profile-signout" class="chip" type="button">Sign out</button>
+    </section>
+  </div>
+</Base>
+
+<script>
+  import { auth } from '../../lib/firebase.js';
+  import { onAuthStateChanged, signOut } from 'firebase/auth';
+
+  const loadingEl = document.getElementById('profile-loading') as HTMLElement;
+  const signedOutEl = document.getElementById('profile-signed-out') as HTMLElement;
+  const contentEl = document.getElementById('profile-content') as HTMLElement;
+  const avatarEl = document.getElementById('profile-avatar') as HTMLElement;
+  const nameEl = document.getElementById('profile-name') as HTMLElement;
+  const emailEl = document.getElementById('profile-email') as HTMLElement;
+  const signOutBtn = document.getElementById('profile-signout') as HTMLButtonElement;
+
+  signOutBtn.addEventListener('click', () => signOut(auth));
+
+  onAuthStateChanged(auth, (user) => {
+    loadingEl.hidden = true;
+    if (user) {
+      signedOutEl.hidden = true;
+      contentEl.hidden = false;
+
+      const displayName = user.displayName ?? user.email ?? 'Anonymous';
+      nameEl.textContent = displayName;
+      emailEl.textContent = user.email ?? '';
+
+      if (user.photoURL) {
+        avatarEl.style.backgroundImage = `url(${user.photoURL})`;
+        avatarEl.textContent = '';
+      } else {
+        avatarEl.style.backgroundImage = '';
+        avatarEl.textContent = displayName.charAt(0).toUpperCase();
+      }
+    } else {
+      contentEl.hidden = true;
+      signedOutEl.hidden = false;
+    }
+  });
+</script>
+
+<style>
+  .profile-state {
+    padding: 1.5rem 0 2.5rem;
+    font-family: var(--mono);
+    font-size: .85rem;
+    color: var(--ink-soft);
+  }
+
+  .profile-card[hidden] { display: none; }
+  .profile-card {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    background: var(--card);
+    border: var(--edge) solid var(--ink);
+    box-shadow: 8px 8px 0 var(--ink-soft);
+    margin: 1.5rem 0 2.5rem;
+  }
+
+  .profile-avatar {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .profile-info { flex: 1; min-width: 0; }
+  .profile-info h2 {
+    font-family: var(--display);
+    font-size: 1.3rem;
+    margin: 0 0 .25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .profile-email {
+    font-family: var(--mono);
+    font-size: .78rem;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+</style>
