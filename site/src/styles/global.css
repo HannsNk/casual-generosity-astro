@@ -127,6 +127,7 @@ a { color: inherit; }
 /* ---------- masthead ---------- */
 .masthead {
   border-bottom: var(--edge) solid var(--ink);
+  padding-block: clamp(2.5rem, 6vw, 3.5rem) clamp(2rem, 5vw, 3rem);
 }
 
 .wordmark {
@@ -135,7 +136,7 @@ a { color: inherit; }
   font-size: clamp(2.75rem, 9vw, 6rem);
   line-height: .92;
   letter-spacing: -.035em;
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.75rem;
   max-width: 14ch;
   /* the wordmark is one unbroken word with no spaces to wrap at — without
      this it overflows the viewport on narrow screens instead of breaking */
@@ -204,7 +205,7 @@ a { color: inherit; }
 .intent {
   /* padding-block, not the padding shorthand — .intent shares this element
      with .wrap, and a shorthand here would zero out .wrap's padding-inline. */
-  padding-block: clamp(2.5rem, 6vw, 4rem);
+  padding-block: clamp(2rem, 5vw, 3rem);
 }
 .intent-label {
   font-family: var(--mono);
@@ -402,9 +403,9 @@ a { color: inherit; }
 .landing-section {
   border-top: var(--edge) solid var(--ink);
   /* padding-block: same reasoning as .intent above. */
-  padding-block: clamp(2.5rem, 6vw, 4rem);
+  padding-block: clamp(2rem, 5vw, 3rem);
 }
-.landing-section .landing-pitch { margin-bottom: 2rem; }
+.landing-section .landing-pitch { margin-bottom: 1.5rem; }
 
 /* A bordered box, not a hard-shadow card (that look is reserved for
    .card/.start-intent) — enough to visually set the notes list apart. */
@@ -435,7 +436,7 @@ a { color: inherit; }
 .landing-why {
   border-top: var(--edge) solid var(--ink);
   /* padding-block: same reasoning as .intent above. */
-  padding-block: clamp(2.5rem, 6vw, 4rem) clamp(3rem, 8vw, 5rem);
+  padding-block: clamp(2rem, 5vw, 3rem) clamp(2.25rem, 6vw, 3.5rem);
 }
 .landing-why h2 {
   font-family: var(--mono);
@@ -466,7 +467,7 @@ a { color: inherit; }
    secondary to the .intent-card CTAs above. */
 .landing-generous {
   border-top: var(--edge) solid var(--ink);
-  padding-block: clamp(2rem, 5vw, 3rem) clamp(3rem, 8vw, 5rem);
+  padding-block: clamp(1.5rem, 4vw, 2.25rem) clamp(2.25rem, 6vw, 3.5rem);
 }
 .landing-generous h2 {
   font-family: var(--mono);
@@ -966,6 +967,7 @@ a { color: inherit; }
   justify-content: space-between;
   gap: 1rem;
 }
+.detail .detail-top .back { padding-block: .75rem; }
 .back {
   font-family: var(--mono);
   font-size: .72rem;
@@ -1003,7 +1005,8 @@ a { color: inherit; }
   object-fit: cover;
   border: var(--edge) solid var(--ink);
   box-shadow: 12px 12px 0 var(--tier);
-  margin-bottom: 3.5rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .spec {
