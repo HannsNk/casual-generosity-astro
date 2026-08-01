@@ -27,7 +27,11 @@ export const activityStatsRef = (slug) => doc(db, 'activityStats', slug);
 // activity's done count (creating it at 1 if this is the first time anyone's
 // done it) — all as one atomic batch. increment() resolves against a
 // missing field/doc as 0, so the create-if-absent case needs no read.
-export const markActivityDone = async (uid, slug) => {
+// `wasFavorited` (the caller already knows this from its own local cache)
+// decides whether the same write also owes the save count a decrement — a
+// Firestore batch can't issue two separate writes to the same document, so
+// both counters have to move in a single .set() call when both apply.
+export const markActivityDone = async (uid, slug, wasFavorited) => {
   const batch = writeBatch(db);
   batch.delete(doc(db, 'users', uid, 'favorites', slug));
   batch.set(doneRecordRef(uid, slug), {
@@ -36,7 +40,10 @@ export const markActivityDone = async (uid, slug) => {
     active: true,
     doneAt: serverTimestamp(),
   }, { merge: true });
-  batch.set(activityStatsRef(slug), { doneCount: increment(1) }, { merge: true });
+  batch.set(activityStatsRef(slug), {
+    doneCount: increment(1),
+    ...(wasFavorited ? { saveCount: increment(-1) } : {}),
+  }, { merge: true });
   await batch.commit();
 };
 

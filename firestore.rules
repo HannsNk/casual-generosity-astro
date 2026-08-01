@@ -2,6 +2,21 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // activityStats has two independent counters (doneCount, saveCount).
+    // A single write may touch either or both (marking an activity done
+    // that was previously favorited moves both in the same batch write),
+    // but each one that's present may only move by exactly +1 or -1 from
+    // its prior value — resource is null on create, so "before" reads as 0.
+    function statsBefore(field) {
+      return resource == null ? 0 : resource.data.get(field, 0);
+    }
+    function validCounter(field) {
+      return request.resource.data.get(field, 0) == statsBefore(field)
+        || request.resource.data.get(field, 0) == statsBefore(field) + 1
+        || request.resource.data.get(field, 0) == statsBefore(field) - 1;
+    }
+
     match /stories/{storyId} {
       allow read: if true;
       allow create: if request.resource.data.activity is string
@@ -31,10 +46,10 @@ service cloud.firestore {
 
     match /activityStats/{slug} {
       allow read: if true;
-      allow create: if request.auth != null && request.resource.data.doneCount == 1;
-      allow update: if request.auth != null
-        && (request.resource.data.doneCount == resource.data.doneCount + 1
-            || request.resource.data.doneCount == resource.data.doneCount - 1);
+      allow create, update: if request.auth != null
+        && request.resource.data.keys().hasOnly(['doneCount', 'saveCount'])
+        && validCounter('doneCount')
+        && validCounter('saveCount');
     }
   }
 }

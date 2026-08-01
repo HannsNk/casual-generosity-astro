@@ -1,11 +1,12 @@
 import {
-  auth, db, markActivityDone, undoActivityDone, patchDoneRecord, doneRecordRef, activityStatsRef,
+  auth, db, markActivityDone, undoActivityDone, patchDoneRecord, doneRecordRef,
 } from '../lib/firebase.js';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
   collection, query, where, getDocs, getDoc,
 } from 'firebase/firestore';
-import { clearFavoriteLocal } from '../lib/favorites.js';
+import { clearFavoriteLocal, isFavoritedLocal } from '../lib/favorites.js';
+import { onStatsChange, bumpStat } from '../lib/stats.js';
 
 let uid = null;
 const doneSlugs = new Set();
@@ -15,7 +16,7 @@ const applyDoneState = (btn, active) => {
   btn.classList.toggle('is-done', active);
   btn.setAttribute('aria-pressed', String(active));
   const label = btn.querySelector('.done-label');
-  if (label) label.textContent = active ? 'Done' : 'Mark done';
+  if (label) label.textContent = active ? 'Done' : 'I have done this';
 };
 
 const refreshButtons = () => {
@@ -207,26 +208,54 @@ copyLinkBtn.addEventListener('click', async () => {
   }
 });
 
-// ---------- done count display (activity detail page) ----------
+// ---------- save/done counts (activity cards + detail page) ----------
 
-const countEl = document.getElementById('done-count');
+const formatSaves = (n) => `${n} saved`;
+const formatCardDone = (n) => `${n} done`;
+const formatDetailDone = (n) => {
+  if (n === 0) return 'Be the first person to do this!';
+  if (n === 1) return '1 person has done this';
+  return `${n} people have done this`;
+};
 
-const loadCount = async () => {
-  if (!countEl) return;
-  const slug = countEl.dataset.slug ?? '';
-  try {
-    const snap = await getDoc(activityStatsRef(slug));
-    countEl.textContent = String(snap.exists() ? (snap.data().doneCount ?? 0) : 0);
-  } catch (err) {
-    console.error('Failed to load done count', err);
+const applyCardStats = (stats) => {
+  document.querySelectorAll('[data-stats-slug]').forEach((el) => {
+    const slug = el.dataset.statsSlug ?? '';
+    const { saveCount, doneCount } = stats.get(slug) ?? { saveCount: 0, doneCount: 0 };
+    const savesEl = el.querySelector('[data-stat-saves]');
+    const doneEl = el.querySelector('[data-stat-done]');
+    if (savesEl) {
+      savesEl.hidden = saveCount === 0;
+      savesEl.textContent = formatSaves(saveCount);
+    }
+    if (doneEl) {
+      doneEl.hidden = doneCount === 0;
+      doneEl.textContent = formatCardDone(doneCount);
+    }
+  });
+};
+
+const saveCountEl = document.getElementById('save-count');
+const doneCountEl = document.getElementById('done-count');
+
+const applyDetailStats = (stats) => {
+  if (saveCountEl) {
+    const slug = saveCountEl.dataset.slug ?? '';
+    const { saveCount } = stats.get(slug) ?? { saveCount: 0 };
+    saveCountEl.hidden = saveCount === 0;
+    saveCountEl.textContent = formatSaves(saveCount);
+  }
+  if (doneCountEl) {
+    const slug = doneCountEl.dataset.slug ?? '';
+    const { doneCount } = stats.get(slug) ?? { doneCount: 0 };
+    doneCountEl.textContent = formatDetailDone(doneCount);
   }
 };
-loadCount();
 
-const bumpCount = (slug, delta) => {
-  if (!countEl || countEl.dataset.slug !== slug) return;
-  countEl.textContent = String(Number(countEl.textContent || '0') + delta);
-};
+onStatsChange((stats) => {
+  applyCardStats(stats);
+  applyDetailStats(stats);
+});
 
 // ---------- done button clicks ----------
 
@@ -252,14 +281,18 @@ document.addEventListener('click', async (e) => {
       await undoActivityDone(uid, slug);
       doneSlugs.delete(slug);
       refreshButtons();
-      bumpCount(slug, -1);
+      bumpStat(slug, 'doneCount', -1);
       closeWindowIfSlug(slug);
     } else {
-      await markActivityDone(uid, slug);
+      const wasFav = isFavoritedLocal(slug);
+      await markActivityDone(uid, slug, wasFav);
       doneSlugs.add(slug);
       refreshButtons();
-      bumpCount(slug, 1);
-      clearFavoriteLocal(slug);
+      bumpStat(slug, 'doneCount', 1);
+      if (wasFav) {
+        clearFavoriteLocal(slug);
+        bumpStat(slug, 'saveCount', -1);
+      }
       openCapture(slug, btn.dataset.title ?? '', btn.dataset.url ?? '');
     }
   } catch (err) {

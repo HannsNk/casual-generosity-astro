@@ -873,13 +873,18 @@ a { color: inherit; }
   color: var(--paper);
 }
 
-.done-count {
+.detail-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
   font-family: var(--mono);
   font-size: .78rem;
   color: var(--ink-soft);
-  margin: 0;
+  margin: .85rem 0 0;
 }
-.done-count b { color: var(--ink); }
+/* Only prefix "done" with a separator when "saved" is showing beside it —
+   with saveCount at 0 that span stays hidden and done-count sits alone. */
+.save-count:not([hidden]) + .done-count::before { content: '· '; }
 
 .share-btn.shared::after {
   content: attr(data-feedback);
@@ -939,6 +944,19 @@ a { color: inherit; }
   line-height: 1.5;
   color: var(--ink-soft);
 }
+
+.card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .1rem .7rem;
+  margin-top: .6rem;
+  font-family: var(--mono);
+  font-size: .66rem;
+  letter-spacing: .03em;
+  color: var(--ink-soft);
+}
+.card-stats .stat[hidden] { display: none; }
+
 .meta {
   min-width: 0;
   font-family: var(--mono);
@@ -1035,9 +1053,10 @@ a { color: inherit; }
 .back:hover { border-bottom-color: var(--ink); }
 .detail-actions { display: flex; align-items: center; gap: .6rem; }
 
-/* Below ~480px the done count + three labeled buttons no longer fit one
-   row without crowding — drop to a 2x2 grid instead of letting them wrap
-   ragged. .detail-top needs to wrap too, so .detail-actions can claim a
+/* Below ~480px the three labeled buttons no longer fit one row without
+   crowding. Done is the primary action, so it gets a full-width row of its
+   own with Want to do / Share sharing the row underneath, rather than an
+   even grid. .detail-top needs to wrap too, so .detail-actions can claim a
    full row of its own under the back link. */
 @media (max-width: 480px) {
   .detail-top { flex-wrap: wrap; }
@@ -1047,11 +1066,7 @@ a { color: inherit; }
     grid-template-columns: 1fr 1fr;
     gap: .5rem;
   }
-  .detail-actions .done-count {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  .detail-actions .done-btn.labeled { grid-column: 1 / -1; }
   .detail-actions .done-btn.labeled,
   .detail-actions .fav-btn.labeled,
   .detail-actions .share-btn.labeled {
@@ -1185,33 +1200,8 @@ a { color: inherit; }
   padding-bottom: 1px;
 }
 
-/* ---------- have-you-done-this stories ---------- */
-.stories {
-  margin-top: 4rem;
-  padding-top: 2rem;
-  border-top: var(--edge) solid var(--ink);
-  max-width: 40rem;
-}
-.stories > h2 {
-  font-family: var(--mono);
-  font-weight: 400;
-  font-size: .68rem;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin: 0 0 1.25rem;
-}
-
-.story-counts {
-  font-family: var(--mono);
-  font-size: .78rem;
-  color: var(--ink-soft);
-  margin: 0 0 1.5rem;
-}
-.story-counts b { color: var(--ink); }
-
+/* ---------- shared form styling (about page contact form) ---------- */
 .story-form { margin-bottom: 2.5rem; }
-.story-status { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.25rem; }
 
 .story-field { margin-bottom: 1rem; }
 .story-field label {
@@ -1275,23 +1265,6 @@ a { color: inherit; }
   margin: .75rem 0 0;
 }
 .form-hint a { color: inherit; }
-
-.story-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-.story-item { border-top: 1px solid var(--rule); padding-top: 1.25rem; }
-.story-item p {
-  margin: .6rem 0 0;
-  font-family: var(--body);
-  font-size: .95rem;
-  line-height: 1.55;
-  color: var(--ink);
-}
 
 .story-empty {
   font-family: var(--mono);

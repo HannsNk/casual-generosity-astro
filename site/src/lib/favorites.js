@@ -1,7 +1,7 @@
-import { auth, db } from './firebase.js';
+import { auth, db, activityStatsRef } from './firebase.js';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
-  collection, doc, getDocs, setDoc, deleteDoc, serverTimestamp,
+  collection, doc, getDocs, serverTimestamp, writeBatch, increment,
 } from 'firebase/firestore';
 
 let uid = null;
@@ -44,7 +44,8 @@ onAuthStateChanged(auth, async (user) => {
 // (and notifying subscribers) before the Firestore write resolves, then
 // rolling back on failure. Returns null if the user isn't signed in yet —
 // in that case it kicks off the existing sign-in flow instead of failing
-// silently, matching the AuthWidget's own trigger button.
+// silently, matching the AuthWidget's own trigger button. The favorite doc
+// and the activity's public save count are written as one atomic batch.
 export const toggleFavorite = async (slug) => {
   if (!uid) {
     document.getElementById('auth-signin')?.click();
@@ -57,11 +58,14 @@ export const toggleFavorite = async (slug) => {
 
   const ref = doc(db, 'users', uid, 'favorites', slug);
   try {
+    const batch = writeBatch(db);
     if (willFavorite) {
-      await setDoc(ref, { createdAt: serverTimestamp() });
+      batch.set(ref, { createdAt: serverTimestamp() });
     } else {
-      await deleteDoc(ref);
+      batch.delete(ref);
     }
+    batch.set(activityStatsRef(slug), { saveCount: increment(willFavorite ? 1 : -1) }, { merge: true });
+    await batch.commit();
   } catch (err) {
     console.error('Failed to update favorite', err);
     willFavorite ? favSlugs.delete(slug) : favSlugs.add(slug);
@@ -78,3 +82,8 @@ export const toggleFavorite = async (slug) => {
 export const clearFavoriteLocal = (slug) => {
   if (favSlugs.delete(slug)) notify();
 };
+
+// Whether the signed-in user currently has this slug favorited, per the
+// local cache — used to decide whether marking an activity done also owes
+// the save count a decrement, without an extra read.
+export const isFavoritedLocal = (slug) => favSlugs.has(slug);

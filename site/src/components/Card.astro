@@ -1,6 +1,5 @@
 ---
 import { Image } from 'astro:assets';
-import DoneButton from './DoneButton.astro';
 
 const { a, compact = false } = Astro.props;
 const url = `${import.meta.env.BASE_URL}${a.slug}.html`;
@@ -33,7 +32,6 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
     <div class="card-head">
       <span class="stamp">{a.tier}</span>
       <div class="card-actions">
-        <DoneButton a={a} url={url} compact />
         <button
           class="fav-btn icon-only"
           type="button"
@@ -67,5 +65,9 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
     </div>
     <h2>{a.title}</h2>
     <p>{a.hook}</p>
+    <div class="card-stats" data-stats-slug={a.slug}>
+      <span class="stat stat-saves" data-stat-saves hidden>0 saved</span>
+      <span class="stat stat-done" data-stat-done hidden>0 done</span>
+    </div>
   </div>
 </div>
