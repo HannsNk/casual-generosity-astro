@@ -1,5 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
+import Card from '../../components/Card.astro';
+import activities from '../../data/activities.json';
 
 const base = import.meta.env.BASE_URL;
 ---
@@ -24,13 +26,29 @@ const base = import.meta.env.BASE_URL;
       <p>You're not signed in. Use the sign-in button in the nav to continue.</p>
     </section>
 
-    <section id="profile-content" class="profile-card" hidden>
-      <div id="profile-avatar" class="profile-avatar"></div>
-      <div class="profile-info">
-        <h2 id="profile-name"></h2>
-        <p id="profile-email" class="profile-email"></p>
+    <section id="profile-content" hidden>
+      <div class="profile-card">
+        <div id="profile-avatar" class="profile-avatar"></div>
+        <div class="profile-info">
+          <h2 id="profile-name"></h2>
+          <p id="profile-email" class="profile-email"></p>
+        </div>
+        <button id="profile-signout" class="chip" type="button">Sign out</button>
       </div>
-      <button id="profile-signout" class="chip" type="button">Sign out</button>
+
+      <section class="profile-favorites">
+        <h2>Saved</h2>
+        <div class="grid" id="favorites-grid">
+          {activities.map((a) => (
+            <div class="fav-card" data-slug={a.slug} hidden>
+              <Card a={a} compact />
+            </div>
+          ))}
+        </div>
+        <p class="favorites-empty" id="favorites-empty" hidden>
+          Nothing saved yet — tap the heart on any activity to add it here.
+        </p>
+      </section>
     </section>
   </div>
 </Base>
@@ -38,6 +56,7 @@ const base = import.meta.env.BASE_URL;
 <script>
   import { auth } from '../../lib/firebase.js';
   import { onAuthStateChanged, signOut } from 'firebase/auth';
+  import { onFavoritesChange } from '../../lib/favorites.js';
 
   const loadingEl = document.getElementById('profile-loading') as HTMLElement;
   const signedOutEl = document.getElementById('profile-signed-out') as HTMLElement;
@@ -46,6 +65,18 @@ const base = import.meta.env.BASE_URL;
   const nameEl = document.getElementById('profile-name') as HTMLElement;
   const emailEl = document.getElementById('profile-email') as HTMLElement;
   const signOutBtn = document.getElementById('profile-signout') as HTMLButtonElement;
+  const favCards = [...document.querySelectorAll<HTMLElement>('.fav-card')];
+  const favEmpty = document.getElementById('favorites-empty') as HTMLElement;
+
+  onFavoritesChange((slugs: Set<string>) => {
+    let shown = 0;
+    favCards.forEach((card) => {
+      const ok = slugs.has(card.dataset.slug ?? '');
+      card.hidden = !ok;
+      if (ok) shown++;
+    });
+    favEmpty.hidden = shown !== 0;
+  });
 
   signOutBtn.addEventListener('click', () => signOut(auth));
 
@@ -126,4 +157,31 @@ const base = import.meta.env.BASE_URL;
     color: var(--ink-soft);
     margin: 0;
   }
+
+  .profile-favorites { margin-bottom: 4rem; }
+  .profile-favorites > h2 {
+    font-family: var(--mono);
+    font-weight: 400;
+    font-size: .68rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 1.25rem;
+    padding-bottom: .6rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .favorites-empty {
+    font-family: var(--mono);
+    font-size: .8rem;
+    color: var(--ink-soft);
+  }
+  .favorites-empty[hidden] { display: none; }
+
+  /* .grid stretches its direct children to equal row height by default, but
+     that's .fav-card here, not the .card inside it — without this the .card
+     boxes stay only as tall as their own content, so titles/descriptions of
+     differing length leave cards visibly mismatched in height. */
+  .fav-card { display: flex; }
+  .fav-card[hidden] { display: none; }
+  .fav-card .card { width: 100%; }
 </style>

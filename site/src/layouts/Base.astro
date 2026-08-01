@@ -137,3 +137,46 @@ const isCurrent = (match: string) =>
     }
   });
 </script>
+
+<script>
+  // Delegated handler for every [data-fav] heart button on the page (cards
+  // and the detail page's "want to do" button alike), backed by the shared
+  // in-memory favorites set in lib/favorites.js. toggleFavorite() updates
+  // that set (and notifies onFavoritesChange subscribers, i.e. this script)
+  // before its Firestore write resolves, so there's no need to re-apply
+  // state here after awaiting it.
+  import { onFavoritesChange, toggleFavorite } from '../lib/favorites.js';
+
+  const applyFavState = (btn: HTMLButtonElement, active: boolean) => {
+    btn.classList.toggle('is-fav', active);
+    btn.setAttribute('aria-pressed', String(active));
+    const label = btn.querySelector('.fav-label');
+    if (label) label.textContent = active ? 'Saved' : 'Want to do';
+  };
+
+  onFavoritesChange((slugs: Set<string>) => {
+    document.querySelectorAll<HTMLButtonElement>('[data-fav]').forEach((btn) => {
+      applyFavState(btn, slugs.has(btn.dataset.slug ?? ''));
+    });
+  });
+
+  // Brief "see it in your profile" hint after favoriting, same timed-flash
+  // pattern as the share button's "Copied!" tooltip above.
+  const favHintTimers = new WeakMap<HTMLButtonElement, number>();
+  const flashSavedHint = (btn: HTMLButtonElement) => {
+    btn.dataset.feedback = 'Saved! See it in your profile';
+    btn.classList.add('fav-hint');
+    const prev = favHintTimers.get(btn);
+    if (prev) window.clearTimeout(prev);
+    favHintTimers.set(btn, window.setTimeout(() => btn.classList.remove('fav-hint'), 2400));
+  };
+
+  document.addEventListener('click', async (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-fav]');
+    if (!btn) return;
+    const slug = btn.dataset.slug ?? '';
+    if (!slug) return;
+    const wasFavorited = await toggleFavorite(slug);
+    if (wasFavorited === true) flashSavedHint(btn);
+  });
+</script>

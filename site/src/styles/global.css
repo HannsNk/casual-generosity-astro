@@ -738,6 +738,7 @@ a { color: inherit; }
   margin-bottom: .5rem;
 }
 .card-head .stamp { margin-bottom: 0; }
+.card-actions { display: flex; align-items: center; gap: .4rem; }
 
 .stamp {
   font-family: var(--mono);
@@ -751,8 +752,9 @@ a { color: inherit; }
   margin-bottom: .5rem;
 }
 
-/* ---------- share button ---------- */
-.share-btn {
+/* ---------- share & favorite buttons ---------- */
+.share-btn,
+.fav-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -769,24 +771,30 @@ a { color: inherit; }
    to the card/page's own --tier instead of a facet selection. */
 .share-btn:hover,
 .share-btn:focus-visible,
-.share-btn.shared {
+.share-btn.shared,
+.fav-btn:hover,
+.fav-btn:focus-visible {
   background: var(--tier, var(--ink));
   border-color: var(--tier, var(--ink));
   color: #fff;
 }
-.share-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
-.share-btn svg { flex: 0 0 auto; }
+.share-btn:focus-visible,
+.fav-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.share-btn svg,
+.fav-btn svg { flex: 0 0 auto; }
 
 /* sits above .card-link (z-index: 1) so clicks land on the button, not the
    card's whole-card overlay link */
-.share-btn.icon-only {
+.share-btn.icon-only,
+.fav-btn.icon-only {
   z-index: 2;
   width: 26px;
   height: 26px;
   padding: 0;
 }
 
-.share-btn.labeled {
+.share-btn.labeled,
+.fav-btn.labeled {
   padding: .55em 1em;
   font-size: .72rem;
   letter-spacing: .06em;
@@ -794,6 +802,35 @@ a { color: inherit; }
 }
 
 .share-btn.shared::after {
+  content: attr(data-feedback);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: .62rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: .4em .65em;
+  pointer-events: none;
+}
+
+/* Favorited state: heart fills red and stays that way regardless of hover,
+   which uses the tier-fill treatment shared with .share-btn above. */
+.fav-btn.is-fav {
+  border-color: #e0304a;
+  color: #e0304a;
+}
+.fav-btn.is-fav svg { fill: currentColor; }
+.fav-btn.is-fav:hover,
+.fav-btn.is-fav:focus-visible {
+  background: #e0304a;
+  border-color: #e0304a;
+  color: #fff;
+}
+
+.fav-btn.fav-hint::after {
   content: attr(data-feedback);
   position: absolute;
   bottom: calc(100% + 8px);
@@ -915,6 +952,7 @@ a { color: inherit; }
   border-bottom: 2px solid transparent;
 }
 .back:hover { border-bottom-color: var(--ink); }
+.detail-actions { display: flex; align-items: center; gap: .6rem; }
 
 .detail { padding-bottom: 6rem; }
 .detail h1 {
