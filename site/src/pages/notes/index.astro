@@ -11,12 +11,12 @@ const posts = (await getCollection('notes')).sort(
 const dateFmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' });
 ---
 <Base title="Notes — CasuallyGenerous" description="Notes and updates from CasuallyGenerous.">
-  <header class="masthead">
-    <div class="detail-top">
+  <header class="masthead masthead-compact">
+    <div class="wrap detail-top">
       <a class="back" href={base}>← Home</a>
     </div>
     <div class="wrap">
-      <h1 class="wordmark">Notes</h1>
+      <h1 class="wordmark-sm">Notes</h1>
       <p class="landing-pitch">Occasional writing, with a few activities worth trying alongside it.</p>
     </div>
   </header>

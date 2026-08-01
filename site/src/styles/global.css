@@ -108,9 +108,26 @@ a { color: inherit; }
   .sitenav-links { gap: .4rem .85rem; }
 }
 
+/* Landing page: the nav bar's title is redundant with the big masthead
+   title until you scroll past it, so it starts hidden and fades in only
+   once scrolling shrinks the masthead title away (see .is-landing .wordmark
+   below) — the title merges into the nav instead of showing twice. */
+.is-landing .sitenav-word {
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.is-landing.scrolled .sitenav-word {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 /* ---------- masthead ---------- */
 .masthead {
   border-bottom: var(--edge) solid var(--ink);
+  padding-block: clamp(2.5rem, 6vw, 3.5rem) clamp(2rem, 5vw, 3rem);
 }
 
 .wordmark {
@@ -119,7 +136,7 @@ a { color: inherit; }
   font-size: clamp(2.75rem, 9vw, 6rem);
   line-height: .92;
   letter-spacing: -.035em;
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.75rem;
   max-width: 14ch;
   /* the wordmark is one unbroken word with no spaces to wrap at — without
      this it overflows the viewport on narrow screens instead of breaking */
@@ -130,6 +147,26 @@ a { color: inherit; }
   font-style: normal;
   display: block;
   color: var(--pink);
+}
+
+/* smaller page-title variant of .wordmark, for sub-page mastheads (e.g.
+   Notes) that don't need the full landing-page-sized headline */
+.wordmark-sm {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: .95;
+  letter-spacing: -.03em;
+  margin: 0 0 .75rem;
+}
+
+.is-landing .wordmark {
+  transition: opacity .3s ease, transform .3s ease;
+  transform-origin: left top;
+}
+.is-landing.scrolled .wordmark {
+  opacity: 0;
+  transform: scale(.55) translateY(-10px);
 }
 
 .standfirst {
@@ -168,6 +205,18 @@ a { color: inherit; }
   color: var(--ink-soft);
 }
 
+/* masthead with nothing but the legend in it (activities page) — the
+   default masthead padding is sized for a wordmark, so it leaves the
+   legend swimming in whitespace when it's the only thing there */
+.masthead-compact {
+  padding-block: 1.25rem;
+}
+.masthead-compact .legend {
+  margin-top: 0;
+  gap: 1rem 2rem;
+}
+.masthead-compact .back { padding-block: .75rem; }
+
 /* ---------- landing page ---------- */
 .landing-pitch {
   max-width: 58ch;
@@ -179,7 +228,7 @@ a { color: inherit; }
 .intent {
   /* padding-block, not the padding shorthand — .intent shares this element
      with .wrap, and a shorthand here would zero out .wrap's padding-inline. */
-  padding-block: clamp(2.5rem, 6vw, 4rem);
+  padding-block: clamp(2rem, 5vw, 3rem);
 }
 .intent-label {
   font-family: var(--mono);
@@ -377,9 +426,9 @@ a { color: inherit; }
 .landing-section {
   border-top: var(--edge) solid var(--ink);
   /* padding-block: same reasoning as .intent above. */
-  padding-block: clamp(2.5rem, 6vw, 4rem);
+  padding-block: clamp(2rem, 5vw, 3rem);
 }
-.landing-section .landing-pitch { margin-bottom: 2rem; }
+.landing-section .landing-pitch { margin-bottom: 1.5rem; }
 
 /* A bordered box, not a hard-shadow card (that look is reserved for
    .card/.start-intent) — enough to visually set the notes list apart. */
@@ -410,7 +459,7 @@ a { color: inherit; }
 .landing-why {
   border-top: var(--edge) solid var(--ink);
   /* padding-block: same reasoning as .intent above. */
-  padding-block: clamp(2.5rem, 6vw, 4rem) clamp(3rem, 8vw, 5rem);
+  padding-block: clamp(2rem, 5vw, 3rem) clamp(2.25rem, 6vw, 3.5rem);
 }
 .landing-why h2 {
   font-family: var(--mono);
@@ -441,7 +490,7 @@ a { color: inherit; }
    secondary to the .intent-card CTAs above. */
 .landing-generous {
   border-top: var(--edge) solid var(--ink);
-  padding-block: clamp(2rem, 5vw, 3rem) clamp(3rem, 8vw, 5rem);
+  padding-block: clamp(1.5rem, 4vw, 2.25rem) clamp(2.25rem, 6vw, 3.5rem);
 }
 .landing-generous h2 {
   font-family: var(--mono);
@@ -951,7 +1000,7 @@ a { color: inherit; }
   padding-top: 2rem;
   border-top: var(--edge) solid var(--ink);
 }
-.notes-featured h2 {
+.notes-featured > h2 {
   font-family: var(--mono);
   font-weight: 400;
   font-size: .68rem;
@@ -972,6 +1021,7 @@ a { color: inherit; }
   justify-content: space-between;
   gap: 1rem;
 }
+.detail .detail-top .back { padding-block: .75rem; }
 .back {
   font-family: var(--mono);
   font-size: .72rem;
@@ -1033,7 +1083,8 @@ a { color: inherit; }
   object-fit: cover;
   border: var(--edge) solid var(--ink);
   box-shadow: 12px 12px 0 var(--tier);
-  margin-bottom: 3.5rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .spec {

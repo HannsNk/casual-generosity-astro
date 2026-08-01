@@ -28,6 +28,9 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
 ---
 <Base title={`${a.title} — CasuallyGenerous`} description={a.hook} image={a.image || undefined}>
   <div class={`wrap detail t-${a.tier}`}>
+    
+    {a.image && <Image class="hero" src={a.image} inferSize alt="" />}
+    
     <div class="detail-top">
       <a class="back" href={`${import.meta.env.BASE_URL}activities.html`}>← All activities</a>
       <div class="detail-actions">
@@ -72,8 +75,6 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
       <h1>{a.title}</h1>
       <p class="detail-hook">{a.hook}</p>
     </div>
-
-    {a.image && <Image class="hero" src={a.image} inferSize alt="" />}
 
     <dl class="spec">
       <div><dt>Cost</dt><dd>{a.cost.join(' / ')}</dd></div>
