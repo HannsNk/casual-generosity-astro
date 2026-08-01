@@ -5,10 +5,14 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "fetch-activities": "node scripts/fetch-airtable.mjs"
   },
   "dependencies": {
     "astro": "^5.0.0",
     "firebase": "^11.10.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.6.1"
   }
 }
