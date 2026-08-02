@@ -1,7 +1,9 @@
-import { auth, db, activityStatsRef } from './firebase.js';
+import {
+  auth, db, setFavorited, clearFavorited,
+} from './firebase.js';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
-  collection, doc, getDocs, serverTimestamp, writeBatch, increment,
+  collection, query, where, getDocs,
 } from 'firebase/firestore';
 
 let uid = null;
@@ -29,8 +31,13 @@ onAuthStateChanged(auth, async (user) => {
 
   if (uid) {
     try {
-      const snap = await getDocs(collection(db, 'users', uid, 'favorites'));
-      snap.forEach((d) => favSlugs.add(d.id));
+      const q = query(
+        collection(db, 'activityInteractions'),
+        where('uid', '==', uid),
+        where('state', '==', 'favorited'),
+      );
+      const snap = await getDocs(q);
+      snap.forEach((d) => favSlugs.add(d.data().activitySlug));
     } catch (err) {
       console.error('Failed to load favorites', err);
     }
@@ -44,8 +51,7 @@ onAuthStateChanged(auth, async (user) => {
 // (and notifying subscribers) before the Firestore write resolves, then
 // rolling back on failure. Returns null if the user isn't signed in yet —
 // in that case it kicks off the existing sign-in flow instead of failing
-// silently, matching the AuthWidget's own trigger button. The favorite doc
-// and the activity's public save count are written as one atomic batch.
+// silently, matching the AuthWidget's own trigger button.
 export const toggleFavorite = async (slug) => {
   if (!uid) {
     document.getElementById('auth-signin')?.click();
@@ -56,16 +62,12 @@ export const toggleFavorite = async (slug) => {
   willFavorite ? favSlugs.add(slug) : favSlugs.delete(slug);
   notify();
 
-  const ref = doc(db, 'users', uid, 'favorites', slug);
   try {
-    const batch = writeBatch(db);
     if (willFavorite) {
-      batch.set(ref, { createdAt: serverTimestamp() });
+      await setFavorited(uid, slug);
     } else {
-      batch.delete(ref);
+      await clearFavorited(uid, slug);
     }
-    batch.set(activityStatsRef(slug), { saveCount: increment(willFavorite ? 1 : -1) }, { merge: true });
-    await batch.commit();
   } catch (err) {
     console.error('Failed to update favorite', err);
     willFavorite ? favSlugs.delete(slug) : favSlugs.add(slug);
@@ -77,13 +79,12 @@ export const toggleFavorite = async (slug) => {
 };
 
 // Drops a slug from the in-memory favorite set without a Firestore write —
-// used when marking an activity done, which deletes the favorite doc as
-// part of its own batch, so the heart button just needs to catch up locally.
+// used when marking an activity done, which overwrites the same interaction
+// doc to state 'done', so the heart button just needs to catch up locally.
 export const clearFavoriteLocal = (slug) => {
   if (favSlugs.delete(slug)) notify();
 };
 
 // Whether the signed-in user currently has this slug favorited, per the
-// local cache — used to decide whether marking an activity done also owes
-// the save count a decrement, without an extra read.
+// local cache — used by the detail-page tally to mark "incl. you".
 export const isFavoritedLocal = (slug) => favSlugs.has(slug);

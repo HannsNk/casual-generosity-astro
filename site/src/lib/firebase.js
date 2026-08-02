@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getFirestore, doc, getDoc, setDoc, increment, serverTimestamp, writeBatch,
+  getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp,
+  collection, query, where, getDocs,
 } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
@@ -18,49 +19,76 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
-export const doneRecordRef = (uid, slug) => doc(db, 'doneRecords', `${uid}_${slug}`);
-export const activityStatsRef = (slug) => doc(db, 'activityStats', slug);
+// Public fact: the signed-in user's current relationship to an activity —
+// 'favorited' or 'done'. One doc per uid+slug, so marking done simply
+// overwrites whatever was there (no separate delete needed to drop a prior
+// favorite — see markActivityDone).
+export const activityInteractionRef = (uid, slug) => doc(db, 'activityInteractions', `${uid}_${slug}`);
 
-// Marks an activity done for a signed-in user: drops any existing favorite,
-// upserts the done record (merge, so a highlight/withWho/reaction captured
-// on an earlier done — later undone — survives a redo), and bumps the
-// activity's done count (creating it at 1 if this is the first time anyone's
-// done it) — all as one atomic batch. increment() resolves against a
-// missing field/doc as 0, so the create-if-absent case needs no read.
-// `wasFavorited` (the caller already knows this from its own local cache)
-// decides whether the same write also owes the save count a decrement — a
-// Firestore batch can't issue two separate writes to the same document, so
-// both counters have to move in a single .set() call when both apply.
-export const markActivityDone = async (uid, slug, wasFavorited) => {
-  const batch = writeBatch(db);
-  batch.delete(doc(db, 'users', uid, 'favorites', slug));
-  batch.set(doneRecordRef(uid, slug), {
+// Private detail: highlight/withWho/reaction captured on Done. Keyed the
+// same way, but a separate collection so it can stay owner-only and, per
+// Undo Done, survive deletion of the interaction doc above.
+export const doneDetailsRef = (uid, slug) => doc(db, 'doneDetails', `${uid}_${slug}`);
+
+// Favourite: single upsert. Only ever called while the activity isn't
+// currently done — Base.astro's click handler redirects a fav-muted click
+// to the done button instead of calling this.
+export const setFavorited = async (uid, slug) => {
+  await setDoc(activityInteractionRef(uid, slug), {
     uid,
     activitySlug: slug,
-    active: true,
+    state: 'favorited',
+    createdAt: serverTimestamp(),
+    doneAt: null,
+  });
+};
+
+// Unfavourite: only ever called while state is 'favorited', so a plain
+// delete is safe — there's no done record on this doc to preserve.
+export const clearFavorited = async (uid, slug) => {
+  await deleteDoc(activityInteractionRef(uid, slug));
+};
+
+// Mark Done: one upsert overwriting the interaction doc to state 'done'.
+// This is the same doc a prior favorite lived on, so it needs no separate
+// write to clear one. doneDetails (highlight/withWho/reaction) is patched
+// separately, after the quick-capture panel resolves — see patchDoneDetails.
+export const markActivityDone = async (uid, slug) => {
+  await setDoc(activityInteractionRef(uid, slug), {
+    uid,
+    activitySlug: slug,
+    state: 'done',
+    createdAt: serverTimestamp(),
     doneAt: serverTimestamp(),
-  }, { merge: true });
-  batch.set(activityStatsRef(slug), {
-    doneCount: increment(1),
-    ...(wasFavorited ? { saveCount: increment(-1) } : {}),
-  }, { merge: true });
-  await batch.commit();
+  });
 };
 
-// Undoes a done mark: flips the record inactive (never deleted, so any
-// captured content survives) and decrements the done count. Does not
-// restore a favorite that was dropped when the activity was marked done.
+// Undo Done: deletes the interaction doc outright (not a soft-inactive flag)
+// so a fresh Favourite/Done both start clean. doneDetails is deliberately
+// left alone so a later re-Done shows the previously captured highlight.
 export const undoActivityDone = async (uid, slug) => {
-  const batch = writeBatch(db);
-  batch.update(doneRecordRef(uid, slug), { active: false });
-  batch.update(activityStatsRef(slug), { doneCount: increment(-1) });
-  await batch.commit();
+  await deleteDoc(activityInteractionRef(uid, slug));
 };
 
-// Patches whichever quick-capture fields were filled in onto the done
-// record. Only ever called after markActivityDone, so the doc already exists.
-export const patchDoneRecord = async (uid, slug, fields) => {
-  await setDoc(doneRecordRef(uid, slug), fields, { merge: true });
+// Patches whichever quick-capture fields were filled in. Only ever called
+// after markActivityDone, so the doc may or may not already exist —
+// merge:true covers both.
+export const patchDoneDetails = async (uid, slug, fields) => {
+  await setDoc(doneDetailsRef(uid, slug), {
+    uid,
+    activitySlug: slug,
+    ...fields,
+  }, { merge: true });
+};
+
+// Deletes all of a uid's doneDetails docs. Must run client-side, before
+// calling Firebase Auth's deleteUser — doneDetails is owner-only, so it's
+// unreachable once the account (and its auth token) is gone. The public
+// activityInteractions facts are deliberately left untouched; they persist
+// as historical record even after the account is deleted.
+export const deleteAccountData = async (uid) => {
+  const snap = await getDocs(query(collection(db, 'doneDetails'), where('uid', '==', uid)));
+  await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)));
 };
 
 // Returns true if the current user is signed in AND has not yet
