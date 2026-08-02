@@ -1,7 +1,7 @@
 import { auth, db, activityStatsRef } from './firebase.js';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
-  collection, doc, getDocs, serverTimestamp, writeBatch, increment,
+  collection, doc, getDocs, serverTimestamp, runTransaction,
 } from 'firebase/firestore';
 
 let uid = null;
@@ -45,7 +45,10 @@ onAuthStateChanged(auth, async (user) => {
 // rolling back on failure. Returns null if the user isn't signed in yet —
 // in that case it kicks off the existing sign-in flow instead of failing
 // silently, matching the AuthWidget's own trigger button. The favorite doc
-// and the activity's public save count are written as one atomic batch.
+// and the activity's public save count are written as one atomic
+// transaction, with the count read-then-clamped at 0 rather than blindly
+// incremented — stale local state across tabs/devices can otherwise fire
+// the same decrement twice and drive the public total negative.
 export const toggleFavorite = async (slug) => {
   if (!uid) {
     document.getElementById('auth-signin')?.click();
@@ -57,15 +60,20 @@ export const toggleFavorite = async (slug) => {
   notify();
 
   const ref = doc(db, 'users', uid, 'favorites', slug);
+  const statsRef = activityStatsRef(slug);
   try {
-    const batch = writeBatch(db);
-    if (willFavorite) {
-      batch.set(ref, { createdAt: serverTimestamp() });
-    } else {
-      batch.delete(ref);
-    }
-    batch.set(activityStatsRef(slug), { saveCount: increment(willFavorite ? 1 : -1) }, { merge: true });
-    await batch.commit();
+    await runTransaction(db, async (tx) => {
+      const statsSnap = await tx.get(statsRef);
+      const current = statsSnap.exists() ? statsSnap.data() : {};
+      const saveCount = Math.max(0, (current.saveCount ?? 0) + (willFavorite ? 1 : -1));
+
+      if (willFavorite) {
+        tx.set(ref, { createdAt: serverTimestamp() });
+      } else {
+        tx.delete(ref);
+      }
+      tx.set(statsRef, { saveCount }, { merge: true });
+    });
   } catch (err) {
     console.error('Failed to update favorite', err);
     willFavorite ? favSlugs.delete(slug) : favSlugs.add(slug);

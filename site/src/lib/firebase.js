@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getFirestore, doc, getDoc, setDoc, increment, serverTimestamp, writeBatch,
+  getFirestore, doc, getDoc, setDoc, serverTimestamp, runTransaction,
 } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
@@ -25,36 +25,45 @@ export const activityStatsRef = (slug) => doc(db, 'activityStats', slug);
 // upserts the done record (merge, so a highlight/withWho/reaction captured
 // on an earlier done — later undone — survives a redo), and bumps the
 // activity's done count (creating it at 1 if this is the first time anyone's
-// done it) — all as one atomic batch. increment() resolves against a
-// missing field/doc as 0, so the create-if-absent case needs no read.
-// `wasFavorited` (the caller already knows this from its own local cache)
-// decides whether the same write also owes the save count a decrement — a
-// Firestore batch can't issue two separate writes to the same document, so
-// both counters have to move in a single .set() call when both apply.
+// done it) — all as one atomic transaction. Counters are read-then-clamped
+// at 0 rather than blindly incremented/decremented: a plain increment(-1)
+// can be issued more than once for the same favorite/done edge (stale local
+// state across tabs or devices), which would drive the public total negative
+// with no way to recover short of a manual fix. `wasFavorited` (the caller
+// already knows this from its own local cache) decides whether the same
+// write also owes the save count a decrement.
 export const markActivityDone = async (uid, slug, wasFavorited) => {
-  const batch = writeBatch(db);
-  batch.delete(doc(db, 'users', uid, 'favorites', slug));
-  batch.set(doneRecordRef(uid, slug), {
-    uid,
-    activitySlug: slug,
-    active: true,
-    doneAt: serverTimestamp(),
-  }, { merge: true });
-  batch.set(activityStatsRef(slug), {
-    doneCount: increment(1),
-    ...(wasFavorited ? { saveCount: increment(-1) } : {}),
-  }, { merge: true });
-  await batch.commit();
+  const statsRef = activityStatsRef(slug);
+  await runTransaction(db, async (tx) => {
+    const statsSnap = await tx.get(statsRef);
+    const current = statsSnap.exists() ? statsSnap.data() : {};
+    const update = { doneCount: Math.max(0, (current.doneCount ?? 0) + 1) };
+    if (wasFavorited) {
+      update.saveCount = Math.max(0, (current.saveCount ?? 0) - 1);
+    }
+
+    tx.delete(doc(db, 'users', uid, 'favorites', slug));
+    tx.set(doneRecordRef(uid, slug), {
+      uid,
+      activitySlug: slug,
+      active: true,
+      doneAt: serverTimestamp(),
+    }, { merge: true });
+    tx.set(statsRef, update, { merge: true });
+  });
 };
 
 // Undoes a done mark: flips the record inactive (never deleted, so any
 // captured content survives) and decrements the done count. Does not
 // restore a favorite that was dropped when the activity was marked done.
 export const undoActivityDone = async (uid, slug) => {
-  const batch = writeBatch(db);
-  batch.update(doneRecordRef(uid, slug), { active: false });
-  batch.update(activityStatsRef(slug), { doneCount: increment(-1) });
-  await batch.commit();
+  const statsRef = activityStatsRef(slug);
+  await runTransaction(db, async (tx) => {
+    const statsSnap = await tx.get(statsRef);
+    const current = statsSnap.exists() ? statsSnap.data() : {};
+    tx.update(doneRecordRef(uid, slug), { active: false });
+    tx.set(statsRef, { doneCount: Math.max(0, (current.doneCount ?? 0) - 1) }, { merge: true });
+  });
 };
 
 // Patches whichever quick-capture fields were filled in onto the done

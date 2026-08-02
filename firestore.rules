@@ -8,13 +8,18 @@ service cloud.firestore {
     // that was previously favorited moves both in the same batch write),
     // but each one that's present may only move by exactly +1 or -1 from
     // its prior value — resource is null on create, so "before" reads as 0.
+    // The >= 0 floor is enforced here, not just in client code, because a
+    // stale/racing client issuing a legal -1 step from an already-zero
+    // counter would otherwise be able to drift it negative forever with no
+    // way back — client-side clamping alone isn't a security boundary.
     function statsBefore(field) {
       return resource == null ? 0 : resource.data.get(field, 0);
     }
     function validCounter(field) {
-      return request.resource.data.get(field, 0) == statsBefore(field)
-        || request.resource.data.get(field, 0) == statsBefore(field) + 1
-        || request.resource.data.get(field, 0) == statsBefore(field) - 1;
+      return request.resource.data.get(field, 0) >= 0
+        && (request.resource.data.get(field, 0) == statsBefore(field)
+          || request.resource.data.get(field, 0) == statsBefore(field) + 1
+          || request.resource.data.get(field, 0) == statsBefore(field) - 1);
     }
 
     match /stories/{storyId} {
