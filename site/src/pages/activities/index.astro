@@ -45,7 +45,14 @@ const searchIndex = activities.map((a) => ({
 
   <div class="filters">
     <div class="wrap search-row">
-      <div class="search-box">
+      <button type="button" class="search-toggle" id="search-toggle" aria-expanded="false" aria-controls="search-box">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.2" y2="16.2"></line>
+        </svg>
+        Search
+      </button>
+      <div class="search-box" id="search-box" hidden>
         <input
           type="search"
           id="search-input"
@@ -109,11 +116,16 @@ const searchIndex = activities.map((a) => ({
           </div>
           <div class="fgroup">
             <span class="flabel">Tags</span>
-            <div class="chip-row">
-              {TAGS.map((t) => (
-                <button class="chip" data-facet="tags" data-value={t} aria-pressed="false">{t}</button>
-              ))}
-            </div>
+            <details class="tag-dropdown" id="tag-dropdown">
+              <summary class="tag-dropdown-summary">
+                <span id="tag-dropdown-label">All tags</span>
+              </summary>
+              <div class="tag-dropdown-panel chip-row">
+                {TAGS.map((t) => (
+                  <button class="chip" data-facet="tags" data-value={t} aria-pressed="false">{t}</button>
+                ))}
+              </div>
+            </details>
             <select class="fselect" data-facet="tags" aria-label="Filter by tag">
               <option value="">All tags</option>
               {TAGS.map((t) => <option value={t}>{t}</option>)}
@@ -175,7 +187,11 @@ const searchIndex = activities.map((a) => ({
   const grid = document.getElementById('grid')!;
   const viewButtons = [...document.querySelectorAll<HTMLButtonElement>('.view-btn')];
   const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+  const searchToggle = document.getElementById('search-toggle') as HTMLButtonElement | null;
+  const searchBox = document.getElementById('search-box') as HTMLElement | null;
   const sortSelect = document.getElementById('sort-select') as HTMLSelectElement | null;
+  const tagDropdown = document.getElementById('tag-dropdown') as HTMLDetailsElement | null;
+  const tagDropdownLabel = document.getElementById('tag-dropdown-label');
 
   const active: Record<string, Set<string>> = {
     tier: new Set(), cost: new Set(), time: new Set(), group: new Set(), tags: new Set(),
@@ -213,6 +229,7 @@ const searchIndex = activities.map((a) => ({
   const runSearch = (query: string) => {
     const q = query.trim();
     searchMatches = q ? new Set(fuse.search(q).map((r) => r.item.slug)) : null;
+    searchToggle?.classList.toggle('has-query', q.length > 0);
     apply();
   };
 
@@ -220,6 +237,23 @@ const searchIndex = activities.map((a) => ({
   searchInput?.addEventListener('input', () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => runSearch(searchInput.value), 120);
+  });
+
+  // The search box stays collapsed behind the toggle button until opened,
+  // to keep the filter bar compact — same idea as the mobile filters panel.
+  const openSearch = () => {
+    if (!searchBox || !searchToggle) return;
+    searchBox.hidden = false;
+    searchToggle.setAttribute('aria-expanded', 'true');
+    searchInput?.focus();
+  };
+  const closeSearch = () => {
+    if (!searchBox || !searchToggle) return;
+    searchBox.hidden = true;
+    searchToggle.setAttribute('aria-expanded', 'false');
+  };
+  searchToggle?.addEventListener('click', () => {
+    (searchBox?.hidden ?? true) ? openSearch() : closeSearch();
   });
 
   // Sort-by-saved reorders the actual card DOM nodes; "Featured order" just
@@ -254,6 +288,11 @@ const searchIndex = activities.map((a) => ({
       const set = active[facet];
       select.value = set.size ? [...set][set.size - 1] : '';
     });
+    if (tagDropdownLabel) {
+      const n = active.tags.size;
+      tagDropdownLabel.textContent = n ? `${n} tag${n > 1 ? 's' : ''}` : 'All tags';
+      tagDropdown?.classList.toggle('has-selection', n > 0);
+    }
   };
 
   const apply = () => {
@@ -299,6 +338,16 @@ const searchIndex = activities.map((a) => ({
   applyParamsToChips();
   syncControls();
   runSearch(searchInput?.value ?? '');
+  // A query loaded from the URL (?q=) should land with the box open, not
+  // hidden behind the toggle with an invisible active filter.
+  if (searchInput?.value) openSearch();
+
+  // Close the tag popover on an outside click, same as any dropdown.
+  document.addEventListener('click', (e) => {
+    if (tagDropdown?.open && !tagDropdown.contains(e.target as Node)) {
+      tagDropdown.open = false;
+    }
+  });
 
   chips.forEach((chip) => {
     chip.addEventListener('click', () => {
@@ -337,6 +386,9 @@ const searchIndex = activities.map((a) => ({
     Object.values(active).forEach((s) => s.clear());
     if (searchInput) searchInput.value = '';
     searchMatches = null;
+    searchToggle?.classList.remove('has-query');
+    closeSearch();
+    if (tagDropdown) tagDropdown.open = false;
     syncControls();
     apply();
   });

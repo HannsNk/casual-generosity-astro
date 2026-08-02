@@ -555,7 +555,28 @@ a { color: inherit; }
 .sort-select { display: block; width: auto; }
 @media (max-width: 640px) { .sort-select { width: 100%; } }
 
-.search-box { position: relative; width: min(320px, 100%); }
+.search-row { padding-bottom: .65rem; }
+.search-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .4em;
+  font-family: var(--mono);
+  font-size: .72rem;
+  letter-spacing: .05em;
+  padding: .42em .7em;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.search-toggle:hover { background: var(--paper-deep); }
+.search-toggle[aria-expanded="true"] { background: var(--ink); color: var(--paper); }
+.search-toggle.has-query {
+  background: var(--ink);
+  color: var(--paper);
+}
+.search-box[hidden] { display: none; }
+.search-box { width: min(320px, 100%); margin-top: .5rem; }
 .search-input {
   width: 100%;
   font-family: var(--mono);
@@ -569,6 +590,45 @@ a { color: inherit; }
 }
 .search-input::-webkit-search-cancel-button { appearance: none; }
 .search-input:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+/* Tags dropdown: a chip-row like the other facets, but with 16 possible
+   values it's too wide to lay out inline, so it's tucked behind a
+   <details>/<summary> popover instead — same interaction model as the
+   mobile filters panel elsewhere on this page. */
+.tag-dropdown { position: relative; }
+.tag-dropdown-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: .3em;
+  font-family: var(--mono);
+  font-size: .72rem;
+  padding: .42em .7em;
+  border: 2px solid var(--ink);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.tag-dropdown-summary:hover { background: var(--paper-deep); }
+.tag-dropdown-summary::-webkit-details-marker { display: none; }
+.tag-dropdown-summary::after { content: "▾"; font-size: .6rem; }
+.tag-dropdown[open] .tag-dropdown-summary::after { content: "▴"; }
+.tag-dropdown.has-selection .tag-dropdown-summary {
+  background: var(--ink);
+  color: var(--paper);
+}
+.tag-dropdown-panel {
+  position: absolute;
+  top: calc(100% + .5rem);
+  left: 0;
+  z-index: 30;
+  width: max(320px, 60vw);
+  max-width: 90vw;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  padding: .75rem;
+}
 
 .count {
   font-family: var(--mono);
@@ -648,6 +708,7 @@ a { color: inherit; }
   .fgroup { flex-direction: column; align-items: stretch; gap: .3rem; }
   .fgroup > .flabel { margin: 0; }
   .chip-row { display: none; }
+  .tag-dropdown { display: none; }
   .fselect { display: block; width: 100%; }
   .count { margin-left: auto; }
   .reset { flex: 0 0 auto; }
