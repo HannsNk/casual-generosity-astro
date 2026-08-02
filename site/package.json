@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "astro": "^5.0.0",
-    "firebase": "^11.10.0"
+    "firebase": "^11.10.0",
+    "fuse.js": "^7.5.0"
   },
   "devDependencies": {
     "dotenv": "^16.6.1"

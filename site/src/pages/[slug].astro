@@ -121,7 +121,9 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
       )}
 
       <div class="taglist">
-        {a.tags.map((t) => <span>{t}</span>)}
+        {a.tags.map((t) => (
+          <a href={`${import.meta.env.BASE_URL}activities.html?tags=${encodeURIComponent(t)}`}>{t}</a>
+        ))}
       </div>
     </section>
   </div>

@@ -7,12 +7,24 @@ const TIERS = ['Spontaneous', 'Planned', 'Committed'];
 const COSTS = ['Free', 'Under £20pp', '£20+pp'];
 const GROUPS = ['Solo / Duo', 'Small Group (3-6)', 'Large Group (7+)'];
 const TIMES = ['Under 30 min', '30-90 min', '90-120 min', 'Half-day'];
+const TAGS = [...new Set(activities.flatMap((a) => a.tags))].sort((a, b) => a.localeCompare(b));
 
 const TIER_NOTE = {
   Spontaneous: 'Do it today. Nothing to book, nothing to arrange.',
   Planned: 'Needs a date in the diary and a bit of coordinating.',
   Committed: 'Sign up, apply or train first — then it stays available to you.',
 };
+
+// Flattened, searchable text per activity (title, hook, why, instructions,
+// tags and the rest of the metadata) — fed to Fuse.js client-side for a
+// fuzzy full-text search across every field, not just the title.
+const searchIndex = activities.map((a) => ({
+  slug: a.slug,
+  text: [
+    a.title, a.hook, a.why, a.needs, a.instructions, a.link, a.tier, a.time,
+    ...a.cost, ...a.groupSize, ...a.location, ...a.tags,
+  ].filter(Boolean).join(' '),
+}));
 ---
 <Base
   title="Explore activities — CasuallyGenerous"
@@ -32,6 +44,17 @@ const TIER_NOTE = {
   </header>
 
   <div class="filters">
+    <div class="wrap search-row">
+      <div class="search-box">
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="Search activities…"
+          aria-label="Search all activity details"
+        />
+      </div>
+    </div>
     <div class="wrap filters-inner">
       <details class="filters-panel" id="filters-panel" open>
         <summary class="filters-toggle">Filters</summary>
@@ -85,6 +108,25 @@ const TIER_NOTE = {
             </select>
           </div>
           <div class="fgroup">
+            <span class="flabel">Tags</span>
+            <div class="chip-row">
+              {TAGS.map((t) => (
+                <button class="chip" data-facet="tags" data-value={t} aria-pressed="false">{t}</button>
+              ))}
+            </div>
+            <select class="fselect" data-facet="tags" aria-label="Filter by tag">
+              <option value="">All tags</option>
+              {TAGS.map((t) => <option value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div class="fgroup">
+            <span class="flabel">Sort</span>
+            <select class="sort-select" id="sort-select" aria-label="Sort activities">
+              <option value="">Featured order</option>
+              <option value="saved">Most saved</option>
+            </select>
+          </div>
+          <div class="fgroup">
             <span class="flabel">View</span>
             <div class="view-toggle" id="view-toggle" role="group" aria-label="Grid columns">
               <button type="button" class="chip view-btn" data-cols="2" aria-pressed="false" aria-label="2 columns">
@@ -113,12 +155,17 @@ const TIER_NOTE = {
       </p>
     </div>
   </main>
+
+  <script is:inline type="application/json" id="search-index" set:html={JSON.stringify(searchIndex)} />
 </Base>
 
 <script>
   // Plain DOM filtering — no framework, ~1KB of JS on an otherwise static page.
   // .view-btn reuses .chip styling but isn't a filter facet, so it's excluded
   // here and handled by its own click listener further down.
+  import Fuse from 'fuse.js';
+  import { onStatsChange } from '../../lib/stats.js';
+
   const chips = [...document.querySelectorAll<HTMLButtonElement>('.chip[data-facet]')];
   const selects = [...document.querySelectorAll<HTMLSelectElement>('.fselect')];
   const cards = [...document.querySelectorAll<HTMLElement>('.card')];
@@ -127,12 +174,18 @@ const TIER_NOTE = {
   const reset = document.getElementById('reset') as HTMLButtonElement;
   const grid = document.getElementById('grid')!;
   const viewButtons = [...document.querySelectorAll<HTMLButtonElement>('.view-btn')];
+  const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+  const sortSelect = document.getElementById('sort-select') as HTMLSelectElement | null;
 
   const active: Record<string, Set<string>> = {
     tier: new Set(), cost: new Set(), time: new Set(), group: new Set(), tags: new Set(),
   };
 
+  // null = no active search query, so filtering falls through untouched.
+  let searchMatches: Set<string> | null = null;
+
   const matches = (card: HTMLElement) => {
+    if (searchMatches && !searchMatches.has(card.dataset.slug ?? '')) return false;
     for (const facet of Object.keys(active)) {
       const wanted = active[facet];
       if (!wanted.size) continue;
@@ -142,6 +195,52 @@ const TIER_NOTE = {
     }
     return true;
   };
+
+  // Fuzzy full-text search over every field (title, hook, why, instructions,
+  // tags, cost, time, group size, location — see `searchIndex` in the
+  // frontmatter) rather than just the title, so a search for e.g. an
+  // ingredient or a tag mentioned only in the instructions still hits.
+  type SearchItem = { slug: string; text: string };
+  const searchDataEl = document.getElementById('search-index');
+  const searchCorpus: SearchItem[] = searchDataEl ? JSON.parse(searchDataEl.textContent ?? '[]') : [];
+  const fuse = new Fuse(searchCorpus, {
+    keys: ['text'],
+    threshold: 0.35,
+    ignoreLocation: true,
+    minMatchCharLength: 2,
+  });
+
+  const runSearch = (query: string) => {
+    const q = query.trim();
+    searchMatches = q ? new Set(fuse.search(q).map((r) => r.item.slug)) : null;
+    apply();
+  };
+
+  let searchTimer: ReturnType<typeof setTimeout> | undefined;
+  searchInput?.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => runSearch(searchInput.value), 120);
+  });
+
+  // Sort-by-saved reorders the actual card DOM nodes; "Featured order" just
+  // leaves them in their build-time order (tier/Airtable order) untouched.
+  // Save counts load asynchronously from Firestore (see lib/stats.js), so
+  // this re-sorts again whenever that data (or a live save/unsave) arrives.
+  let statsMap = new Map<string, number>();
+  const sortCards = () => {
+    if (sortSelect?.value !== 'saved') return;
+    const sorted = [...cards].sort((a, b) => {
+      const bv = statsMap.get(b.dataset.slug ?? '') ?? 0;
+      const av = statsMap.get(a.dataset.slug ?? '') ?? 0;
+      return bv - av;
+    });
+    sorted.forEach((card) => grid.appendChild(card));
+  };
+  sortSelect?.addEventListener('change', sortCards);
+  onStatsChange((stats) => {
+    statsMap = new Map([...stats].map(([slug, s]) => [slug, s.saveCount]));
+    sortCards();
+  });
 
   // Keep chips and the mobile <select> for the same facet in sync, since
   // either can be used to change the filter depending on viewport width.
@@ -168,19 +267,18 @@ const TIER_NOTE = {
       ? `${shown} things to do`
       : `${shown} of ${cards.length}`;
     empty.hidden = shown !== 0;
-    const any = Object.values(active).some((s) => s.size > 0);
+    const any = Object.values(active).some((s) => s.size > 0) || searchMatches !== null;
     reset.hidden = !any;
   };
 
-  // Pre-fill filters from the URL's query string (?tier=&cost=&time=&group=&tags=)
+  // Pre-fill filters from the URL's query string (?tier=&cost=&time=&group=&tags=&q=)
   // so a link like /activities/?tier=Spontaneous lands already filtered.
-  // tier/cost/time/group are matched against their chip's data-value; a value
-  // with no matching chip is ignored silently. tags has no chip UI on this
-  // page, so it's matched directly against each card's data-tags instead.
+  // Facet values are matched against their chip's data-value; a value with
+  // no matching chip is ignored silently.
   const applyParamsToChips = () => {
     const params = new URLSearchParams(window.location.search);
     const facetParams: [string, string][] = [
-      ['tier', 'tier'], ['cost', 'cost'], ['time', 'time'], ['group', 'group'],
+      ['tier', 'tier'], ['cost', 'cost'], ['time', 'time'], ['group', 'group'], ['tags', 'tags'],
     ];
 
     for (const [param, facet] of facetParams) {
@@ -194,18 +292,13 @@ const TIER_NOTE = {
       }
     }
 
-    const tagsRaw = params.get('tags');
-    if (tagsRaw) {
-      const knownTags = new Set(cards.flatMap((c) => (c.dataset.tags ?? '').split('|')));
-      for (const value of tagsRaw.split(',').map((v) => v.trim()).filter(Boolean)) {
-        if (knownTags.has(value)) active.tags.add(value);
-      }
-    }
+    const q = params.get('q');
+    if (q && searchInput) searchInput.value = q;
   };
 
   applyParamsToChips();
   syncControls();
-  apply();
+  runSearch(searchInput?.value ?? '');
 
   chips.forEach((chip) => {
     chip.addEventListener('click', () => {
@@ -242,6 +335,8 @@ const TIER_NOTE = {
 
   reset.addEventListener('click', () => {
     Object.values(active).forEach((s) => s.clear());
+    if (searchInput) searchInput.value = '';
+    searchMatches = null;
     syncControls();
     apply();
   });

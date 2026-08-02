@@ -9,6 +9,7 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
 ---
 <div
   class:list={['card', `t-${a.tier}`]}
+  data-slug={a.slug}
   data-tier={a.tier}
   data-cost={a.cost.join('|')}
   data-group={a.groupSize.join('|')}

@@ -549,6 +549,27 @@ a { color: inherit; }
   background-repeat: no-repeat;
 }
 
+/* Sort is a single-choice control, unlike the multi-select chip facets, so
+   it's just a <select> shown at every width instead of the chip-row +
+   mobile-only-<select> pattern the other .fselect facets use. */
+.sort-select { display: block; width: auto; }
+@media (max-width: 640px) { .sort-select { width: 100%; } }
+
+.search-box { position: relative; width: min(320px, 100%); }
+.search-input {
+  width: 100%;
+  font-family: var(--mono);
+  font-size: .78rem;
+  color: var(--ink);
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  padding: .5em .6em;
+  appearance: none;
+}
+.search-input::-webkit-search-cancel-button { appearance: none; }
+.search-input:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
 .count {
   font-family: var(--mono);
   font-size: .72rem;
