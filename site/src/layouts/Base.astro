@@ -178,7 +178,7 @@ const isLanding = isCurrent('');
     btn.classList.toggle('is-fav', active);
     btn.setAttribute('aria-pressed', String(active));
     const label = btn.querySelector('.fav-label');
-    if (label) label.textContent = active ? 'Saved' : 'Want to do';
+    if (label) label.textContent = active ? 'Saved' : 'Save';
   };
 
   onFavoritesChange((slugs: Set<string>) => {
@@ -203,6 +203,17 @@ const isLanding = isCurrent('');
     if (!btn) return;
     const slug = btn.dataset.slug ?? '';
     if (!slug) return;
+
+    // Save and Done are mutually exclusive. done.js marks every matching
+    // [data-fav] button .fav-muted while the activity is done — per the
+    // design spec, clicking it in that state clears Done rather than
+    // favoriting alongside it, so simulate a click on the done button
+    // instead of favoriting here.
+    if (btn.classList.contains('fav-muted')) {
+      document.querySelector<HTMLButtonElement>(`[data-done][data-slug="${slug}"]`)?.click();
+      return;
+    }
+
     const wasFavorited = await toggleFavorite(slug);
     if (wasFavorited === true) {
       flashSavedHint(btn);

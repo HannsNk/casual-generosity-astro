@@ -5,28 +5,38 @@ import { onAuthStateChanged } from 'firebase/auth';
 import {
   collection, query, where, getDocs, getDoc,
 } from 'firebase/firestore';
-import { clearFavoriteLocal, isFavoritedLocal } from '../lib/favorites.js';
+import { clearFavoriteLocal, isFavoritedLocal, onFavoritesChange } from '../lib/favorites.js';
 import { onStatsChange, bumpStat } from '../lib/stats.js';
 
 let uid = null;
-const doneSlugs = new Set();
+// slug -> Date the signed-in user marked it done (present only while active).
+const doneDates = new Map();
 const pending = new Set();
 
-const applyDoneState = (btn, active) => {
+const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
+
+const applyDoneState = (btn, active, date) => {
   btn.classList.toggle('is-done', active);
   btn.setAttribute('aria-pressed', String(active));
   const label = btn.querySelector('.done-label');
-  if (label) label.textContent = active ? 'Done' : 'I have done this';
+  if (label) label.textContent = active && date ? `Done — ${dateFmt.format(date)}` : 'Mark as done';
 };
 
+// Save and Done are mutually exclusive, so every [data-fav] button also
+// de-emphasises itself (.fav-muted) whenever its slug is currently done —
+// it's still clickable (clicking it clears Done), just visually quieter.
 const refreshButtons = () => {
   document.querySelectorAll('[data-done]').forEach((btn) => {
-    applyDoneState(btn, doneSlugs.has(btn.dataset.slug ?? ''));
+    const slug = btn.dataset.slug ?? '';
+    applyDoneState(btn, doneDates.has(slug), doneDates.get(slug));
+  });
+  document.querySelectorAll('[data-fav]').forEach((btn) => {
+    btn.classList.toggle('fav-muted', doneDates.has(btn.dataset.slug ?? ''));
   });
 };
 
 onAuthStateChanged(auth, async (user) => {
-  doneSlugs.clear();
+  doneDates.clear();
   uid = user ? user.uid : null;
 
   if (uid) {
@@ -37,13 +47,17 @@ onAuthStateChanged(auth, async (user) => {
         where('active', '==', true),
       );
       const snap = await getDocs(q);
-      snap.forEach((d) => doneSlugs.add(d.data().activitySlug));
+      snap.forEach((d) => {
+        const data = d.data();
+        doneDates.set(data.activitySlug, data.doneAt?.toDate ? data.doneAt.toDate() : new Date());
+      });
     } catch (err) {
       console.error('Failed to load done activities', err);
     }
   }
 
   refreshButtons();
+  applyDetailStats(latestStats);
 });
 
 // ---------- quick-capture + share window ----------
@@ -208,54 +222,66 @@ copyLinkBtn.addEventListener('click', async () => {
   }
 });
 
-// ---------- save/done counts (activity cards + detail page) ----------
+// ---------- save/done counts (activity cards + detail tally) ----------
 
-const formatSaves = (n) => `${n} saved`;
-const formatCardDone = (n) => `${n} done`;
-const formatDetailDone = (n) => {
-  if (n === 0) return 'Be the first person to do this!';
-  if (n === 1) return '1 person has done this';
-  return `${n} people have done this`;
-};
-
+// Card-scale fav/done buttons carry their own live count (icon + number,
+// shown even at zero — these are public totals, not "yours"). The detail
+// page's fav/done buttons have no count span, so they're skipped here.
 const applyCardStats = (stats) => {
-  document.querySelectorAll('[data-stats-slug]').forEach((el) => {
-    const slug = el.dataset.statsSlug ?? '';
-    const { saveCount, doneCount } = stats.get(slug) ?? { saveCount: 0, doneCount: 0 };
-    const savesEl = el.querySelector('[data-stat-saves]');
-    const doneEl = el.querySelector('[data-stat-done]');
-    if (savesEl) {
-      savesEl.hidden = saveCount === 0;
-      savesEl.textContent = formatSaves(saveCount);
-    }
-    if (doneEl) {
-      doneEl.hidden = doneCount === 0;
-      doneEl.textContent = formatCardDone(doneCount);
-    }
+  document.querySelectorAll('[data-fav]').forEach((btn) => {
+    const countEl = btn.querySelector('[data-stat-saves]');
+    if (!countEl) return;
+    const slug = btn.dataset.slug ?? '';
+    const { saveCount } = stats.get(slug) ?? { saveCount: 0 };
+    countEl.textContent = String(saveCount);
+    btn.setAttribute('aria-label', `${btn.classList.contains('is-fav') ? 'Saved' : 'Save'} — ${saveCount} saved`);
+  });
+  document.querySelectorAll('[data-done]').forEach((btn) => {
+    const countEl = btn.querySelector('[data-stat-done]');
+    if (!countEl) return;
+    const slug = btn.dataset.slug ?? '';
+    const { doneCount } = stats.get(slug) ?? { doneCount: 0 };
+    countEl.textContent = String(doneCount);
+    btn.setAttribute('aria-label', `${btn.classList.contains('is-done') ? 'Done' : 'Mark as done'} — ${doneCount} done`);
   });
 };
 
-const saveCountEl = document.getElementById('save-count');
-const doneCountEl = document.getElementById('done-count');
+const tallySavesEl = document.getElementById('tally-saves');
+const tallyDoneEl = document.getElementById('tally-done');
 
+// The detail-page tally: whichever count includes the signed-in user is
+// inked (figure in the tier colour, label spelling out "incl. you"); the
+// other stays neutral grey.
 const applyDetailStats = (stats) => {
-  if (saveCountEl) {
-    const slug = saveCountEl.dataset.slug ?? '';
+  if (tallySavesEl) {
+    const slug = tallySavesEl.dataset.slug ?? '';
     const { saveCount } = stats.get(slug) ?? { saveCount: 0 };
-    saveCountEl.hidden = saveCount === 0;
-    saveCountEl.textContent = formatSaves(saveCount);
+    const isYours = isFavoritedLocal(slug);
+    tallySavesEl.querySelector('.tally-figure').textContent = String(saveCount);
+    tallySavesEl.querySelector('.tally-label').textContent = isYours ? 'saved, incl. you' : 'saved';
+    tallySavesEl.classList.toggle('is-yours', isYours);
   }
-  if (doneCountEl) {
-    const slug = doneCountEl.dataset.slug ?? '';
+  if (tallyDoneEl) {
+    const slug = tallyDoneEl.dataset.slug ?? '';
     const { doneCount } = stats.get(slug) ?? { doneCount: 0 };
-    doneCountEl.textContent = formatDetailDone(doneCount);
+    const isYours = doneDates.has(slug);
+    tallyDoneEl.querySelector('.tally-figure').textContent = String(doneCount);
+    tallyDoneEl.querySelector('.tally-label').textContent = isYours ? 'done, incl. you' : 'done';
+    tallyDoneEl.classList.toggle('is-yours', isYours);
   }
 };
 
+let latestStats = new Map();
 onStatsChange((stats) => {
+  latestStats = stats;
   applyCardStats(stats);
   applyDetailStats(stats);
 });
+
+// Favorites load asynchronously on their own after sign-in (no count
+// changes, so no onStatsChange fires) — re-run the tally so "incl. you"
+// catches up once favorites are known.
+onFavoritesChange(() => applyDetailStats(latestStats));
 
 // ---------- done button clicks ----------
 
@@ -275,18 +301,18 @@ document.addEventListener('click', async (e) => {
   pending.add(slug);
   btn.disabled = true;
 
-  const wasDone = doneSlugs.has(slug);
+  const wasDone = doneDates.has(slug);
   try {
     if (wasDone) {
       await undoActivityDone(uid, slug);
-      doneSlugs.delete(slug);
+      doneDates.delete(slug);
       refreshButtons();
       bumpStat(slug, 'doneCount', -1);
       closeWindowIfSlug(slug);
     } else {
       const wasFav = isFavoritedLocal(slug);
       await markActivityDone(uid, slug, wasFav);
-      doneSlugs.add(slug);
+      doneDates.set(slug, new Date());
       refreshButtons();
       bumpStat(slug, 'doneCount', 1);
       if (wasFav) {

@@ -2,17 +2,19 @@
 const { a, url, compact = false } = Astro.props;
 ---
 <button
-  class:list={['done-btn', compact ? 'icon-only' : 'labeled']}
+  class:list={['done-btn', compact ? 'card-action' : 'detail-action']}
   type="button"
   data-done
   data-slug={a.slug}
   data-title={a.title}
   data-url={url}
   aria-pressed="false"
-  aria-label={compact ? `Mark ${a.title} done` : undefined}
+  aria-label={compact ? `Mark as done — 0 done` : undefined}
 >
-  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg viewBox="0 0 24 24" width={compact ? 17 : 17} height={compact ? 17 : 17} aria-hidden="true" fill="none" stroke="currentColor" stroke-width={compact ? 2.6 : 2.4} stroke-linecap="round" stroke-linejoin="round">
     <polyline points="20 6 9 17 4 12"></polyline>
   </svg>
-  {!compact && <span class="done-label">I have done this</span>}
+  {compact
+    ? <span class="btn-count" data-stat-done>0</span>
+    : <span class="done-label">Mark as done</span>}
 </button>
