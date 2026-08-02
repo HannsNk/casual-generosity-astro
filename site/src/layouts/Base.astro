@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import AuthWidget from '../components/AuthWidget.astro';
+import ShareWindow from '../components/ShareWindow.astro';
 
 
 const { title, description, image } = Astro.props;
@@ -98,6 +99,7 @@ const isLanding = isCurrent('');
       }
     </script>
     <slot />
+    <ShareWindow />
     <footer class="foot">
       <div class="wrap">
         <p>
@@ -170,12 +172,13 @@ const isLanding = isCurrent('');
   // before its Firestore write resolves, so there's no need to re-apply
   // state here after awaiting it.
   import { onFavoritesChange, toggleFavorite } from '../lib/favorites.js';
+  import { bumpStat } from '../lib/stats.js';
 
   const applyFavState = (btn: HTMLButtonElement, active: boolean) => {
     btn.classList.toggle('is-fav', active);
     btn.setAttribute('aria-pressed', String(active));
     const label = btn.querySelector('.fav-label');
-    if (label) label.textContent = active ? 'Saved' : 'Want to do';
+    if (label) label.textContent = active ? 'Saved' : 'Save';
   };
 
   onFavoritesChange((slugs: Set<string>) => {
@@ -200,7 +203,23 @@ const isLanding = isCurrent('');
     if (!btn) return;
     const slug = btn.dataset.slug ?? '';
     if (!slug) return;
+
+    // Save and Done are mutually exclusive. done.js marks every matching
+    // [data-fav] button .fav-muted while the activity is done — per the
+    // design spec, clicking it in that state clears Done rather than
+    // favoriting alongside it, so simulate a click on the done button
+    // instead of favoriting here.
+    if (btn.classList.contains('fav-muted')) {
+      document.querySelector<HTMLButtonElement>(`[data-done][data-slug="${slug}"]`)?.click();
+      return;
+    }
+
     const wasFavorited = await toggleFavorite(slug);
-    if (wasFavorited === true) flashSavedHint(btn);
+    if (wasFavorited === true) {
+      flashSavedHint(btn);
+      bumpStat(slug, 'saveCount', 1);
+    } else if (wasFavorited === false) {
+      bumpStat(slug, 'saveCount', -1);
+    }
   });
 </script>

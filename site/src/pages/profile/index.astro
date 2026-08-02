@@ -49,13 +49,33 @@ const base = import.meta.env.BASE_URL;
           Nothing saved yet — tap the heart on any activity to add it here.
         </p>
       </section>
+
+      <section class="profile-done">
+        <h2>Done</h2>
+        <div class="grid" id="done-grid">
+          {activities.map((a) => (
+            <div class="done-card" data-slug={a.slug} hidden>
+              <Card a={a} compact />
+              <div class="done-meta">
+                <p class="done-date" data-done-date></p>
+                <p class="done-highlight" data-done-highlight hidden></p>
+                <div class="done-tags" data-done-tags></div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p class="done-empty" id="done-empty" hidden>
+          Nothing marked done yet — tap "Done" on any activity once you've tried it.
+        </p>
+      </section>
     </section>
   </div>
 </Base>
 
 <script>
-  import { auth } from '../../lib/firebase.js';
+  import { auth, db } from '../../lib/firebase.js';
   import { onAuthStateChanged, signOut } from 'firebase/auth';
+  import { collection, query, where, getDocs } from 'firebase/firestore';
   import { onFavoritesChange } from '../../lib/favorites.js';
 
   const loadingEl = document.getElementById('profile-loading') as HTMLElement;
@@ -80,6 +100,81 @@ const base = import.meta.env.BASE_URL;
 
   signOutBtn.addEventListener('click', () => signOut(auth));
 
+  // ---------- done activities ----------
+
+  const doneGrid = document.getElementById('done-grid') as HTMLElement;
+  const doneEmpty = document.getElementById('done-empty') as HTMLElement;
+  const doneCards = [...document.querySelectorAll<HTMLElement>('.done-card')];
+  const doneCardBySlug = new Map(doneCards.map((c) => [c.dataset.slug ?? '', c]));
+
+  const doneDateFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  type DoneRecord = { slug: string; doneAt: Date; highlight: string; withWho: string; reaction: string };
+
+  const loadDone = async (uid: string) => {
+    doneCards.forEach((card) => { card.hidden = true; });
+
+    let records: DoneRecord[] = [];
+    try {
+      const q = query(
+        collection(db, 'doneRecords'),
+        where('uid', '==', uid),
+        where('active', '==', true),
+      );
+      const snap = await getDocs(q);
+      records = snap.docs.map((d) => {
+        const data = d.data() as {
+          activitySlug: string; doneAt?: { toDate(): Date }; highlight?: string; withWho?: string; reaction?: string;
+        };
+        return {
+          slug: data.activitySlug,
+          doneAt: data.doneAt?.toDate() ?? new Date(0),
+          highlight: data.highlight ?? '',
+          withWho: data.withWho ?? '',
+          reaction: data.reaction ?? '',
+        };
+      });
+    } catch (err) {
+      console.error('Failed to load done activities', err);
+    }
+
+    // Most recently done first.
+    records.sort((a, b) => b.doneAt.getTime() - a.doneAt.getTime());
+
+    records.forEach((r) => {
+      const card = doneCardBySlug.get(r.slug);
+      if (!card) return;
+
+      const dateEl = card.querySelector('[data-done-date]') as HTMLElement;
+      const highlightEl = card.querySelector('[data-done-highlight]') as HTMLElement;
+      const tagsEl = card.querySelector('[data-done-tags]') as HTMLElement;
+
+      dateEl.textContent = doneDateFormat.format(r.doneAt);
+
+      if (r.highlight) {
+        highlightEl.textContent = `“${r.highlight}”`;
+        highlightEl.hidden = false;
+      } else {
+        highlightEl.hidden = true;
+      }
+
+      tagsEl.innerHTML = '';
+      [r.withWho, r.reaction].filter(Boolean).forEach((value) => {
+        const span = document.createElement('span');
+        span.className = 'done-stamp';
+        span.textContent = value;
+        tagsEl.append(span);
+      });
+
+      card.hidden = false;
+      // Re-append in sorted order — moves the existing node rather than
+      // cloning it, so the grid ends up ordered most-recent-first.
+      doneGrid.append(card);
+    });
+
+    doneEmpty.hidden = records.length !== 0;
+  };
+
   onAuthStateChanged(auth, (user) => {
     loadingEl.hidden = true;
     if (user) {
@@ -97,9 +192,13 @@ const base = import.meta.env.BASE_URL;
         avatarEl.style.backgroundImage = '';
         avatarEl.textContent = displayName.charAt(0).toUpperCase();
       }
+
+      loadDone(user.uid);
     } else {
       contentEl.hidden = true;
       signedOutEl.hidden = false;
+      doneCards.forEach((card) => { card.hidden = true; });
+      doneEmpty.hidden = true;
     }
   });
 </script>
@@ -184,4 +283,65 @@ const base = import.meta.env.BASE_URL;
   .fav-card { display: flex; }
   .fav-card[hidden] { display: none; }
   .fav-card .card { width: 100%; }
+
+  .profile-done { margin-bottom: 4rem; }
+  .profile-done > h2 {
+    font-family: var(--mono);
+    font-weight: 400;
+    font-size: .68rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 1.25rem;
+    padding-bottom: .6rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .done-empty {
+    font-family: var(--mono);
+    font-size: .8rem;
+    color: var(--ink-soft);
+  }
+  .done-empty[hidden] { display: none; }
+
+  .done-card { display: flex; flex-direction: column; }
+  .done-card[hidden] { display: none; }
+  .done-card .card { width: 100%; }
+
+  .done-meta {
+    padding: .75rem 1rem 0;
+  }
+  .done-date {
+    font-family: var(--mono);
+    font-size: .66rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .done-highlight {
+    font-family: var(--body);
+    font-style: italic;
+    font-size: .9rem;
+    line-height: 1.45;
+    color: var(--ink);
+    margin: .5rem 0 0;
+  }
+  .done-highlight[hidden] { display: none; }
+
+  .done-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin-top: .6rem;
+  }
+  .done-tags:empty { display: none; }
+  .done-stamp {
+    font-family: var(--mono);
+    font-size: .62rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    padding: .28em .55em;
+  }
 </style>

@@ -779,15 +779,19 @@ a { color: inherit; }
 
 .card-body { padding: .65rem 1rem 1.1rem; display: flex; flex-direction: column; flex: 1; }
 
-.card-head {
+/* Card footer: tier stamp and the three social actions share one baseline,
+   set off from the hook text by a rule — the last thing in the card. */
+.card-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: .5rem;
-  margin-bottom: .5rem;
+  gap: .75rem;
+  margin-top: .9rem;
+  padding-top: .875rem;
+  border-top: var(--edge) solid var(--ink);
 }
-.card-head .stamp { margin-bottom: 0; }
-.card-actions { display: flex; align-items: center; gap: .4rem; }
+.card-foot .stamp { margin-bottom: 0; }
+.card-actions { display: flex; align-items: center; gap: .75rem; }
 
 .stamp {
   font-family: var(--mono);
@@ -801,53 +805,244 @@ a { color: inherit; }
   margin-bottom: .5rem;
 }
 
-/* ---------- share & favorite buttons ---------- */
-.share-btn,
-.fav-btn {
+/* ---------- social actions: state as elevation ----------
+   An untoggled Save/Done sits raised on a hard offset shadow; toggling
+   slides it into its own shadow and fills it — the card's misregistered
+   second print pass, at button scale. Save fills with the tier colour,
+   Done always fills with ink (it sits outside the tier system). Share
+   never lifts, so it reads as a different class of action entirely. */
+.fav-btn,
+.done-btn,
+.share-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: .4em;
-  border: var(--edge) solid var(--ink);
-  background: transparent;
-  color: var(--ink);
   font-family: var(--mono);
+  font-weight: 700;
   cursor: pointer;
-  transition: background .12s, color .12s, border-color .12s;
 }
-/* Same fill-on-active treatment as .chip[aria-pressed="true"], just keyed
-   to the card/page's own --tier instead of a facet selection. */
-.share-btn:hover,
-.share-btn:focus-visible,
-.share-btn.shared,
+.fav-btn:focus-visible,
+.done-btn:focus-visible,
+.share-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.fav-btn svg,
+.done-btn svg,
+.share-btn svg { flex: 0 0 auto; }
+
+.fav-btn,
+.done-btn {
+  border: var(--edge) solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease,
+    border-color .12s ease, color .12s ease;
+}
+.fav-btn { box-shadow: 4px 4px 0 var(--tier); }
+.done-btn { box-shadow: 4px 4px 0 var(--ink); }
 .fav-btn:hover,
-.fav-btn:focus-visible {
-  background: var(--tier, var(--ink));
-  border-color: var(--tier, var(--ink));
+.fav-btn:focus-visible { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--tier); }
+.done-btn:hover,
+.done-btn:focus-visible { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+
+/* Toggled: pressed fully into its own shadow — no shadow left to cast. */
+.fav-btn.is-fav {
+  background: var(--tier);
+  border-color: var(--tier);
   color: #fff;
+  transform: translate(4px, 4px);
+  box-shadow: none;
 }
-.share-btn:focus-visible,
-.fav-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
-.share-btn svg,
-.fav-btn svg { flex: 0 0 auto; }
+.fav-btn.is-fav svg { fill: currentColor; }
+.fav-btn.is-fav:hover,
+.fav-btn.is-fav:focus-visible { transform: translate(4px, 4px); box-shadow: none; }
 
-/* sits above .card-link (z-index: 1) so clicks land on the button, not the
-   card's whole-card overlay link */
-.share-btn.icon-only,
-.fav-btn.icon-only {
+.done-btn.is-done {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+.done-btn.is-done:hover,
+.done-btn.is-done:focus-visible { transform: translate(4px, 4px); box-shadow: none; }
+
+/* Save de-emphasises (but stays clickable — clicking it clears Done) while
+   the same activity is marked Done, since the two are mutually exclusive. */
+.fav-btn.fav-muted {
+  border-color: var(--rule);
+  color: var(--ink-soft);
+  background: var(--card);
+  box-shadow: none;
+  transform: none;
+}
+.fav-btn.fav-muted:hover,
+.fav-btn.fav-muted:focus-visible {
+  border-color: var(--ink);
+  color: var(--ink);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Share is deliberately flat so it never competes with the two toggles. */
+.share-btn {
+  background: transparent;
+  border: 0;
+  color: var(--ink-soft);
+  transition: color .12s ease;
+}
+.share-btn:hover,
+.share-btn:focus-visible { color: var(--ink); }
+
+/* Card-scale actions: 34px tall, icon + live count, sit above .card-link
+   (z-index: 1) so clicks land on the button, not the card's overlay link. */
+.fav-btn.card-action,
+.done-btn.card-action {
   z-index: 2;
-  width: 26px;
-  height: 26px;
-  padding: 0;
+  height: 34px;
+  padding: 0 .625rem;
+  gap: .4375rem;
+  font-size: .75rem;
+}
+.done-btn.card-action svg { stroke-width: 2.6; }
+.done-btn.card-action.is-done svg { stroke-width: 3; }
+.share-btn.card-action {
+  z-index: 2;
+  width: 34px;
+  height: 34px;
 }
 
-.share-btn.labeled,
-.fav-btn.labeled {
-  padding: .55em 1em;
-  font-size: .72rem;
-  letter-spacing: .06em;
+/* Commit-panel actions (5B): Done stands full width on its own — the panel
+   itself already carries the offset shadow, so nesting a second one on the
+   button would read as noise, hence no box-shadow/lift here at all (the one
+   deliberate deviation from 4A's detail button). Save + Share share a row
+   beneath it: Save flex: 1, Share a fixed 52px square. */
+.fav-btn.detail-action,
+.done-btn.detail-action {
+  gap: .625rem;
+  font-size: .75rem;
+  letter-spacing: .08em;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+.done-btn.detail-action {
+  width: 100%;
+  padding: .9375rem 1.25rem;
+  font-size: .8125rem;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+  box-shadow: none;
+  transform: none;
+}
+.done-btn.detail-action:hover,
+.done-btn.detail-action:focus-visible {
+  background: var(--tier);
+  border-color: var(--tier);
+  transform: none;
+  box-shadow: none;
+}
+.done-btn.detail-action svg { stroke-width: 2.4; }
+.done-btn.detail-action.is-done svg { stroke-width: 3; }
+.done-btn.detail-action.is-done {
+  background: var(--tier);
+  border-color: var(--tier);
+  color: #fff;
+  transform: none;
+  box-shadow: none;
+}
+.done-btn.detail-action.is-done:hover,
+.done-btn.detail-action.is-done:focus-visible {
+  background: var(--tier);
+  border-color: var(--tier);
+  transform: none;
+  box-shadow: none;
+}
+@media (max-width: 640px) {
+  .done-btn.detail-action { padding: 1rem .75rem; }
+}
+
+.detail-actions { display: flex; gap: .75rem; }
+.fav-btn.detail-action {
+  flex: 1;
+  padding: .75rem .875rem;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+.fav-btn.detail-action:hover,
+.fav-btn.detail-action:focus-visible {
+  background: var(--paper-deep);
+  transform: none;
+  box-shadow: none;
+}
+/* Three-class selectors, not the generic .fav-btn.is-fav — that rule ties
+   in specificity with .fav-btn.detail-action above, and source order alone
+   would let this transparent/no-shadow base win over the toggled fill. */
+.fav-btn.detail-action.is-fav {
+  background: var(--tier);
+  border-color: var(--tier);
+  color: #fff;
+  transform: none;
+  box-shadow: none;
+}
+.fav-btn.detail-action.is-fav:hover,
+.fav-btn.detail-action.is-fav:focus-visible {
+  background: var(--tier);
+  border-color: var(--tier);
+  transform: none;
+  box-shadow: none;
+}
+@media (max-width: 640px) {
+  .fav-btn.detail-action { padding: .875rem .625rem; gap: .5625rem; }
+}
+
+.share-btn.detail-action {
+  flex: 0 0 52px;
+  width: 52px;
+  border: var(--edge) solid var(--rule);
+}
+.share-btn.detail-action:hover,
+.share-btn.detail-action:focus-visible { border-color: var(--ink); }
+
+/* ---------- detail page tally (inside the commit panel) ---------- */
+/* Side by side, figure always inline with its label — but the label wraps
+   onto a second line rather than pushing the layout wider than the panel
+   ("N SAVED, INCL. YOU" doesn't reliably fit on one line at this width).
+   Grid, not flex, for the figure/label pair: a grid column has a fixed
+   edge, so a wrapped second line stays pinned under the label's own
+   column rather than sliding back to sit under the figure. */
+.tally { display: flex; align-items: baseline; gap: .875rem; }
+.tally-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: .5rem;
+  flex: 1;
+  min-width: 0;
+}
+.tally-figure {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.875rem;
+  line-height: 1;
+  letter-spacing: -.03em;
+  color: var(--ink-soft);
+}
+.tally-label {
+  font-family: var(--mono);
+  font-size: .625rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+.tally-divider { align-self: stretch; width: var(--edge); background: var(--rule); flex: 0 0 auto; }
+/* Whichever count includes the signed-in user is inked; the other stays
+   neutral grey. */
+.tally-item.is-yours .tally-figure { color: var(--tier); }
+.tally-item.is-yours .tally-label { color: var(--ink); }
+@media (max-width: 640px) {
+  .tally-figure { font-size: 1.75rem; }
 }
 
 .share-btn.shared::after {
@@ -863,20 +1058,6 @@ a { color: inherit; }
   white-space: nowrap;
   padding: .4em .65em;
   pointer-events: none;
-}
-
-/* Favorited state: heart fills red and stays that way regardless of hover,
-   which uses the tier-fill treatment shared with .share-btn above. */
-.fav-btn.is-fav {
-  border-color: #e0304a;
-  color: #e0304a;
-}
-.fav-btn.is-fav svg { fill: currentColor; }
-.fav-btn.is-fav:hover,
-.fav-btn.is-fav:focus-visible {
-  background: #e0304a;
-  border-color: #e0304a;
-  color: #fff;
 }
 
 .fav-btn.fav-hint::after {
@@ -908,6 +1089,7 @@ a { color: inherit; }
   line-height: 1.5;
   color: var(--ink-soft);
 }
+
 .meta {
   min-width: 0;
   font-family: var(--mono);
@@ -984,12 +1166,7 @@ a { color: inherit; }
 }
 
 /* ---------- detail page ---------- */
-.detail-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
+.detail-top { display: flex; }
 .detail .detail-top .back { padding-block: .75rem; }
 .back {
   font-family: var(--mono);
@@ -1002,23 +1179,8 @@ a { color: inherit; }
   border-bottom: 2px solid transparent;
 }
 .back:hover { border-bottom-color: var(--ink); }
-.detail-actions { display: flex; align-items: center; gap: .6rem; }
 
 .detail { padding-bottom: 6rem; }
-.detail h1 {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(2rem, 5.5vw, 3.5rem);
-  line-height: 1.02;
-  letter-spacing: -.03em;
-  margin: .9rem 0 1rem;
-}
-.detail-hook {
-  font-size: clamp(1.125rem, 2vw, 1.375rem);
-  line-height: 1.45;
-  color: var(--ink-soft);
-  margin: 0 0 2rem;
-}
 
 .hero {
   display: block;
@@ -1028,17 +1190,89 @@ a { color: inherit; }
   object-fit: cover;
   border: var(--edge) solid var(--ink);
   box-shadow: 12px 12px 0 var(--tier);
-  margin-top: 2.5rem;
-  margin-bottom: 1.5rem;
+  margin: 1.375rem 0 3.25rem;
+}
+@media (max-width: 640px) {
+  .hero { aspect-ratio: 3 / 2; box-shadow: 8px 8px 0 var(--tier); margin: 1rem 0 1.75rem; }
 }
 
-.spec {
+/* Masthead: the reading column (tier label, h1, hook) stays pure type —
+   the social actions live entirely in the commit panel beside it, the one
+   card-like, shadowed object on the page. */
+.detail-masthead {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1.5rem;
-  border-block: var(--edge) solid var(--ink);
-  padding: 1.5rem 0;
+  grid-template-columns: 1fr 350px;
+  gap: 3rem;
+  align-items: start;
+}
+.detail-main { min-width: 0; }
+@media (max-width: 640px) {
+  .detail-masthead { grid-template-columns: 1fr; }
+}
+
+.tier-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: .6875rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--tier);
+}
+.detail h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 3.25rem;
+  line-height: 1.03;
+  letter-spacing: -.03em;
+  margin: .875rem 0 0;
+}
+.detail-hook {
+  font-family: var(--body);
+  font-size: 1.25rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 1.25rem 0 0;
+  max-width: 46ch;
+}
+@media (max-width: 640px) {
+  .detail h1 { font-size: 2.125rem; margin-top: .625rem; }
+  .detail-hook { font-size: 1.0625rem; margin-top: .875rem; }
+}
+
+/* Commit panel: the one bordered, shadowed object on the page — tally,
+   Done (full width, no shadow of its own — the panel already casts one),
+   then Save/Share sharing a row beneath. */
+.commit-panel {
+  width: 350px;
+  background: var(--card);
+  border: var(--edge) solid var(--ink);
+  box-shadow: 8px 8px 0 var(--tier);
+  padding: 1.375rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+@media (max-width: 640px) {
+  .commit-panel {
+    width: 100%;
+    margin-top: 1.75rem;
+    padding: 1rem;
+    gap: .875rem;
+    box-shadow: 6px 6px 0 var(--tier);
+  }
+}
+
+/* Metadata: one full-width rule, uneven tracks so the longer values don't
+   wrap to three lines. On narrow screens it becomes a label/value list on
+   hairlines instead of a grid. */
+.spec {
+  margin-top: 3.25rem;
   margin-bottom: 3rem;
+  border-top: var(--edge) solid var(--ink);
+  padding-top: 1.5rem;
+  display: grid;
+  grid-template-columns: .75fr .8fr 1.7fr .95fr 1.2fr;
+  gap: 1.75rem;
 }
 .spec div { min-width: 0; }
 .spec dt {
@@ -1053,8 +1287,22 @@ a { color: inherit; }
   margin: 0;
   font-family: var(--display);
   font-weight: 600;
-  font-size: 1.0625rem;
+  font-size: 1rem;
   line-height: 1.25;
+}
+@media (max-width: 640px) {
+  .spec { grid-template-columns: none; display: flex; flex-direction: column; gap: 0; }
+  .spec div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1.25rem;
+    padding: .75rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .spec div:last-child { border-bottom: none; }
+  .spec dt { margin-bottom: 0; white-space: nowrap; }
+  .spec dd { text-align: right; font-size: .9375rem; line-height: 1.3; }
 }
 
 .why {
@@ -1130,33 +1378,8 @@ a { color: inherit; }
   padding-bottom: 1px;
 }
 
-/* ---------- have-you-done-this stories ---------- */
-.stories {
-  margin-top: 4rem;
-  padding-top: 2rem;
-  border-top: var(--edge) solid var(--ink);
-  max-width: 40rem;
-}
-.stories > h2 {
-  font-family: var(--mono);
-  font-weight: 400;
-  font-size: .68rem;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin: 0 0 1.25rem;
-}
-
-.story-counts {
-  font-family: var(--mono);
-  font-size: .78rem;
-  color: var(--ink-soft);
-  margin: 0 0 1.5rem;
-}
-.story-counts b { color: var(--ink); }
-
+/* ---------- shared form styling (about page contact form) ---------- */
 .story-form { margin-bottom: 2.5rem; }
-.story-status { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.25rem; }
 
 .story-field { margin-bottom: 1rem; }
 .story-field label {
@@ -1221,29 +1444,190 @@ a { color: inherit; }
 }
 .form-hint a { color: inherit; }
 
-.story-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-.story-item { border-top: 1px solid var(--rule); padding-top: 1.25rem; }
-.story-item p {
-  margin: .6rem 0 0;
-  font-family: var(--body);
-  font-size: .95rem;
-  line-height: 1.55;
-  color: var(--ink);
-}
-
 .story-empty {
   font-family: var(--mono);
   font-size: .8rem;
   color: var(--ink-soft);
 }
 .story-empty[hidden] { display: none; }
+
+/* ---------- done: quick-capture / share window ---------- */
+.donewin {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+.donewin[hidden] { display: none; }
+
+.donewin-backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.donewin-panel {
+  position: relative;
+  width: 100%;
+  max-width: 28rem;
+  max-height: calc(100vh - 2.5rem);
+  overflow-y: auto;
+  padding: 1.75rem;
+  background: var(--card);
+  border: var(--edge) solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ink-soft);
+}
+
+.donewin-close {
+  position: absolute;
+  top: .9rem;
+  right: .9rem;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: .75rem;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.donewin-close:hover { background: var(--ink); color: var(--paper); }
+.donewin-close:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.donewin-step h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: -.015em;
+  margin: 0 0 .5rem;
+}
+.donewin-step[hidden] { display: none; }
+
+.donewin-sub {
+  font-size: .9rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0 0 1.5rem;
+}
+
+.donewin-field { margin-bottom: 1.1rem; }
+.donewin-field label,
+.donewin-flabel {
+  display: block;
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: .45rem;
+}
+.donewin-field label span {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--body);
+}
+.donewin-field input {
+  width: 100%;
+  font-family: var(--body);
+  font-size: .95rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  padding: .6em .75em;
+}
+.donewin-field input:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.donewin-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .6rem;
+  margin-top: 1.5rem;
+}
+.donewin-skip {
+  font-family: var(--mono);
+  font-size: .72rem;
+  letter-spacing: .03em;
+  color: var(--ink-soft);
+  background: none;
+  border: none;
+  padding: .5em;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.donewin-skip:hover { color: var(--ink); }
+.donewin-continue {
+  font-family: var(--mono);
+  font-size: .72rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: .6em 1.2em;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  transition: background .12s;
+}
+.donewin-continue:hover { background: var(--ink-soft); border-color: var(--ink-soft); }
+.donewin-skip:focus-visible,
+.donewin-continue:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.donewin-caption {
+  width: 100%;
+  font-family: var(--body);
+  font-size: .95rem;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  padding: .7em .85em;
+  resize: vertical;
+  margin-bottom: 1.25rem;
+}
+.donewin-caption:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.donewin-sharebtns { display: flex; flex-wrap: wrap; gap: .5rem; }
+.donewin-action {
+  position: relative;
+  font-family: var(--mono);
+  font-size: .7rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .6em 1em;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.donewin-action:hover { background: var(--tier, var(--ink)); border-color: var(--tier, var(--ink)); color: #fff; }
+.donewin-action:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.donewin-action--primary { background: var(--ink); color: var(--paper); }
+.donewin-action--primary:hover { background: var(--tier, var(--ink)); border-color: var(--tier, var(--ink)); }
+.donewin-action.flashed::after {
+  content: attr(data-feedback);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: .62rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: .4em .65em;
+  pointer-events: none;
+}
 
 /* ---------- 404 ---------- */
 .not-found {
