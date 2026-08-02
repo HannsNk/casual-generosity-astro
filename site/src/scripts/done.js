@@ -282,11 +282,16 @@ const applyDetailStats = (stats) => {
   }
 };
 
-// Every [data-fav] button on the page (cards and detail alike) carries the
-// slug of an activity whose counts need loading — there's no bulk collection
-// read anymore, so kick off the per-slug aggregation queries up front.
-const pageSlugs = [...document.querySelectorAll('[data-fav]')].map((btn) => btn.dataset.slug ?? '').filter(Boolean);
-if (pageSlugs.length) loadStats(pageSlugs);
+// Live save/done counts are only fetched on the activity detail page (where
+// tally-saves/tally-done exist) — 2 aggregation queries per page load there.
+// Grid pages render dozens to hundreds of cards at once, so firing count()
+// queries per card there previously meant hundreds of simultaneous Firestore
+// requests; cards just show the icon with no count instead.
+const isDetailPage = Boolean(document.getElementById('tally-saves') || document.getElementById('tally-done'));
+if (isDetailPage) {
+  const pageSlugs = [...document.querySelectorAll('[data-fav]')].map((btn) => btn.dataset.slug ?? '').filter(Boolean);
+  if (pageSlugs.length) loadStats(pageSlugs);
+}
 
 let latestStats = new Map();
 onStatsChange((stats) => {
