@@ -26,10 +26,6 @@ const NAV_LINKS = [
 // Home has no segment of its own, so it only matches the bare root path.
 const isCurrent = (match: string) =>
   match === '' ? (path === base || path === `${base}index.html`) : path.includes(`/${match}`);
-
-// The landing page shows its own large title in the masthead, so the nav
-// bar's title stays hidden there until scrolling merges the two together.
-const isLanding = isCurrent('');
 ---
 <!doctype html>
 <html lang="en">
@@ -61,7 +57,7 @@ const isLanding = isCurrent('');
     <!-- End Cloudflare Web Analytics -->
 
   </head>
-  <body class={isLanding ? 'is-landing' : undefined}>
+  <body>
     <nav class="sitenav">
       <div class="wrap sitenav-inner">
         <a class="sitenav-word" href={base}>CasuallyGenerous</a>
@@ -83,19 +79,6 @@ const isLanding = isCurrent('');
           document.documentElement.style.setProperty('--nav-h', `${nav.getBoundingClientRect().height}px`);
         setNavHeight();
         new ResizeObserver(setNavHeight).observe(nav);
-      }
-    </script>
-    <script>
-      // On the landing page only: the nav bar's own title stays hidden while
-      // the large masthead title is visible up top, and fades in (as the
-      // masthead title shrinks away) once the page is scrolled — so the
-      // title never appears twice at once.
-      if (document.body.classList.contains('is-landing')) {
-        const onScroll = () => {
-          document.body.classList.toggle('scrolled', window.scrollY > 24);
-        };
-        onScroll();
-        window.addEventListener('scroll', onScroll, { passive: true });
       }
     </script>
     <slot />

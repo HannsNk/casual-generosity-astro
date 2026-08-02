@@ -108,45 +108,10 @@ a { color: inherit; }
   .sitenav-links { gap: .4rem .85rem; }
 }
 
-/* Landing page: the nav bar's title is redundant with the big masthead
-   title until you scroll past it, so it starts hidden and fades in only
-   once scrolling shrinks the masthead title away (see .is-landing .wordmark
-   below) — the title merges into the nav instead of showing twice. */
-.is-landing .sitenav-word {
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-  transition: opacity .25s ease, transform .25s ease;
-}
-.is-landing.scrolled .sitenav-word {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
 /* ---------- masthead ---------- */
 .masthead {
   border-bottom: var(--edge) solid var(--ink);
   padding-block: clamp(2.5rem, 6vw, 3.5rem) clamp(2rem, 5vw, 3rem);
-}
-
-.wordmark {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(2.75rem, 9vw, 6rem);
-  line-height: .92;
-  letter-spacing: -.035em;
-  margin: 0 0 1.75rem;
-  max-width: 14ch;
-  /* the wordmark is one unbroken word with no spaces to wrap at — without
-     this it overflows the viewport on narrow screens instead of breaking */
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
-.wordmark em {
-  font-style: normal;
-  display: block;
-  color: var(--pink);
 }
 
 /* smaller page-title variant of .wordmark, for sub-page mastheads (e.g.
@@ -158,15 +123,6 @@ a { color: inherit; }
   line-height: .95;
   letter-spacing: -.03em;
   margin: 0 0 .75rem;
-}
-
-.is-landing .wordmark {
-  transition: opacity .3s ease, transform .3s ease;
-  transform-origin: left top;
-}
-.is-landing.scrolled .wordmark {
-  opacity: 0;
-  transform: scale(.55) translateY(-10px);
 }
 
 .standfirst {
@@ -218,6 +174,10 @@ a { color: inherit; }
 .masthead-compact .back { padding-block: .75rem; }
 
 /* ---------- landing page ---------- */
+/* Direction 1C, "one question, three bands": the tier picker and the
+   featured section are the same object — the fold asks a single question,
+   each effort tier below gets a full-bleed band with its own featured
+   activities, alternating which side the colour panel sits on. */
 .landing-pitch {
   max-width: 58ch;
   font-size: clamp(1.0625rem, 1.6vw, 1.3125rem);
@@ -225,283 +185,248 @@ a { color: inherit; }
   margin: 0;
 }
 
-.intent {
-  /* padding-block, not the padding shorthand — .intent shares this element
-     with .wrap, and a shorthand here would zero out .wrap's padding-inline. */
-  padding-block: clamp(2rem, 5vw, 3rem);
+.fold {
+  border-bottom: var(--edge) solid var(--ink);
 }
-.intent-label {
+.fold .wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.875rem;
+  text-align: center;
+  padding-block: clamp(3rem, 9vw, 5.125rem) clamp(2rem, 5vw, 2.875rem);
+}
+.fold-eyebrow {
   font-family: var(--mono);
-  font-size: .68rem;
+  font-size: .72rem;
   letter-spacing: .18em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  margin: 0 0 1.5rem;
-}
-/* Four boxes, same visual weight: two carry a one-at-a-time carousel
-   (intents, featured activities), two are single flat CTAs (explore /
-   learn more) styled white and grey respectively. Default (stretch)
-   alignment so the two boxes in each row match height exactly. */
-.start-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-@media (min-width: 800px) {
-  .start-grid { grid-template-columns: 1fr 1fr; gap: 1.75rem; }
-}
-
-/* Bare layout box — no border/fill/padding of its own. The intents and
-   featured-activities boxes rely on their inner tile (.start-intent /
-   .card) for visual boundary instead of a second box wrapped around it;
-   only the flat CTA tiles (.start-box--cta) opt back into a bordered,
-   padded panel below. */
-.start-box {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.start-box-label {
-  font-family: var(--mono);
-  font-size: .68rem;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin: 0 0 .6rem;
-}
-
-/* One slide visible at a time, sliding via transform. The slide itself
-   (the intent tile / the card) is stretched to fill the carousel's full
-   height rather than centered within it, so a short intent tile grows to
-   match a taller activities card instead of floating in empty space. */
-.carousel {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-.carousel-viewport {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-.carousel-track {
-  display: flex;
-  height: 100%;
-  transition: transform .3s ease;
-}
-.carousel-slide {
-  flex: 0 0 100%;
-  min-width: 0;
-  height: 100%;
-}
-.carousel-slide > .card { height: 100%; }
-
-/* Prev/next live inside the tile itself, pinned to its bottom-right
-   corner, rather than in a row that would add height beyond the slide. */
-.carousel-nav-group {
-  position: absolute;
-  right: .6rem;
-  bottom: .6rem;
-  z-index: 2;
-  display: flex;
-  gap: .4rem;
-}
-.carousel-nav {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: 2px solid var(--ink);
-  background: var(--card);
-  color: var(--ink);
-  font-family: var(--mono);
-  font-size: .8rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: background .12s, color .12s;
-}
-.carousel-nav:hover,
-.carousel-nav:focus-visible { background: var(--ink); color: var(--paper); }
-.carousel-nav:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
-
-/* A compact restatement of the old full-width intent-card: same
-   tier-filled, hard-shadow CTA language, just sized to sit in a carousel
-   slide instead of spanning the page. */
-.start-intent {
-  display: flex;
-  flex-direction: column;
-  gap: .4rem;
-  padding: 1.1rem 1rem;
-  border: var(--edge) solid var(--ink);
-  background: var(--tier, var(--card));
-  color: #fff;
-  box-shadow: 6px 6px 0 color-mix(in srgb, var(--tier, var(--ink)) 65%, black);
-  text-decoration: none;
-  transition: transform .14s ease, box-shadow .14s ease;
-}
-.start-intent.neutral { background: var(--card); color: var(--ink); box-shadow: 6px 6px 0 var(--ink-soft); }
-.start-intent:hover,
-.start-intent:focus-visible {
-  transform: translate(4px, 4px);
-  box-shadow: 2px 2px 0 color-mix(in srgb, var(--tier, var(--ink)) 65%, black);
-}
-.start-intent.neutral:hover,
-.start-intent.neutral:focus-visible { box-shadow: 2px 2px 0 var(--ink-soft); }
-.start-intent:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
-
-.start-intent-label {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(1.375rem, 2.4vw, 1.75rem);
-  line-height: 1.15;
-  letter-spacing: -.015em;
-}
-.start-intent-sub {
-  font-size: 1.0625rem;
-  line-height: 1.5;
-  opacity: .9;
-}
-.start-intent-arrow {
-  font-family: var(--mono);
-  font-size: .8rem;
-  margin-top: auto;
-  padding-top: .4rem;
-}
-
-/* Shrunk, tag-free restatement of .card for the featured-activities
-   carousel — a short fixed image, two-line-clamped hook, no meta row —
-   so a slide is roughly the same height as a .start-intent slide. */
-.card--compact { box-shadow: 6px 6px 0 var(--tier); }
-.card--compact:hover,
-.card--compact:has(:focus-visible) {
-  transform: translate(4px, 4px);
-  box-shadow: 2px 2px 0 var(--tier);
-}
-/* ~20% shorter overall than a plain 3:2 card, mostly taken out of the
-   image, which is what a compact carousel slide needs least. */
-.card--compact .card-img { aspect-ratio: 16 / 5; }
-/* Extra bottom-right clearance — inside a carousel, the prev/next
-   overlay sits in that corner and would otherwise cover the hook text. */
-.card--compact .card-body { padding: .45rem .85rem 1.9rem; }
-.card--compact h2 { font-size: .95rem; margin-bottom: .25rem; }
-.card--compact p {
-  font-size: .82rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* The two plain-CTA boxes: same hard-shadow language as .start-intent,
-   just neutral-filled (white / grey) instead of tier-coloured. */
-.start-box--cta {
-  border: var(--edge) solid var(--ink);
-  padding: 1.25rem 1.5rem 1.5rem;
-  justify-content: center;
-  gap: .5rem;
-  box-shadow: 8px 8px 0 var(--ink-soft);
-  color: var(--ink);
-  text-decoration: none;
-  transition: transform .14s ease, box-shadow .14s ease;
-}
-.start-box--cta:hover,
-.start-box--cta:focus-visible {
-  transform: translate(6px, 6px);
-  box-shadow: 2px 2px 0 var(--ink-soft);
-}
-.start-box--cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
-.start-box--explore { background: var(--card); }
-.start-box--about { background: var(--paper-deep); }
-.start-box-cta {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(1.1rem, 2.2vw, 1.4rem);
-  letter-spacing: -.02em;
   margin: 0;
 }
-
-.landing-section {
-  border-top: var(--edge) solid var(--ink);
-  /* padding-block: same reasoning as .intent above. */
-  padding-block: clamp(2rem, 5vw, 3rem);
+.fold-title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2.75rem, 7.5vw, 6.5rem);
+  line-height: .9;
+  letter-spacing: -.03em;
+  max-width: 22ch;
+  margin: 0;
 }
-.landing-section .landing-pitch { margin-bottom: 1.5rem; }
-
-/* A bordered box, not a hard-shadow card (that look is reserved for
-   .card/.start-intent) — enough to visually set the notes list apart. */
-.landing-col {
-  border: var(--edge) solid var(--ink);
-  padding: 1.75rem 1.75rem 2rem;
-  min-width: 0;
+.fold-deck {
+  font-family: var(--body);
+  font-size: clamp(1.0625rem, 1.6vw, 1.375rem);
+  line-height: 1.5;
+  max-width: 54ch;
+  margin: 0;
 }
-.landing-col .notes-index { max-width: none; }
-.landing-col .notes-index-item:last-child { border-bottom: none; }
-
-@media (max-width: 640px) {
-  .landing { --gutter: 1.5rem; }
-  .landing .masthead { padding: 2rem 0 1.5rem; }
-  /* smaller than the clamp() default so this one unbroken word fits on a
-     single line instead of breaking mid-word via overflow-wrap */
-  .landing .wordmark { font-size: 2rem; }
-  .landing .intent { padding-block: 0.5rem; }
-  .landing .start-grid { gap: 1.1rem; }
-  .landing .start-box--cta { padding: 1.1rem 1.25rem 1.35rem; }
-  .landing .landing-section { padding-block: 1.5rem; }
-  .landing .landing-section .landing-pitch { margin-bottom: 1.25rem; }
-  .landing .notes-index-item a { padding: 1rem 0; }
-  .landing-col { padding: 1.5rem 1.5rem 1.75rem; }
-  .landing-why { padding-bottom: 3rem; }
-}
-
-.landing-why {
-  border-top: var(--edge) solid var(--ink);
-  /* padding-block: same reasoning as .intent above. */
-  padding-block: clamp(2rem, 5vw, 3rem) clamp(2.25rem, 6vw, 3.5rem);
-}
-.landing-why h2 {
+.fold-cue {
   font-family: var(--mono);
-  font-weight: 400;
+  font-size: .72rem;
+  letter-spacing: .16em;
+  color: var(--ink-soft);
+  margin: .5rem 0 0;
+}
+@media (max-width: 640px) {
+  .fold { gap: 1.25rem; }
+}
+
+/* Each band is a two-column grid: a solid tier-coloured panel (the
+   "answer") beside a card grid of that tier's featured activities. Order
+   swaps per band so panels alternate left/right down the page; on narrow
+   screens every band collapses to panel-then-cards, single column. */
+.tier-band {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  border-bottom: var(--edge) solid var(--ink);
+}
+.tier-band--right { grid-template-columns: 1fr 350px; }
+
+.tier-panel {
+  order: 1;
+  background: var(--tier);
+  color: #fff;
+  padding: 2.125rem 1.875rem 2.25rem;
+  border-right: var(--edge) solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: .875rem;
+}
+.tier-band--right .tier-panel {
+  order: 2;
+  border-right: none;
+  border-left: var(--edge) solid var(--ink);
+}
+.tier-index {
+  font-family: var(--mono);
+  font-weight: 700;
   font-size: .68rem;
   letter-spacing: .18em;
+  margin: 0;
+}
+.tier-headline {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.75rem, 3.2vw, 2.625rem);
+  line-height: .98;
+  margin: 0;
+}
+.tier-body {
+  font-family: var(--body);
+  font-size: 1.125rem;
+  line-height: 1.45;
+  margin: 0;
+}
+.tier-link {
+  margin-top: auto;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-decoration: none;
+}
+.tier-link:hover { text-decoration: underline; }
+
+.tier-cards.grid {
+  order: 2;
+  padding: 1.875rem 2rem 2.5rem;
+  gap: 1.625rem;
+}
+.tier-band--right .tier-cards.grid { order: 1; }
+
+@media (max-width: 800px) {
+  .tier-band,
+  .tier-band--right { grid-template-columns: 1fr; }
+  .tier-panel,
+  .tier-band--right .tier-panel {
+    order: 1;
+    border-right: none;
+    border-left: none;
+    border-bottom: var(--edge) solid var(--ink);
+  }
+  .tier-cards.grid,
+  .tier-band--right .tier-cards.grid { order: 2; }
+}
+@media (max-width: 640px) {
+  .tier-panel { padding: 1.5rem 1.125rem 1.625rem; }
+  .tier-cards.grid { padding: 1.25rem 1.125rem 1.5rem; gap: 1.25rem; }
+}
+
+/* ---------- notes strip ---------- */
+.notes-strip {
+  background: var(--paper-deep);
+  border-bottom: var(--edge) solid var(--ink);
+}
+.notes-strip .wrap {
+  padding-block: 2.125rem 2.5rem;
+}
+.notes-strip-label {
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .16em;
   text-transform: uppercase;
   color: var(--ink-soft);
   margin: 0 0 1.25rem;
 }
-.landing-why p {
-  max-width: 52ch;
-  font-size: 1.0625rem;
-  line-height: 1.6;
-  margin: 0 0 1rem;
-}
-.landing-why a {
-  display: inline-block;
-  font-family: var(--mono);
-  font-size: .78rem;
-  border-bottom: 2px solid var(--pink);
+.notes-grid.grid { padding: 0; gap: 1.625rem; }
+.note-card {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  background: var(--card);
+  border: var(--edge) solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ink-soft);
+  padding: 1.25rem 1.25rem 1.5rem;
   text-decoration: none;
-  padding-bottom: 1px;
+  color: inherit;
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+.note-card:hover,
+.note-card:focus-visible {
+  transform: translate(6px, 6px);
+  box-shadow: 2px 2px 0 var(--ink-soft);
+}
+.note-card:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.note-date {
+  font-family: var(--mono);
+  font-size: .65rem;
+  letter-spacing: .1em;
+  color: var(--ink-soft);
+}
+.note-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.3125rem;
+  line-height: 1.15;
+}
+.note-excerpt {
+  font-family: var(--body);
+  font-size: .97rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+@media (max-width: 640px) {
+  .notes-strip .wrap { padding-block: 1.5rem 1.75rem; }
 }
 
-/* A quiet closing note, not a second intent grid — smaller type, no
-   shadows, tier colour used only as a thin left accent so it stays
-   secondary to the .intent-card CTAs above. */
-.landing-generous {
-  border-top: var(--edge) solid var(--ink);
-  padding-block: clamp(1.5rem, 4vw, 2.25rem) clamp(2.25rem, 6vw, 3.5rem);
+/* ---------- split CTA footer ---------- */
+.split-cta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
-.landing-generous h2 {
+.split-cta-block {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  padding: 1.875rem 2rem 2.125rem;
+  text-decoration: none;
+  color: var(--ink);
+}
+.split-cta-block--dark {
+  background: var(--ink);
+  color: var(--paper);
+}
+.split-cta-block:not(.split-cta-block--dark) { border-left: var(--edge) solid var(--ink); }
+.split-cta-eyebrow {
   font-family: var(--mono);
-  font-weight: 400;
   font-size: .68rem;
-  letter-spacing: .18em;
+  letter-spacing: .16em;
+  color: var(--rule);
+}
+.split-cta-block:not(.split-cta-block--dark) .split-cta-eyebrow { color: var(--ink-soft); }
+.split-cta-title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3vw, 2.125rem);
+  line-height: 1;
+}
+@media (max-width: 640px) {
+  .split-cta { grid-template-columns: 1fr; }
+  .split-cta-block:not(.split-cta-block--dark) {
+    border-left: none;
+    border-top: var(--edge) solid var(--ink);
+  }
+  .split-cta-block { padding: 1.5rem 1.125rem 1.625rem; }
+}
+
+/* A quiet closing note, not another hard-shadow band — smaller type, no
+   shadows, tier colour used only as a thin left accent so it stays
+   secondary to the tier bands above. */
+.generous {
+  border-top: var(--edge) solid var(--ink);
+}
+.generous .wrap {
+  padding-block: clamp(1.75rem, 4vw, 2.5rem) clamp(2.25rem, 6vw, 3.5rem);
+}
+.generous-eyebrow {
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .16em;
   text-transform: uppercase;
   color: var(--ink-soft);
   margin: 0 0 .75rem;
 }
-.landing-generous > p {
+.generous-intro {
   max-width: 52ch;
   font-family: var(--body);
   font-size: .92rem;
@@ -1075,7 +1000,8 @@ a { color: inherit; }
   pointer-events: none;
 }
 
-.card h2 {
+.card h2,
+.card h3 {
   font-family: var(--display);
   font-weight: 700;
   font-size: 1.1875rem;

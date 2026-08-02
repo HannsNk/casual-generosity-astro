@@ -2,124 +2,94 @@
 import Base from '../layouts/Base.astro';
 import Card from '../components/Card.astro';
 import activities from '../data/activities.json';
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 
 const base = import.meta.env.BASE_URL;
 
-// Placeholder until a live Firestore count query replaces it.
-const thingsDone = 0;
-
-// Hand-picked, not derived from any ranking — update this list manually
-// whenever you want to change what the homepage recommends.
-const featuredSlugs = [
-  'write-an-appreciation-email-to-an-old-teacher',
-  'donate-blood-together',
-  'do-a-first-aid-course-together',
+const TIERS = [
+  {
+    key: 'Spontaneous',
+    index: '01',
+    headline: "Whatever time you have right now.",
+    body: 'No planning, no cost. Something you could start in the next ten minutes.',
+  },
+  {
+    key: 'Planned',
+    index: '02',
+    headline: 'Worth putting in the diary.',
+    body: "A bit of coordinating — an evening, a weekend morning — with someone it's worth making time for.",
+  },
+  {
+    key: 'Committed',
+    index: '03',
+    headline: 'Worth signing up for properly.',
+    body: "A form, a booking or a training, then it's yours to come back to. Better with someone alongside you.",
+  },
 ];
-const featured = featuredSlugs
-  .map((slug) => activities.find((a) => a.slug === slug))
-  .filter((a) => a !== undefined);
+
+const bands = TIERS.map((tier) => {
+  const tierActivities = activities.filter((a) => a.tier === tier.key);
+  return {
+    ...tier,
+    count: tierActivities.length,
+    activities: tierActivities.slice(0, 3),
+  };
+});
 
 const dateFmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' });
 const latestNotes = (await getCollection('notes'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 3);
-
-const INTENTS = [
-  {
-    tier: 'Spontaneous',
-    href: `${base}activities.html?tier=Spontaneous`,
-    label: 'Do something right now, alone or as a group',
-    sub: 'No planning, no cost, just today.',
-  },
-  {
-    tier: 'Planned',
-    href: `${base}activities.html?tier=Planned`,
-    label: 'Plan something together for an evening or weekend',
-    sub: 'A bit of coordinating, worth the effort.',
-  },
-  {
-    tier: 'Committed',
-    href: `${base}notes/preparedness-evening.html`,
-    label: 'Organise a preparedness evening with friends',
-    sub: 'My notes on being prepared to be generous in various situations, and a few activities to try alongside it.',
-  },
-];
 ---
 <Base
   title="CasuallyGenerous — easy, good things to do with people you're already seeing"
   description="A directory of low-effort, mostly free ways to do something meaningful while hanging out with friends or a partner."
 >
-  <div class="landing">
-    <header class="masthead">
-      <div class="wrap">
-        <h1 class="wordmark">CasuallyGenerous</h1>
-        <p class="landing-pitch">
-          Small, mostly free things worth doing with the people you're already seeing this week.
-          <br />Pick what fits your moment.
-        </p>
+  <section class="fold">
+    <div class="wrap">
+      <p class="fold-eyebrow">Welcome to CasuallyGenerous</p>
+      <h1 class="fold-title">Be generous in your every day social plans.</h1>
+      <p class="fold-deck">
+        Free, or nearly free. Small enough to fit into a life you're already
+        living, not a separate slot for "doing good." Sorted below by how
+        much you've got to give this week.
+      </p>
+    </div>
+  </section>
+
+  {bands.map((band, i) => (
+    <section class:list={['tier-band', `t-${band.key}`, i === 1 && 'tier-band--right']}>
+      <div class="tier-panel">
+        <p class="tier-index">{band.index} — {band.key.toUpperCase()}</p>
+        <h2 class="tier-headline">{band.headline}</h2>
+        <p class="tier-body">{band.body}</p>
+        <a class="tier-link" href={`${base}activities.html?tier=${band.key}`}>
+          ALL {band.count} {band.key.toUpperCase()} →
+        </a>
       </div>
-    </header>
-
-    <section class="intent wrap">
-      <div class="start-grid">
-        <div class="start-box start-box--intents">
-          <p class="start-box-label">Where to start</p>
-          <div class="carousel" data-carousel>
-            <div class="carousel-viewport">
-              <div class="carousel-track">
-                {INTENTS.map((i) => (
-                  <a class:list={['carousel-slide', 'start-intent', i.tier ? `t-${i.tier}` : 'neutral']} href={i.href}>
-                    <span class="start-intent-label">{i.label}</span>
-                    <span class="start-intent-sub">{i.sub}</span>
-                    <span class="start-intent-arrow">→</span>
-                  </a>
-                ))}
-              </div>
-              <div class="carousel-nav-group">
-                <button type="button" class="carousel-nav" data-carousel-prev aria-label="Previous">‹</button>
-                <button type="button" class="carousel-nav" data-carousel-next aria-label="Next">›</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {featured.length > 0 && (
-          <div class="start-box start-box--featured">
-            <p class="start-box-label">Featured activities</p>
-            <div class="carousel" data-carousel>
-              <div class="carousel-viewport">
-                <div class="carousel-track">
-                  {featured.map((a) => (
-                    <div class="carousel-slide">
-                      <Card a={a} compact />
-                    </div>
-                  ))}
-                </div>
-                <div class="carousel-nav-group">
-                  <button type="button" class="carousel-nav" data-carousel-prev aria-label="Previous">‹</button>
-                  <button type="button" class="carousel-nav" data-carousel-next aria-label="Next">›</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <a class="start-box start-box--cta start-box--explore" href={`${base}activities.html`}>
-          <p class="start-box-label">Explore</p>
-          <p class="start-box-cta">See every activity →</p>
-        </a>
-
-        <a class="start-box start-box--cta start-box--about" href={`${base}about.html`}>
-          <p class="start-box-label">Learn more</p>
-          <p class="start-box-cta">Why this exists →</p>
-        </a>
+      <div class="tier-cards grid cols-3">
+        {band.activities.map((a) => (
+          <Card a={a} headingLevel="h3" />
+        ))}
       </div>
     </section>
+  ))}
 
-    <section class="landing-generous wrap">
-      <h2>Feeling generous toward this too?</h2>
-      <p>
+  <section class="split-cta">
+    <a class="split-cta-block split-cta-block--dark" href={`${base}activities.html`}>
+      <span class="split-cta-eyebrow">EXPLORE</span>
+      <span class="split-cta-title">All {activities.length} activities →</span>
+    </a>
+    <a class="split-cta-block" href={`${base}about.html`}>
+      <span class="split-cta-eyebrow">LEARN MORE</span>
+      <span class="split-cta-title">Why this exists →</span>
+    </a>
+  </section>
+
+  <section class="generous">
+    <div class="wrap">
+      <p class="generous-eyebrow">Feeling generous toward this project?</p>
+      <p class="generous-intro">
         This is a small side project, not a business — if you want to help it
         grow, here's what actually helps.
       </p>
@@ -145,28 +115,6 @@ const INTENTS = [
           <a href="https://github.com/HannsNk/casual-generosity-astro">It's on GitHub →</a>
         </div>
       </div>
-    </section>
-  </div>
-
-  <script>
-    // One slide at a time, wrapping in both directions — plain index math,
-    // no library, since there are only ever a handful of slides.
-    document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((root) => {
-      const track = root.querySelector<HTMLElement>('.carousel-track');
-      const slides = track ? Array.from(track.children) : [];
-      if (!track || slides.length <= 1) {
-        root.querySelector('.carousel-nav-group')?.remove();
-        return;
-      }
-
-      let index = 0;
-      const go = (next: number) => {
-        index = (next + slides.length) % slides.length;
-        track.style.transform = `translateX(-${index * 100}%)`;
-      };
-
-      root.querySelector('[data-carousel-prev]')?.addEventListener('click', () => go(index - 1));
-      root.querySelector('[data-carousel-next]')?.addEventListener('click', () => go(index + 1));
-    });
-  </script>
+    </div>
+  </section>
 </Base>
