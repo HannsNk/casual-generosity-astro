@@ -15,6 +15,6 @@ const { a, url, compact = false } = Astro.props;
     <polyline points="20 6 9 17 4 12"></polyline>
   </svg>
   {compact
-    ? <span class="btn-count" data-stat-done>0</span>
+    ? <span class="btn-count" data-stat-done hidden>0</span>
     : <span class="done-label">Mark as done</span>}
 </button>

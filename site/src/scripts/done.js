@@ -6,7 +6,9 @@ import {
   collection, query, where, getDocs, getDoc,
 } from 'firebase/firestore';
 import { clearFavoriteLocal, isFavoritedLocal, onFavoritesChange } from '../lib/favorites.js';
-import { onStatsChange, bumpStat, loadStats } from '../lib/stats.js';
+import {
+  onStatsChange, bumpStat, loadStats, loadGridStats,
+} from '../lib/stats.js';
 
 let uid = null;
 // slug -> Date the signed-in user marked it done (present only while active).
@@ -282,11 +284,18 @@ const applyDetailStats = (stats) => {
   }
 };
 
-// Every [data-fav] button on the page (cards and detail alike) carries the
-// slug of an activity whose counts need loading — there's no bulk collection
-// read anymore, so kick off the per-slug aggregation queries up front.
+// The detail page (where tally-saves/tally-done exist) asks for exactly one
+// slug, so per-slug aggregation count() queries are cheap there — 2 requests
+// total. Grid/list pages (activities grid, landing page, notes) can render
+// dozens of cards at once, so they use the batched `in`-query loader instead
+// (2 requests per chunk of up to 24 cards) rather than firing count() once
+// per card.
+const isDetailPage = Boolean(document.getElementById('tally-saves') || document.getElementById('tally-done'));
 const pageSlugs = [...document.querySelectorAll('[data-fav]')].map((btn) => btn.dataset.slug ?? '').filter(Boolean);
-if (pageSlugs.length) loadStats(pageSlugs);
+if (pageSlugs.length) {
+  if (isDetailPage) loadStats(pageSlugs);
+  else loadGridStats(pageSlugs);
+}
 
 let latestStats = new Map();
 onStatsChange((stats) => {
