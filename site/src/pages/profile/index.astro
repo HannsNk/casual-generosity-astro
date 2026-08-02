@@ -122,22 +122,29 @@ const base = import.meta.env.BASE_URL;
 
     let records: DoneRecord[] = [];
     try {
-      const q = query(
-        collection(db, 'doneRecords'),
-        where('uid', '==', uid),
-        where('active', '==', true),
-      );
-      const snap = await getDocs(q);
-      records = snap.docs.map((d) => {
-        const data = d.data() as {
-          activitySlug: string; doneAt?: { toDate(): Date }; highlight?: string; withWho?: string; reaction?: string;
-        };
+      const [interactionsSnap, detailsSnap] = await Promise.all([
+        getDocs(query(
+          collection(db, 'activityInteractions'),
+          where('uid', '==', uid),
+          where('state', '==', 'done'),
+        )),
+        getDocs(query(collection(db, 'doneDetails'), where('uid', '==', uid))),
+      ]);
+
+      const detailsBySlug = new Map(detailsSnap.docs.map((d) => {
+        const data = d.data() as { activitySlug: string; highlight?: string; withWho?: string; reaction?: string };
+        return [data.activitySlug, data];
+      }));
+
+      records = interactionsSnap.docs.map((d) => {
+        const data = d.data() as { activitySlug: string; doneAt?: { toDate(): Date } };
+        const details = detailsBySlug.get(data.activitySlug);
         return {
           slug: data.activitySlug,
           doneAt: data.doneAt?.toDate() ?? new Date(0),
-          highlight: data.highlight ?? '',
-          withWho: data.withWho ?? '',
-          reaction: data.reaction ?? '',
+          highlight: details?.highlight ?? '',
+          withWho: details?.withWho ?? '',
+          reaction: details?.reaction ?? '',
         };
       });
     } catch (err) {
