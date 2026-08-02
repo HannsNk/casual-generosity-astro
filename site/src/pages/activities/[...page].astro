@@ -1,7 +1,12 @@
 ---
+import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
 import Card from '../../components/Card.astro';
 import activities from '../../data/activities.json';
+
+export const getStaticPaths = (({ paginate }) => paginate(activities, { pageSize: 24 })) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
 
 const TIERS = ['Spontaneous', 'Planned', 'Committed'];
 const COSTS = ['Free', 'Under £20pp', '£20+pp'];
@@ -13,10 +18,21 @@ const TIER_NOTE = {
   Planned: 'Needs a date in the diary and a bit of coordinating.',
   Committed: 'Sign up, apply or train first — then it stays available to you.',
 };
+
+const base = import.meta.env.BASE_URL;
+// build.format is 'file', so every internal link in this codebase spells out
+// the .html suffix by hand rather than relying on Astro to rewrite it —
+// page.url.* doesn't carry that suffix, so pagination links are built the
+// same way instead of using it directly.
+const pageHref = (n: number) => (n === 1 ? `${base}activities.html` : `${base}activities/${n}.html`);
+
+const pageTitle = page.currentPage === 1
+  ? 'Explore activities — CasuallyGenerous'
+  : `Explore activities — page ${page.currentPage} — CasuallyGenerous`;
 ---
 <Base
-  title="Explore activities — CasuallyGenerous"
-  description="A directory of 98 low-effort, mostly free ways to do something meaningful while hanging out with friends or a partner."
+  title={pageTitle}
+  description={`A directory of ${activities.length} low-effort, mostly free ways to do something meaningful while hanging out with friends or a partner.`}
 >
   <header class="masthead masthead-compact">
     <div class="wrap">
@@ -31,7 +47,12 @@ const TIER_NOTE = {
     </div>
   </header>
 
-  <div class="filters">
+  <div
+    class="filters"
+    data-current-page={page.currentPage}
+    data-page1-href={pageHref(1)}
+    data-total={page.total}
+  >
     <div class="wrap filters-inner">
       <details class="filters-panel" id="filters-panel" open>
         <summary class="filters-toggle">Filters</summary>
@@ -101,17 +122,41 @@ const TIER_NOTE = {
         </div>
       </details>
       <button class="reset" id="reset" hidden>Clear all</button>
-      <output class="count" id="count">{activities.length} things to do</output>
+      <output class="count" id="count">{page.total} things to do</output>
     </div>
   </div>
 
   <main class="wrap">
     <div class="grid" id="grid">
-      {activities.map((a) => <Card a={a} />)}
+      {page.data.map((a) => <Card a={a} />)}
       <p class="empty" id="empty" hidden>
         Nothing matches all of those at once. Try clearing one filter.
       </p>
     </div>
+
+    {page.lastPage > 1 && (
+      <nav class="pagination" aria-label="Pagination">
+        <a
+          class="page-link page-prev"
+          data-page-nav
+          data-href={page.currentPage > 1 ? pageHref(page.currentPage - 1) : undefined}
+          href={page.currentPage > 1 ? pageHref(page.currentPage - 1) : undefined}
+          aria-disabled={page.currentPage === 1}
+        >
+          ← Prev
+        </a>
+        <span class="page-status">Page {page.currentPage} of {page.lastPage}</span>
+        <a
+          class="page-link page-next"
+          data-page-nav
+          data-href={page.currentPage < page.lastPage ? pageHref(page.currentPage + 1) : undefined}
+          href={page.currentPage < page.lastPage ? pageHref(page.currentPage + 1) : undefined}
+          aria-disabled={page.currentPage === page.lastPage}
+        >
+          Next →
+        </a>
+      </nav>
+    )}
   </main>
 </Base>
 
@@ -127,6 +172,11 @@ const TIER_NOTE = {
   const reset = document.getElementById('reset') as HTMLButtonElement;
   const grid = document.getElementById('grid')!;
   const viewButtons = [...document.querySelectorAll<HTMLButtonElement>('.view-btn')];
+  const filtersEl = document.querySelector<HTMLElement>('.filters')!;
+  const currentPage = Number(filtersEl.dataset.currentPage ?? '1');
+  const page1Href = filtersEl.dataset.page1Href ?? '';
+  const totalActivities = Number(filtersEl.dataset.total ?? cards.length);
+  const pageNavLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-page-nav]')];
 
   const active: Record<string, Set<string>> = {
     tier: new Set(), cost: new Set(), time: new Set(), group: new Set(), tags: new Set(),
@@ -164,12 +214,57 @@ const TIER_NOTE = {
       card.hidden = !ok;
       if (ok) shown++;
     }
-    count.textContent = shown === cards.length
-      ? `${shown} things to do`
-      : `${shown} of ${cards.length}`;
-    empty.hidden = shown !== 0;
     const any = Object.values(active).some((s) => s.size > 0);
+    // Counts against the site-wide total, not just this page's cards — a
+    // filter can only ever reveal matches among the cards actually in the
+    // DOM (this page's slice), so "shown" is necessarily page-scoped, but
+    // the denominator reflects every activity on the site.
+    count.textContent = any
+      ? `${shown} of ${totalActivities}`
+      : `${totalActivities} things to do`;
+    empty.hidden = shown !== 0;
     reset.hidden = !any;
+  };
+
+  // Serialises the active filter sets into the same query-param shape
+  // applyParamsToChips() below reads back — used both to carry filters
+  // across pagination links and to rebuild the page-1 URL when a filter
+  // changes while on a later page (this grid is now paginated at build
+  // time, so a later page can't reveal matches that only live on page 1).
+  const buildFilterQuery = () => {
+    const params = new URLSearchParams();
+    for (const facet of Object.keys(active)) {
+      const set = active[facet];
+      if (set.size) params.set(facet, [...set].join(','));
+    }
+    return params.toString();
+  };
+
+  // Pagination links are rendered with a clean href at build time; this
+  // appends whatever filters are currently active so landing on the next/
+  // prev page re-applies them via applyParamsToChips() on load.
+  const syncPageNavLinks = () => {
+    const qs = buildFilterQuery();
+    pageNavLinks.forEach((a) => {
+      const href = a.dataset.href;
+      if (!href) return;
+      a.href = qs ? `${href}?${qs}` : href;
+    });
+  };
+
+  // Filtering only ever affects the cards present in the DOM, which since
+  // pagination is now just this page's slice — so a filter picked up while
+  // browsing page 2+ jumps back to page 1 rather than silently filtering
+  // within a page that may have no matches at all.
+  const onFilterChange = () => {
+    syncControls();
+    if (currentPage > 1 && page1Href) {
+      const qs = buildFilterQuery();
+      window.location.href = qs ? `${page1Href}?${qs}` : page1Href;
+      return;
+    }
+    apply();
+    syncPageNavLinks();
   };
 
   // Pre-fill filters from the URL's query string (?tier=&cost=&time=&group=&tags=)
@@ -206,6 +301,7 @@ const TIER_NOTE = {
   applyParamsToChips();
   syncControls();
   apply();
+  syncPageNavLinks();
 
   chips.forEach((chip) => {
     chip.addEventListener('click', () => {
@@ -213,8 +309,7 @@ const TIER_NOTE = {
       const set = active[facet];
       const on = set.has(value);
       on ? set.delete(value) : set.add(value);
-      syncControls();
-      apply();
+      onFilterChange();
     });
   });
 
@@ -232,8 +327,7 @@ const TIER_NOTE = {
       const facet = select.dataset.facet!;
       active[facet].clear();
       if (select.value) active[facet].add(select.value);
-      syncControls();
-      apply();
+      onFilterChange();
       // On mobile the panel is a dropdown overlay — collapse it back to a
       // single "Filters" row as soon as a choice is made, so results show.
       if (isMobile()) filtersPanel.open = false;
@@ -242,8 +336,7 @@ const TIER_NOTE = {
 
   reset.addEventListener('click', () => {
     Object.values(active).forEach((s) => s.clear());
-    syncControls();
-    apply();
+    onFilterChange();
   });
 
   // Grid column count: 2/3/4-wide, remembered across visits. A toggle group

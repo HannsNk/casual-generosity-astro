@@ -1036,6 +1036,28 @@ a { color: inherit; }
   color: var(--ink-soft);
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 0 0 4rem;
+  font-family: var(--mono);
+  font-size: .78rem;
+}
+.pagination .page-status { color: var(--ink-soft); white-space: nowrap; }
+.pagination .page-link {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 2px solid var(--ink);
+  padding: 0 0 1px;
+}
+.pagination .page-link[aria-disabled="true"] {
+  color: var(--ink-soft);
+  border-bottom-color: transparent;
+  pointer-events: none;
+}
+
 /* ---------- notes ---------- */
 /* padding-block, not the padding shorthand — .notes-list shares this
    element with .wrap, and a shorthand here would zero its padding-inline. */
