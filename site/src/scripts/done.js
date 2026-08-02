@@ -1,12 +1,12 @@
 import {
-  auth, db, markActivityDone, undoActivityDone, patchDoneRecord, doneRecordRef,
+  auth, db, markActivityDone, undoActivityDone, patchDoneDetails, doneDetailsRef,
 } from '../lib/firebase.js';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
   collection, query, where, getDocs, getDoc,
 } from 'firebase/firestore';
 import { clearFavoriteLocal, isFavoritedLocal, onFavoritesChange } from '../lib/favorites.js';
-import { onStatsChange, bumpStat } from '../lib/stats.js';
+import { onStatsChange, bumpStat, loadStats } from '../lib/stats.js';
 
 let uid = null;
 // slug -> Date the signed-in user marked it done (present only while active).
@@ -42,9 +42,9 @@ onAuthStateChanged(auth, async (user) => {
   if (uid) {
     try {
       const q = query(
-        collection(db, 'doneRecords'),
+        collection(db, 'activityInteractions'),
         where('uid', '==', uid),
-        where('active', '==', true),
+        where('state', '==', 'done'),
       );
       const snap = await getDocs(q);
       snap.forEach((d) => {
@@ -126,7 +126,7 @@ const openCapture = async (slug, title, url) => {
 
   if (uid) {
     try {
-      const snap = await getDoc(doneRecordRef(uid, slug));
+      const snap = await getDoc(doneDetailsRef(uid, slug));
       if (snap.exists()) {
         const data = snap.data();
         if (data.highlight) highlightInput.value = data.highlight;
@@ -159,7 +159,7 @@ const proceedToShare = async () => {
 
   if (uid && currentSlug) {
     try {
-      await patchDoneRecord(uid, currentSlug, {
+      await patchDoneDetails(uid, currentSlug, {
         highlight: highlight || null,
         withWho: selection.withWho,
         reaction: selection.reaction,
@@ -224,9 +224,10 @@ copyLinkBtn.addEventListener('click', async () => {
 
 // ---------- save/done counts (activity cards + detail tally) ----------
 
-// Card-scale fav/done buttons carry their own live count (icon + number,
-// shown even at zero — these are public totals, not "yours"). The detail
-// page's fav/done buttons have no count span, so they're skipped here.
+// Card-scale fav/done buttons carry their own live count (icon + number).
+// Pre-launch, a count of zero is hidden entirely (icon only) rather than
+// shown as "0" — the aria-label still states it for screen readers. The
+// detail page's fav/done buttons have no count span, so they're skipped here.
 const applyCardStats = (stats) => {
   document.querySelectorAll('[data-fav]').forEach((btn) => {
     const countEl = btn.querySelector('[data-stat-saves]');
@@ -234,6 +235,7 @@ const applyCardStats = (stats) => {
     const slug = btn.dataset.slug ?? '';
     const { saveCount } = stats.get(slug) ?? { saveCount: 0 };
     countEl.textContent = String(saveCount);
+    countEl.hidden = saveCount === 0;
     btn.setAttribute('aria-label', `${btn.classList.contains('is-fav') ? 'Saved' : 'Save'} — ${saveCount} saved`);
   });
   document.querySelectorAll('[data-done]').forEach((btn) => {
@@ -242,16 +244,20 @@ const applyCardStats = (stats) => {
     const slug = btn.dataset.slug ?? '';
     const { doneCount } = stats.get(slug) ?? { doneCount: 0 };
     countEl.textContent = String(doneCount);
+    countEl.hidden = doneCount === 0;
     btn.setAttribute('aria-label', `${btn.classList.contains('is-done') ? 'Done' : 'Mark as done'} — ${doneCount} done`);
   });
 };
 
 const tallySavesEl = document.getElementById('tally-saves');
 const tallyDoneEl = document.getElementById('tally-done');
+const tallyDividerEl = document.querySelector('.tally-divider');
 
 // The detail-page tally: whichever count includes the signed-in user is
 // inked (figure in the tier colour, label spelling out "incl. you"); the
-// other stays neutral grey.
+// other stays neutral grey. Pre-launch, a count of zero hides its whole
+// tally item rather than showing "0 saved"/"0 done"; the divider between
+// them only makes sense with both sides visible.
 const applyDetailStats = (stats) => {
   if (tallySavesEl) {
     const slug = tallySavesEl.dataset.slug ?? '';
@@ -260,6 +266,7 @@ const applyDetailStats = (stats) => {
     tallySavesEl.querySelector('.tally-figure').textContent = String(saveCount);
     tallySavesEl.querySelector('.tally-label').textContent = isYours ? 'saved, incl. you' : 'saved';
     tallySavesEl.classList.toggle('is-yours', isYours);
+    tallySavesEl.hidden = saveCount === 0;
   }
   if (tallyDoneEl) {
     const slug = tallyDoneEl.dataset.slug ?? '';
@@ -268,8 +275,18 @@ const applyDetailStats = (stats) => {
     tallyDoneEl.querySelector('.tally-figure').textContent = String(doneCount);
     tallyDoneEl.querySelector('.tally-label').textContent = isYours ? 'done, incl. you' : 'done';
     tallyDoneEl.classList.toggle('is-yours', isYours);
+    tallyDoneEl.hidden = doneCount === 0;
+  }
+  if (tallyDividerEl) {
+    tallyDividerEl.hidden = Boolean(tallySavesEl?.hidden) || Boolean(tallyDoneEl?.hidden);
   }
 };
+
+// Every [data-fav] button on the page (cards and detail alike) carries the
+// slug of an activity whose counts need loading — there's no bulk collection
+// read anymore, so kick off the per-slug aggregation queries up front.
+const pageSlugs = [...document.querySelectorAll('[data-fav]')].map((btn) => btn.dataset.slug ?? '').filter(Boolean);
+if (pageSlugs.length) loadStats(pageSlugs);
 
 let latestStats = new Map();
 onStatsChange((stats) => {
@@ -311,7 +328,7 @@ document.addEventListener('click', async (e) => {
       closeWindowIfSlug(slug);
     } else {
       const wasFav = isFavoritedLocal(slug);
-      await markActivityDone(uid, slug, wasFav);
+      await markActivityDone(uid, slug);
       doneDates.set(slug, new Date());
       refreshButtons();
       bumpStat(slug, 'doneCount', 1);

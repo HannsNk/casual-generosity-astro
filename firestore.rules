@@ -3,53 +3,56 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // activityStats has two independent counters (doneCount, saveCount).
-    // A single write may touch either or both (marking an activity done
-    // that was previously favorited moves both in the same batch write),
-    // but each one that's present may only move by exactly +1 or -1 from
-    // its prior value — resource is null on create, so "before" reads as 0.
-    function statsBefore(field) {
-      return resource == null ? 0 : resource.data.get(field, 0);
-    }
-    function validCounter(field) {
-      return request.resource.data.get(field, 0) == statsBefore(field)
-        || request.resource.data.get(field, 0) == statsBefore(field) + 1
-        || request.resource.data.get(field, 0) == statsBefore(field) - 1;
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
     }
 
-    match /stories/{storyId} {
-      allow read: if true;
-      allow create: if request.resource.data.activity is string
-        && request.resource.data.status in ['Did it', 'Want to try', 'Not for me']
-        && request.resource.data.story is string
-        && request.resource.data.story.size() < 500;
-      allow update, delete: if false;
+    function validDocId(docId, uid, slug) {
+      return docId == uid + '_' + slug;
     }
 
     match /users/{uid} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == uid;
-
-      match /favorites/{activitySlug} {
-        allow read: if true;
-        allow write: if request.auth != null && request.auth.uid == uid;
-      }
+      allow write: if isOwner(uid);
     }
 
-    match /doneRecords/{docId} {
-      allow read: if request.auth != null && request.auth.uid == resource.data.uid;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
-      allow update: if request.auth != null
-        && request.auth.uid == resource.data.uid
-        && request.auth.uid == request.resource.data.uid;
-    }
-
-    match /activityStats/{slug} {
+    // Public fact: what a user's relationship to an activity is right now.
+    // No personal content lives here — safe to be fully public-read and
+    // safe to run count() aggregation queries against.
+    match /activityInteractions/{docId} {
       allow read: if true;
-      allow create, update: if request.auth != null
-        && request.resource.data.keys().hasOnly(['doneCount', 'saveCount'])
-        && validCounter('doneCount')
-        && validCounter('saveCount');
+
+      allow create: if isOwner(request.resource.data.uid)
+        && validDocId(docId, request.resource.data.uid, request.resource.data.activitySlug)
+        && request.resource.data.activitySlug is string
+        && request.resource.data.state in ['favorited', 'done'];
+
+      allow update: if isOwner(resource.data.uid)
+        && isOwner(request.resource.data.uid)
+        && resource.data.uid == request.resource.data.uid
+        && resource.data.activitySlug == request.resource.data.activitySlug
+        && request.resource.data.state in ['favorited', 'done'];
+
+      // Needed for Undo (deletes the fact) — deliberately NOT needed for
+      // account-deletion cleanup, since these should survive account deletion.
+      allow delete: if isOwner(resource.data.uid);
+    }
+
+    // Private detail: only ever exists alongside a 'done' state, holds the
+    // free-text/personal fields. Owner-only in every direction, including
+    // delete — required for account-deletion cleanup.
+    match /doneDetails/{docId} {
+      allow read: if isOwner(resource.data.uid);
+
+      allow create: if isOwner(request.resource.data.uid)
+        && validDocId(docId, request.resource.data.uid, request.resource.data.activitySlug)
+        && request.resource.data.activitySlug is string;
+
+      allow update: if isOwner(resource.data.uid)
+        && isOwner(request.resource.data.uid)
+        && resource.data.uid == request.resource.data.uid;
+
+      allow delete: if isOwner(resource.data.uid);
     }
   }
 }
