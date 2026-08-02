@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getFirestore, doc, setDoc, increment, serverTimestamp, writeBatch,
+  getFirestore, doc, getDoc, setDoc, increment, serverTimestamp, writeBatch,
 } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
@@ -61,4 +61,22 @@ export const undoActivityDone = async (uid, slug) => {
 // record. Only ever called after markActivityDone, so the doc already exists.
 export const patchDoneRecord = async (uid, slug, fields) => {
   await setDoc(doneRecordRef(uid, slug), fields, { merge: true });
+};
+
+// Returns true if the current user is signed in AND has not yet
+// seen onboarding. False if signed out (nothing to show) or already seen.
+export const shouldShowOnboarding = async () => {
+  const user = auth.currentUser;
+  if (!user) return false;
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  if (!snap.exists()) return false;
+  return snap.data().onboardingSeen !== true;
+};
+
+// Marks onboarding as seen. Called on skip, close, or completion —
+// all three count as "seen," none of them should re-trigger it.
+export const markOnboardingSeen = async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+  await setDoc(doc(db, 'users', user.uid), { onboardingSeen: true }, { merge: true });
 };

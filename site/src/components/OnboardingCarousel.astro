@@ -1,0 +1,334 @@
+---
+// src/components/OnboardingCarousel.astro
+//
+// "How this works" onboarding carousel.
+// Fires once after first account creation (see build prompt for the
+// Firestore trigger logic that shows/hides this). Also mountable
+// standalone from the profile page via a "How this works" link —
+// pass forceOpen to skip the auto-trigger check and just show it.
+//
+// Follows the existing riso design system (03-design-system.md):
+// --edge hard border, offset-shadow "misregistered print" card device,
+// .chip pagination dots, Bricolage/Newsreader/Space Mono type roles.
+// No new colours or fonts introduced.
+
+interface Props {
+  forceOpen?: boolean;
+}
+
+const { forceOpen = false } = Astro.props;
+
+const slides = [
+  {
+    tier: "pink",
+    eyebrow: "Browse",
+    title: "Find something worth doing",
+    body: "Spontaneous, Planned, or Committed — pick whatever fits your week, your budget, and how much notice you can give. See something you like but aren't ready for yet? Save it, and it'll be waiting for you.",
+  },
+  {
+    tier: "blue",
+    eyebrow: "Send it to someone",
+    title: "The best plans start with one person",
+    body: "Every activity has a share button that sends a friend the idea, not just a link. Skip the group chat — the people already in your week are the easiest ones to actually do something with.",
+  },
+  {
+    tier: "green",
+    eyebrow: "Do it, then tell us how it went",
+    title: "A few words go a long way",
+    body: "Mark it done when you have. If you want, add a quick note — who you were with, how it went, any tip for the next person. Totally optional, thirty seconds tops, and it becomes part of the activity's story for whoever's next.",
+  },
+  {
+    tier: "ink",
+    eyebrow: "Share it, come back",
+    title: "This is what keeps it going",
+    body: "Post about it if you're up for it — someone else tries this because you did. Then come back whenever. There's always another one worth doing.",
+  },
+];
+---
+
+<div
+  class="onboarding-overlay"
+  id="onboarding-overlay"
+  data-force-open={forceOpen ? "true" : "false"}
+  hidden
+>
+  <div class="onboarding-card" role="dialog" aria-modal="true" aria-label="How CasuallyGenerous works">
+    <button class="onboarding-close" id="onboarding-close" aria-label="Close">✕</button>
+
+    <div class="onboarding-viewport">
+    <div class="onboarding-track" id="onboarding-track">
+      {slides.map((slide, i) => (
+        <div class="onboarding-slide" data-index={i}>
+          <div class={`stamp-badge t-${slide.tier}`} aria-hidden="true">
+            {slide.tier === "pink" && (
+              <svg viewBox="0 0 64 64" class="badge-icon">
+                <rect x="14" y="24" width="28" height="20" rx="1" fill="var(--card)" transform="rotate(-8 28 34)"/>
+                <rect x="18" y="20" width="28" height="20" rx="1" fill="var(--card)" transform="rotate(4 32 30)"/>
+                <rect x="20" y="22" width="26" height="18" rx="1" fill="var(--pink)" stroke="var(--card)" stroke-width="2"/>
+              </svg>
+            )}
+            {slide.tier === "blue" && (
+              <svg viewBox="0 0 64 64" class="badge-icon">
+                <circle cx="16" cy="40" r="6" fill="var(--card)"/>
+                <circle cx="48" cy="22" r="6" fill="var(--card)"/>
+                <path d="M22 36 L42 26" stroke="var(--card)" stroke-width="3" stroke-linecap="round"/>
+                <path d="M36 24 L43 25 L41 32" stroke="var(--card)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            )}
+            {slide.tier === "green" && (
+              <svg viewBox="0 0 64 64" class="badge-icon">
+                <circle cx="32" cy="32" r="20" fill="none" stroke="var(--card)" stroke-width="3"/>
+                <path d="M22 33 L29 40 L44 24" fill="none" stroke="var(--card)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            )}
+            {slide.tier === "ink" && (
+              <svg viewBox="0 0 64 64" class="badge-icon">
+                <path
+                  d="M32 14 A18 18 0 1 1 15 27"
+                  fill="none" stroke="var(--paper)" stroke-width="3.5" stroke-linecap="round"
+                />
+                <path d="M13 19 L15 27 L23 25" fill="none" stroke="var(--paper)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            )}
+          </div>
+
+          <p class="onboarding-eyebrow">{slide.eyebrow}</p>
+          <h2 class="onboarding-title">{slide.title}</h2>
+          <p class="onboarding-body">{slide.body}</p>
+        </div>
+      ))}
+    </div>
+    </div>
+
+    <div class="onboarding-controls">
+      <button class="onboarding-arrow onboarding-prev" id="onboarding-prev" aria-label="Previous slide">‹</button>
+
+      <div class="onboarding-dots" id="onboarding-dots">
+        {slides.map((_, i) => (
+          <button class="dot chip" data-goto={i} aria-label={`Go to slide ${i + 1}`}></button>
+        ))}
+      </div>
+
+      <button class="onboarding-arrow onboarding-next" id="onboarding-next" aria-label="Next slide">›</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import "../scripts/onboarding.js";
+</script>
+
+<style>
+  .onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(23, 22, 26, 0.55); /* --ink at reduced opacity */
+    padding: 16px;
+  }
+
+  /* Author CSS beats the UA [hidden] stylesheet rule at equal specificity,
+     so without this the overlay's own `display: flex` above wins and the
+     modal never visually disappears when JS sets the hidden attribute. */
+  .onboarding-overlay[hidden] {
+    display: none;
+  }
+
+  .onboarding-card {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    max-height: 88vh;
+    background: var(--card);
+    border: var(--edge) solid var(--ink);
+    box-shadow: 8px 8px 0 var(--ink);
+    border-radius: 4px;
+    padding: 36px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  @media (min-width: 640px) {
+    .onboarding-card {
+      max-width: 600px;
+      border-radius: 4px;
+      max-height: 82vh;
+      padding: 44px 40px 32px;
+    }
+  }
+
+  .onboarding-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: transparent;
+    border: none;
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    line-height: 1;
+    padding: 6px;
+  }
+  .onboarding-close:hover,
+  .onboarding-close:focus-visible {
+    color: var(--ink);
+  }
+
+  .onboarding-viewport {
+    overflow: hidden;
+    width: 100%;
+    min-height: 0;
+  }
+
+  .onboarding-track {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    transition: transform 0.35s ease;
+    touch-action: pan-y;
+  }
+
+  .onboarding-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    padding-right: 8px;
+    min-height: 0;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .stamp-badge {
+    --tier: var(--ink);
+    width: 72px;
+    height: 72px;
+    background: var(--tier);
+    border: 3px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+  }
+  .stamp-badge.t-pink  { --tier: var(--pink); }
+  .stamp-badge.t-blue  { --tier: var(--blue); }
+  .stamp-badge.t-green { --tier: var(--green); }
+  .stamp-badge.t-ink   { --tier: var(--ink); }
+
+  .badge-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .onboarding-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+  }
+
+  .onboarding-title {
+    font-family: var(--display);
+    font-size: 1.75rem;
+    line-height: 1.15;
+    color: var(--ink);
+    margin: 0 0 14px;
+  }
+
+  @media (min-width: 640px) {
+    .onboarding-title { font-size: 2rem; }
+  }
+
+  .onboarding-body {
+    font-family: var(--body);
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  .onboarding-controls {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .onboarding-arrow {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 1.2rem;
+    line-height: 1;
+    background: var(--card);
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    cursor: pointer;
+    padding: 0;
+  }
+  .onboarding-arrow:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .onboarding-arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+    background: var(--card);
+    color: var(--ink);
+  }
+
+  .onboarding-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 8px;
+  }
+
+  .onboarding-dots .dot {
+    width: 12px;
+    height: 12px;
+    box-sizing: border-box;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--rule);
+    border: 2px solid var(--ink);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .onboarding-dots .dot.active {
+    background: var(--ink);
+  }
+
+  /* generic .chip fallback in case this component is previewed
+     outside the site's global stylesheet — remove if .chip is
+     already globally defined with equivalent styling */
+  .chip {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    border: 2px solid var(--ink);
+    padding: 8px 14px;
+    background: var(--card);
+    cursor: pointer;
+  }
+</style>

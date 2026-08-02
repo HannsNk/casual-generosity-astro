@@ -7,6 +7,7 @@ import {
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { openOnboarding } from './onboarding.js';
 
 const trigger = document.getElementById('auth-signin');
 const panel = document.getElementById('auth-panel');
@@ -149,8 +150,13 @@ onAuthStateChanged(auth, async (user) => {
         email: user.email ?? '',
         photoURL: user.photoURL ?? '',
         bio: '',
+        onboardingSeen: false,
         createdAt: serverTimestamp(),
       });
+      // Trigger it directly rather than relying on onboarding.js's own
+      // shouldShowOnboarding() re-check — that reads this same doc, and
+      // could race the write above and see the doc as not-yet-existing.
+      openOnboarding();
     }
   } else {
     trigger.hidden = false;
