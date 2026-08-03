@@ -27,12 +27,24 @@ const TIERS = [
   },
 ];
 
+// Temporary manual curation: list up to 3 activity slugs per tier here to
+// pin exactly which cards show on the landing page, in that order. Leave a
+// tier's array empty to fall back to the default (first 3 in tier order).
+const FEATURED_SLUGS: Record<string, string[]> = {
+  Spontaneous: [],
+  Planned: [],
+  Committed: [],
+};
+
 const bands = TIERS.map((tier) => {
   const tierActivities = activities.filter((a) => a.tier === tier.key);
+  const featured = (FEATURED_SLUGS[tier.key] ?? [])
+    .map((slug) => tierActivities.find((a) => a.slug === slug))
+    .filter((a): a is typeof tierActivities[number] => Boolean(a));
   return {
     ...tier,
     count: tierActivities.length,
-    activities: tierActivities.slice(0, 3),
+    activities: featured.length ? featured.slice(0, 3) : tierActivities.slice(0, 3),
   };
 });
 

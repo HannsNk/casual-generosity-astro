@@ -1,0 +1,575 @@
+---
+import Base from '../layouts/Base.astro';
+import Card from '../components/Card.astro';
+import activities from '../data/activities.json';
+
+const TIERS = ['Spontaneous', 'Planned', 'Committed'];
+const COSTS = ['Free', 'Under £20pp', '£20+pp'];
+const GROUPS = ['Solo / Duo', 'Small Group (3-6)', 'Large Group (7+)'];
+const TIMES = ['Under 30 min', '30-90 min', '90-120 min', 'Half-day'];
+const TAGS = [...new Set(activities.flatMap((a) => a.tags))].sort((a, b) => a.localeCompare(b));
+
+const tierCounts = Object.fromEntries(
+  TIERS.map((t) => [t, activities.filter((a) => a.tier === t).length]),
+);
+
+// Flattened, searchable text per activity (title, hook, why, instructions,
+// tags and the rest of the metadata) — fed to Fuse.js client-side for a
+// fuzzy full-text search across every field, not just the title.
+const searchIndex = activities.map((a) => ({
+  slug: a.slug,
+  text: [
+    a.title, a.hook, a.why, a.needs, a.instructions, a.link, a.tier, a.time,
+    ...a.cost, ...a.groupSize, ...a.location, ...a.tags,
+  ].filter(Boolean).join(' '),
+}));
+---
+<Base
+  title="Explore activities — CasuallyGenerous"
+  description={`A directory of ${activities.length} low-effort, mostly free ways to do something meaningful while hanging out with friends or a partner.`}
+>
+  <div class="tools-bar">
+    <div class="search-box-wrap">
+      <button type="button" class="search-toggle" id="search-toggle" aria-expanded="false" aria-controls="search-box">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.2" y2="16.2"></line>
+        </svg>
+        Search
+      </button>
+      <div class="search-box" id="search-box" hidden>
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="Search activities…"
+          aria-label="Search all activity details"
+        />
+      </div>
+    </div>
+    <button
+      type="button"
+      class="search-toggle filters-toggle"
+      id="filters-toggle"
+      aria-expanded="false"
+      aria-controls="rail"
+    >
+      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4" y1="6" x2="20" y2="6"></line>
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <line x1="4" y1="18" x2="20" y2="18"></line>
+        <circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"></circle>
+        <circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"></circle>
+        <circle cx="11" cy="18" r="2" fill="currentColor" stroke="none"></circle>
+      </svg>
+      Filters
+    </button>
+    <select class="sort-select" id="sort-select" aria-label="Sort activities">
+      <option value="">Sort: Featured</option>
+      <option value="saved">Sort: Most saved</option>
+    </select>
+    <div class="view-toggle" id="view-toggle" role="group" aria-label="Grid columns">
+      <button type="button" class="chip view-btn" data-cols="2" aria-pressed="false" aria-label="2 columns">
+        <svg viewBox="0 0 16 14" width="16" height="14" aria-hidden="true"><rect x="0" y="0" width="7" height="14" fill="currentColor" /><rect x="9" y="0" width="7" height="14" fill="currentColor" /></svg>
+      </button>
+      <button type="button" class="chip view-btn" data-cols="3" aria-pressed="false" aria-label="3 columns">
+        <svg viewBox="0 0 16 14" width="16" height="14" aria-hidden="true"><rect x="0" y="0" width="4" height="14" fill="currentColor" /><rect x="6" y="0" width="4" height="14" fill="currentColor" /><rect x="12" y="0" width="4" height="14" fill="currentColor" /></svg>
+      </button>
+      <button type="button" class="chip view-btn" data-cols="4" aria-pressed="false" aria-label="4 columns">
+        <svg viewBox="0 0 16 14" width="16" height="14" aria-hidden="true"><rect x="0" y="0" width="2.8" height="14" fill="currentColor" /><rect x="4.4" y="0" width="2.8" height="14" fill="currentColor" /><rect x="8.8" y="0" width="2.8" height="14" fill="currentColor" /><rect x="13.2" y="0" width="2.8" height="14" fill="currentColor" /></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="result-bar">
+    <output class="result-count" id="count">{activities.length} things to do</output>
+    <div class="result-tokens" id="result-tokens" aria-live="polite"></div>
+    <button class="reset" id="reset" hidden>Clear all</button>
+  </div>
+
+  <div class="activities-layout" data-total={activities.length}>
+    <aside class="rail" id="rail" aria-label="Filter activities">
+      <div class="rail-sticky">
+        <div class="rail-effort" role="group" aria-label="Effort">
+          <p class="rail-label">Effort</p>
+          <div class="rail-effort-list">
+            {TIERS.map((t) => (
+              <button
+                type="button"
+                class={`rail-effort-row t-${t}`}
+                data-facet="tier"
+                data-value={t}
+                aria-pressed="false"
+              >
+                <span class="rail-effort-name">{t}</span>
+                <span class="rail-effort-count">{tierCounts[t]}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <details class="facet-row" data-facet-row="cost">
+          <summary class="facet-row-summary">
+            <span class="facet-row-label">Cost</span>
+            <span class="facet-row-value" data-facet-value="cost" data-empty="Any cost">Any cost</span>
+          </summary>
+          <div class="facet-row-body">
+            <div class="rail-checklist">
+              {COSTS.map((c) => (
+                <label class="rail-check">
+                  <input type="checkbox" class="rail-check-input" data-facet="cost" data-value={c} />
+                  <span class="rail-check-box" aria-hidden="true"></span>
+                  <span class="rail-check-label">{c}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </details>
+
+        <details class="facet-row" data-facet-row="time">
+          <summary class="facet-row-summary">
+            <span class="facet-row-label">Time</span>
+            <span class="facet-row-value" data-facet-value="time" data-empty="Any length">Any length</span>
+          </summary>
+          <div class="facet-row-body">
+            <div class="rail-checklist">
+              {TIMES.map((t) => (
+                <label class="rail-check">
+                  <input type="checkbox" class="rail-check-input" data-facet="time" data-value={t} />
+                  <span class="rail-check-box" aria-hidden="true"></span>
+                  <span class="rail-check-label">{t}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </details>
+
+        <details class="facet-row" data-facet-row="group">
+          <summary class="facet-row-summary">
+            <span class="facet-row-label">People</span>
+            <span class="facet-row-value" data-facet-value="group" data-empty="Any">Any</span>
+          </summary>
+          <div class="facet-row-body">
+            <div class="rail-checklist">
+              {GROUPS.map((g) => (
+                <label class="rail-check">
+                  <input type="checkbox" class="rail-check-input" data-facet="group" data-value={g} />
+                  <span class="rail-check-box" aria-hidden="true"></span>
+                  <span class="rail-check-label">{g}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </details>
+
+        <details class="facet-row facet-row--tags" data-facet-row="tags">
+          <summary class="facet-row-summary">
+            <span class="facet-row-label">Tags</span>
+            <span class="facet-row-value" data-facet-value="tags" data-empty="All tags">All tags</span>
+          </summary>
+          <div class="facet-row-body">
+            <div class="chip-check-row">
+              {TAGS.map((t) => (
+                <label class="chip-check">
+                  <input type="checkbox" class="chip-check-input" data-facet="tags" data-value={t} />
+                  <span class="chip-check-box">{t}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </details>
+      </div>
+    </aside>
+
+    <div class="results" id="results">
+      <main>
+        <div class="grid" id="grid">
+          {activities.map((a) => <Card a={a} />)}
+          <p class="empty" id="empty" hidden>
+            Nothing matches all of those at once. Try clearing one filter.
+          </p>
+        </div>
+
+        <nav class="pagination" id="pagination" aria-label="Pagination" hidden>
+          <button type="button" class="page-link page-prev" id="page-prev">← Prev</button>
+          <span class="page-status" id="page-status">Page 1 of 1</span>
+          <button type="button" class="page-link page-next" id="page-next">Next →</button>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <script is:inline type="application/json" id="search-index" set:html={JSON.stringify(searchIndex)} />
+</Base>
+
+<script>
+  // Plain DOM filtering — no framework, ~1.5KB of JS on an otherwise static
+  // page. .view-btn reuses .chip styling but isn't a filter facet, so it's
+  // excluded from the generic facet wiring and handled by its own listener.
+  //
+  // Every activity's card ships in the DOM (no build-time pagination — see
+  // git history for the previous [...page].astro approach), so filtering
+  // and search always run over the full set. Pagination is purely a display
+  // slice on top of whatever's currently matched, applied client-side.
+  import Fuse from 'fuse.js';
+  import { onStatsChange } from '../lib/stats.js';
+
+  const PAGE_SIZE = 24;
+
+  const tierButtons = [...document.querySelectorAll<HTMLButtonElement>('.rail-effort-row')];
+  const facetInputs = [...document.querySelectorAll<HTMLInputElement>('input[data-facet]')];
+  let cards = [...document.querySelectorAll<HTMLElement>('.card')];
+  const count = document.getElementById('count')!;
+  const empty = document.getElementById('empty')!;
+  const reset = document.getElementById('reset') as HTMLButtonElement;
+  const grid = document.getElementById('grid')!;
+  const viewButtons = [...document.querySelectorAll<HTMLButtonElement>('.view-btn')];
+  const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+  const searchToggle = document.getElementById('search-toggle') as HTMLButtonElement | null;
+  const searchBox = document.getElementById('search-box') as HTMLElement | null;
+  const sortSelect = document.getElementById('sort-select') as HTMLSelectElement | null;
+  const filtersToggle = document.getElementById('filters-toggle') as HTMLButtonElement | null;
+  const rail = document.getElementById('rail') as HTMLElement | null;
+  const facetRows = [...document.querySelectorAll<HTMLDetailsElement>('.facet-row')];
+  const tokensEl = document.getElementById('result-tokens');
+  const isMobile = () => window.matchMedia('(max-width: 899px)').matches;
+  const layoutEl = document.querySelector<HTMLElement>('.activities-layout')!;
+  const resultsEl = document.getElementById('results')!;
+  const totalActivities = Number(layoutEl.dataset.total ?? cards.length);
+  const pagination = document.getElementById('pagination') as HTMLElement;
+  const pagePrev = document.getElementById('page-prev') as HTMLButtonElement;
+  const pageNext = document.getElementById('page-next') as HTMLButtonElement;
+  const pageStatus = document.getElementById('page-status')!;
+
+  const active: Record<string, Set<string>> = {
+    tier: new Set(), cost: new Set(), time: new Set(), group: new Set(), tags: new Set(),
+  };
+
+  // A shorter label for tokens/summaries — People values carry a parenthetical
+  // headcount range ("Small Group (3-6)") that's redundant once it's sitting
+  // next to the other short facet labels.
+  const shortLabel = (facet: string, value: string) => (facet === 'group' ? value.replace(/ \(.*\)/, '') : value);
+
+  // null = no active search query, so filtering falls through untouched.
+  let searchMatches: Set<string> | null = null;
+  let currentPage = 1;
+
+  const matches = (card: HTMLElement) => {
+    if (searchMatches && !searchMatches.has(card.dataset.slug ?? '')) return false;
+    for (const facet of Object.keys(active)) {
+      const wanted = active[facet];
+      if (!wanted.size) continue;
+      const raw = card.dataset[facet] ?? '';
+      const has = raw.split('|').some((v) => wanted.has(v));
+      if (!has) return false;
+    }
+    return true;
+  };
+
+  // Fuzzy full-text search over every field (title, hook, why, instructions,
+  // tags, cost, time, group size, location — see `searchIndex` in the
+  // frontmatter) rather than just the title, so a search for e.g. an
+  // ingredient or a tag mentioned only in the instructions still hits.
+  type SearchItem = { slug: string; text: string };
+  const searchDataEl = document.getElementById('search-index');
+  const searchCorpus: SearchItem[] = searchDataEl ? JSON.parse(searchDataEl.textContent ?? '[]') : [];
+  const fuse = new Fuse(searchCorpus, {
+    keys: ['text'],
+    threshold: 0.35,
+    ignoreLocation: true,
+    minMatchCharLength: 2,
+  });
+
+  // Only updates searchMatches/apply() — resetting to page 1 is layered on
+  // top by the input listener and onFilterChange below.
+  const runSearch = (query: string) => {
+    const q = query.trim();
+    searchMatches = q ? new Set(fuse.search(q).map((r) => r.item.slug)) : null;
+    searchToggle?.classList.toggle('has-query', q.length > 0);
+    apply();
+  };
+
+  let searchTimer: ReturnType<typeof setTimeout> | undefined;
+  searchInput?.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      runSearch(searchInput.value);
+      onFilterChange();
+    }, 120);
+  });
+
+  // The search box stays collapsed behind the toggle button until opened,
+  // to keep the tools bar compact.
+  const openSearch = () => {
+    if (!searchBox || !searchToggle) return;
+    searchBox.hidden = false;
+    searchToggle.setAttribute('aria-expanded', 'true');
+    searchInput?.focus();
+  };
+  const closeSearch = () => {
+    if (!searchBox || !searchToggle) return;
+    searchBox.hidden = true;
+    searchToggle.setAttribute('aria-expanded', 'false');
+  };
+  searchToggle?.addEventListener('click', () => {
+    (searchBox?.hidden ?? true) ? openSearch() : closeSearch();
+  });
+
+  // Mobile-only: the whole filter rail collapses behind this toggle (see
+  // the .rail display rules in global.css — desktop ignores `.is-open`
+  // entirely and keeps the rail permanently visible, same as today).
+  // Opening it just reveals the exact same rail markup already used on
+  // desktop/mobile-expanded, no separate mobile UI to keep in sync.
+  const openFilters = () => {
+    if (!rail || !filtersToggle) return;
+    rail.classList.add('is-open');
+    filtersToggle.setAttribute('aria-expanded', 'true');
+  };
+  const closeFilters = () => {
+    if (!rail || !filtersToggle) return;
+    rail.classList.remove('is-open');
+    filtersToggle.setAttribute('aria-expanded', 'false');
+  };
+  filtersToggle?.addEventListener('click', () => {
+    rail?.classList.contains('is-open') ? closeFilters() : openFilters();
+  });
+
+  // Sort-by-saved reorders the actual card DOM nodes (and the `cards` array
+  // that drives filtering/pagination, so the new order sticks); "Featured
+  // order" just leaves them in their build-time order (tier order)
+  // untouched. Save counts load asynchronously from Firestore (see
+  // lib/stats.js), so this re-sorts again whenever that data (or a live
+  // save/unsave) arrives.
+  let statsMap = new Map<string, number>();
+  const sortCards = () => {
+    if (sortSelect?.value !== 'saved') return;
+    cards = [...cards].sort((a, b) => {
+      const bv = statsMap.get(b.dataset.slug ?? '') ?? 0;
+      const av = statsMap.get(a.dataset.slug ?? '') ?? 0;
+      return bv - av;
+    });
+    cards.forEach((card) => grid.appendChild(card));
+    apply();
+  };
+  sortSelect?.addEventListener('change', sortCards);
+  onStatsChange((stats) => {
+    statsMap = new Map([...stats].map(([slug, s]) => [slug, s.saveCount]));
+    sortCards();
+  });
+
+  // Keeps every control in sync with `active` — button aria-pressed, checkbox
+  // .checked, and each collapsible facet row's summary text (its current
+  // selection, or the row's empty-state label).
+  const syncControls = () => {
+    tierButtons.forEach((btn) => {
+      btn.setAttribute('aria-pressed', String(active.tier.has(btn.dataset.value ?? '')));
+    });
+    facetInputs.forEach((input) => {
+      const facet = input.dataset.facet!;
+      input.checked = active[facet].has(input.dataset.value ?? '');
+    });
+    facetRows.forEach((row) => {
+      const facet = row.dataset.facetRow!;
+      const valueEl = row.querySelector<HTMLElement>('.facet-row-value');
+      if (!valueEl) return;
+      const set = active[facet];
+      if (!set.size) {
+        valueEl.textContent = valueEl.dataset.empty ?? '';
+      } else if (set.size === 1) {
+        valueEl.textContent = shortLabel(facet, [...set][0]);
+      } else {
+        valueEl.textContent = `${set.size} selected`;
+      }
+    });
+  };
+
+  // The removable-token row in the result bar — rebuilt from `active` (and
+  // the current search query) on every filter change.
+  const removeToken = (facet: string, value: string) => {
+    active[facet].delete(value);
+    onFilterChange();
+  };
+  const renderTokens = () => {
+    if (!tokensEl) return;
+    tokensEl.innerHTML = '';
+    const q = searchInput?.value.trim();
+    if (q) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'token';
+      btn.textContent = `“${q}” ×`;
+      btn.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        runSearch('');
+        closeSearch();
+        onFilterChange();
+      });
+      tokensEl.appendChild(btn);
+    }
+    for (const facet of Object.keys(active)) {
+      for (const value of active[facet]) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = facet === 'tier' ? `token token-tier t-${value}` : 'token';
+        btn.textContent = `${shortLabel(facet, value).toUpperCase()} ×`;
+        btn.addEventListener('click', () => removeToken(facet, value));
+        tokensEl.appendChild(btn);
+      }
+    }
+  };
+
+  // Filters/search run over every activity on the site; the result is then
+  // sliced into PAGE_SIZE-card pages, and only the current page's slice is
+  // left unhidden. `total` (and therefore the page count) reflects every
+  // match, not just the ones currently visible.
+  const apply = () => {
+    const matched = cards.filter(matches);
+    const total = matched.length;
+    const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    currentPage = Math.min(Math.max(currentPage, 1), lastPage);
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const visible = new Set(matched.slice(start, start + PAGE_SIZE));
+    for (const card of cards) card.hidden = !visible.has(card);
+
+    const facetsActive = Object.values(active).some((s) => s.size > 0);
+    const any = facetsActive || searchMatches !== null;
+    count.textContent = any
+      ? `${total} of ${totalActivities}`
+      : `${totalActivities} things to do`;
+    empty.hidden = total !== 0;
+    reset.hidden = !any;
+    filtersToggle?.classList.toggle('has-active', facetsActive);
+
+    pagination.hidden = lastPage <= 1;
+    pageStatus.textContent = `Page ${currentPage} of ${lastPage}`;
+    pagePrev.disabled = currentPage <= 1;
+    pageNext.disabled = currentPage >= lastPage;
+
+    renderTokens();
+  };
+
+  // Any filter or search change invalidates the current page's slice — a
+  // page 2 that only had matches from the pre-change result set may no
+  // longer have any, so jump back to page 1 rather than leaving the user
+  // stranded on a now-empty page.
+  const onFilterChange = () => {
+    syncControls();
+    currentPage = 1;
+    apply();
+  };
+
+  pagePrev.addEventListener('click', () => {
+    currentPage -= 1;
+    apply();
+    resultsEl.scrollIntoView({ block: 'start' });
+  });
+  pageNext.addEventListener('click', () => {
+    currentPage += 1;
+    apply();
+    resultsEl.scrollIntoView({ block: 'start' });
+  });
+
+  // Pre-fill filters from the URL's query string (?tier=&cost=&time=&group=&tags=&q=)
+  // so a link like /activities.html?tier=Spontaneous lands already filtered.
+  // Facet values are matched against a known control; a value with no match
+  // is ignored silently.
+  const applyParamsFromUrl = () => {
+    const params = new URLSearchParams(window.location.search);
+    const facetParams: [string, string][] = [
+      ['tier', 'tier'], ['cost', 'cost'], ['time', 'time'], ['group', 'group'], ['tags', 'tags'],
+    ];
+
+    for (const [param, facet] of facetParams) {
+      const raw = params.get(param);
+      if (!raw) continue;
+      for (const value of raw.split(',').map((v) => v.trim()).filter(Boolean)) {
+        const known = facet === 'tier'
+          ? tierButtons.some((b) => b.dataset.value === value)
+          : facetInputs.some((i) => i.dataset.facet === facet && i.dataset.value === value);
+        if (known) active[facet].add(value);
+      }
+    }
+
+    const q = params.get('q');
+    if (q && searchInput) searchInput.value = q;
+  };
+
+  applyParamsFromUrl();
+  syncControls();
+  runSearch(searchInput?.value ?? '');
+  // A query loaded from the URL (?q=) should land with the box open, not
+  // hidden behind the toggle with an invisible active filter.
+  if (searchInput?.value) openSearch();
+
+  tierButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const value = btn.dataset.value ?? '';
+      const wasOnlySelected = active.tier.has(value) && active.tier.size === 1;
+      active.tier.clear();
+      if (!wasOnlySelected) active.tier.add(value);
+      onFilterChange();
+    });
+  });
+
+  facetInputs.forEach((input) => {
+    input.addEventListener('change', () => {
+      const facet = input.dataset.facet!;
+      const value = input.dataset.value ?? '';
+      input.checked ? active[facet].add(value) : active[facet].delete(value);
+      onFilterChange();
+    });
+  });
+
+  // Collapsible facet rows: native <details>, closed by default in the
+  // markup (correct baseline even with no JS at all). Desktop ignores the
+  // open/closed state entirely — CSS force-displays .facet-row-body and
+  // disables pointer clicks on the summary (see global.css) — so this
+  // listener only matters for the mobile "one open at a time" accordion:
+  // opening a row closes any others already open.
+  facetRows.forEach((row) => {
+    row.addEventListener('toggle', () => {
+      if (!isMobile() || !row.open) return;
+      facetRows.forEach((other) => {
+        if (other !== row) other.open = false;
+      });
+    });
+  });
+
+  reset.addEventListener('click', () => {
+    Object.values(active).forEach((s) => s.clear());
+    if (searchInput) searchInput.value = '';
+    searchMatches = null;
+    searchToggle?.classList.remove('has-query');
+    closeSearch();
+    facetRows.forEach((row) => { row.open = false; });
+    onFilterChange();
+  });
+
+  // Grid column count: 2/3/4-wide, remembered across visits. A toggle group
+  // like the facet chips, not a single-select — clicking the active button
+  // again clears back to auto, same as clicking a pressed filter chip twice.
+  const COLS_KEY = 'cg-grid-cols';
+  const applyCols = (v: string) => {
+    grid.classList.toggle('cols-2', v === '2');
+    grid.classList.toggle('cols-3', v === '3');
+    grid.classList.toggle('cols-4', v === '4');
+    viewButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cols === v)));
+    // Mirrors the density onto .results — see the [data-cols] rules in
+    // global.css — so the results column centers itself at exactly that
+    // many fixed-width cards (clamped to the viewport) instead of always
+    // stretching to fill whatever space is left of the docked rail.
+    if (v) resultsEl.dataset.cols = v; else delete resultsEl.dataset.cols;
+  };
+
+  applyCols(localStorage.getItem(COLS_KEY) ?? '');
+
+  viewButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const wasActive = btn.getAttribute('aria-pressed') === 'true';
+      const v = wasActive ? '' : (btn.dataset.cols ?? '');
+      applyCols(v);
+      localStorage.setItem(COLS_KEY, v);
+    });
+  });
+</script>
