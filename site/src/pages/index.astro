@@ -31,9 +31,9 @@ const TIERS = [
 // pin exactly which cards show on the landing page, in that order. Leave a
 // tier's array empty to fall back to the default (first 3 in tier order).
 const FEATURED_SLUGS: Record<string, string[]> = {
-  Spontaneous: [],
-  Planned: [],
-  Committed: [],
+  Spontaneous: ['write-an-appreciation-email-to-an-old-teacher', 'classify-images-for-real-scientific-research', 'learn-basic-sign-language'],
+  Planned: ['write-to-a-neighbour-offering-your-help-as-a-group', 'donate-blood-together', 'run-a-plastic-free-picnic'],
+  Committed: ['do-a-first-aid-course-together', 'spend-an-afternoon-at-a-senior-living-home', 'take-a-dog-out-for-the-day'],
 };
 
 const bands = TIERS.map((tier) => {
