@@ -21,7 +21,7 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' });
     </div>
   </header>
 
-  <main class="wrap notes-list">
+  <section class="wrap notes-list">
     <ul class="notes-index">
       {posts.map((post) => (
         <li class="notes-index-item">
@@ -34,5 +34,5 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' });
       ))}
       {posts.length === 0 && <p class="empty">No notes yet.</p>}
     </ul>
-  </main>
+  </section>
 </Base>

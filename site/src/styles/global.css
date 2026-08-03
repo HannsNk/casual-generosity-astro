@@ -15,7 +15,7 @@
 
   --pink:  #F0355F;  /* Spontaneous */
   --blue:  #2350D8;  /* Planned     */
-  --green: #0B8F63;  /* Committed   */
+  --green: #0A7C56;  /* Committed   */
 
   --display: "Bricolage Grotesque", system-ui, sans-serif;
   --body: "Newsreader", Georgia, serif;
@@ -1900,6 +1900,24 @@ a { color: inherit; }
 }
 .foot a { text-decoration-thickness: 1px; }
 .foot-credit { margin-top: 1.5rem; }
+
+/* ---------- pink contrast fix ----------
+   White text on --pink fails WCAG AA (4.5:1); var(--ink) on --pink clears
+   it (~4.6:1). --blue and --green stay on white text — only pink's fill
+   needs the swap, so this is scoped to .t-Spontaneous rather than applied
+   to every var(--tier) background globally. */
+.t-Spontaneous .legend b,
+.t-Spontaneous.tier-band .tier-panel,
+.rail-effort-row.t-Spontaneous[aria-pressed="true"] .rail-effort-name,
+.rail-effort-row.t-Spontaneous[aria-pressed="true"] .rail-effort-count,
+.token-tier.t-Spontaneous,
+.t-Spontaneous .stamp,
+.t-Spontaneous .fav-btn.is-fav,
+.t-Spontaneous .done-btn.detail-action.is-done,
+.t-Spontaneous .fav-btn.detail-action.is-fav,
+.t-Spontaneous .why {
+  color: var(--ink);
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

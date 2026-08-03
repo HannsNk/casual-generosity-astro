@@ -182,7 +182,7 @@ const searchIndex = activities.map((a) => ({
     </aside>
 
     <div class="results" id="results">
-      <main>
+      <section>
         <div class="grid" id="grid">
           {activities.map((a) => <Card a={a} />)}
           <p class="empty" id="empty" hidden>
@@ -195,7 +195,7 @@ const searchIndex = activities.map((a) => ({
           <span class="page-status" id="page-status">Page 1 of 1</span>
           <button type="button" class="page-link page-next" id="page-next">Next →</button>
         </nav>
-      </main>
+      </section>
     </div>
   </div>
 
