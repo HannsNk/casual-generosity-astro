@@ -985,7 +985,7 @@ a { color: inherit; }
   align-items: center;
   justify-content: space-between;
   gap: .75rem;
-  margin-top: .9rem;
+  margin-top: auto;
   padding-top: .875rem;
   border-top: var(--edge) solid var(--ink);
 }
