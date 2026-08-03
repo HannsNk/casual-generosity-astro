@@ -38,7 +38,11 @@ const base = import.meta.env.BASE_URL;
 </div>
 
 <style>
-  .auth-widget { position: relative; display: flex; align-items: center; }
+  /* margin-left: auto keeps the widget pinned to the right edge of
+     .sitenav-inner even when it wraps onto its own line on narrow
+     screens — without it, a lone item on a wrapped flex line falls
+     back to flex-start (the left). */
+  .auth-widget { position: relative; display: flex; align-items: center; margin-left: auto; }
 
   .auth-panel {
     position: absolute;
@@ -46,6 +50,7 @@ const base = import.meta.env.BASE_URL;
     right: 0;
     z-index: 40;
     width: 260px;
+    max-width: calc(100vw - 2rem);
     padding: 1rem;
     background: var(--card);
     border: 2px solid var(--ink);
@@ -177,7 +182,7 @@ const base = import.meta.env.BASE_URL;
   .auth-chip-user:hover .auth-name { color: var(--ink); }
 
   @media (max-width: 480px) {
-    .auth-panel { right: -1rem; width: 230px; }
+    .auth-panel { width: 230px; }
     .auth-name { max-width: 5rem; }
   }
 </style>
