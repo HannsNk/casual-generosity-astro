@@ -1,11 +1,15 @@
 ---
 import { Image } from 'astro:assets';
 import DoneButton from './DoneButton.astro';
+import { resizePexelsUrl } from '../lib/pexels.js';
 
 const { a, headingLevel = 'h2' } = Astro.props;
 const Heading = headingLevel;
 const url = `${import.meta.env.BASE_URL}${a.slug}.html`;
 const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
+// Card image renders at 301x201 (3:2 crop, design system doc 03);
+// request 2x for pixel density without over-fetching.
+const cardImage = resizePexelsUrl(a.image, 602, 402);
 ---
 <div
   class:list={['card', `t-${a.tier}`]}
@@ -20,7 +24,7 @@ const shareText = `Thought you'd like this: ${a.title} — ${a.hook}`;
 
   <div class="card-top">
     {a.image
-      ? <Image class="card-img" src={a.image} inferSize alt="" loading="lazy" />
+      ? <Image class="card-img" src={cardImage} inferSize alt="" loading="lazy" />
       : <div class="card-img placeholder">no photo</div>}
     <div class="meta">
       <span>{a.cost.join(' / ')}</span>
