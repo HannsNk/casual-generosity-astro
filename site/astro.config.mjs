@@ -1,8 +1,8 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://HannsNk.github.io',
-  base: '/casual-generosity-astro/',
+  site: 'https://casuallygenerous.com',
+  base: '/',
   build: {
     format: 'file',
     inlineStylesheets: 'always',
