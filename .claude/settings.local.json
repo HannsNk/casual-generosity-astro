@@ -21,7 +21,9 @@
       "Bash(npm install *)",
       "Bash(npm run *)",
       "Bash(git status *)",
-      "Bash(awk '{print $1}')"
+      "Bash(awk '{print $1}')",
+      "Bash(node -e \"console.log\\(!!process.env.AIRTABLE_TOKEN\\)\")",
+      "Bash(node -e \"require.resolve\\('dotenv'\\)\")"
     ]
   }
 }

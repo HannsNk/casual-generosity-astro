@@ -77,6 +77,31 @@ function asString(value) {
   return String(value);
 }
 
+// Card images render at 301x201 (3:2 crop, see design system doc 03) inside
+// a fixed-width grid column. Pexels serves full-resolution originals by
+// default (up to 6000x4000px), so request a 2x-density-sized version via
+// Pexels' documented image params instead of shipping the original.
+// Other sources (e.g. Unsplash) are left untouched.
+const PEXELS_CARD_WIDTH = 602;
+const PEXELS_CARD_HEIGHT = 402;
+
+function resizePexelsUrl(url, width, height) {
+  if (!url) return url;
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return url;
+  }
+  if (parsed.hostname !== "images.pexels.com") return url;
+
+  parsed.searchParams.set("auto", "compress");
+  parsed.searchParams.set("cs", "tinysrgb");
+  parsed.searchParams.set("w", String(width));
+  parsed.searchParams.set("h", String(height));
+  return parsed.toString();
+}
+
 async function fetchAllRecords() {
   const records = [];
   let offset;
@@ -149,7 +174,11 @@ function mapRecord(record, seenSlugs) {
     slug,
     title,
     hook: asString(f["Hook"]),
-    image: asString(f["Image URL"]),
+    image: resizePexelsUrl(
+      asString(f["Image URL"]),
+      PEXELS_CARD_WIDTH,
+      PEXELS_CARD_HEIGHT
+    ),
     tier: asString(f["Tier"]),
     cost: asArray(f["Cost"]),
     time,
