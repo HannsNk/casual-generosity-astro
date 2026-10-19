@@ -1,0 +1,151 @@
+{
+  "page": {
+    "title": "Bigger Ways To Help",
+    "description": "Volunteering, effective giving, kindred sites and newsletters worth your time — the places I'd point a friend to.",
+    "intro": [
+      "Casually generous is meant to sit alongside the big stuff, not replace it. Regular volunteering and well-chosen giving can do things a free afternoon can't — and if something on this site sparks that, brilliant.",
+      "These are the places I'd point a friend to. Nobody's paying to be here, and I've kept each list short on purpose."
+    ]
+  },
+  "sections": [
+    {
+      "id": "kindred",
+      "title": "Sites Like This One",
+      "intro": "Other people working on the same idea — making everyday kindness easier to start.",
+      "items": [
+        {
+          "name": "Doing Good Together",
+          "url": "https://www.doinggoodtogether.org/",
+          "blurb": "Kindness and volunteering ideas built for families, with lots for doing good alongside kids. US-based, but most ideas travel well.",
+          "region": ["US"],
+          "bestFor": "Families with kids",
+          "lastChecked": "2026-10-19"
+        },
+        {
+          "name": "DoSomething",
+          "url": "https://www.dosomething.org/",
+          "blurb": "Campaigns and practical actions for young people who want to change something in their community. Mostly US, aimed at 13–25s.",
+          "region": ["US"],
+          "bestFor": "Teens and young adults",
+          "lastChecked": "2026-10-19"
+        }
+      ]
+    },
+    {
+      "id": "volunteering",
+      "title": "Volunteering",
+      "intro": "When you're ready to give regular time, these make it much easier to find something that fits.",
+      "items": [
+        {
+          "name": "Do-it",
+          "url": "https://doit.life/",
+          "blurb": "The UK's big volunteering database. Put in your postcode and browse what local groups and charities actually need.",
+          "region": ["UK"],
+          "lastChecked": "2026-10-19"
+        },
+        {
+          "name": "Reach Volunteering",
+          "url": "https://reachvolunteering.org.uk/",
+          "blurb": "Skills-based volunteering for UK charities — handy if you'd rather offer what you do at work than a Saturday morning.",
+          "region": ["UK"],
+          "bestFor": "Professional skills",
+          "lastChecked": null,
+          "_note": "Not re-verified this round — check site is live before shipping."
+        },
+        {
+          "name": "Idealist",
+          "url": "https://www.idealist.org/",
+          "blurb": "Volunteer roles, internships and jobs at social-impact organisations, mostly US-based. Now also home to what was VolunteerMatch.",
+          "region": ["US", "Global"],
+          "lastChecked": "2026-10-19"
+        }
+      ]
+    },
+    {
+      "id": "giving",
+      "title": "Giving Well",
+      "intro": "I don't pick charities myself. These independent evaluators do the hard research on where money goes furthest.",
+      "items": [
+        {
+          "name": "GiveWell",
+          "url": "https://www.givewell.org/",
+          "blurb": "Deep, public research into global health and poverty charities, with clear explanations of why each one makes the cut.",
+          "region": ["Global"],
+          "bestFor": "Global health and poverty",
+          "lastChecked": null,
+          "_note": "Well-established; quick live check before shipping."
+        },
+        {
+          "name": "Giving Green",
+          "url": "https://www.givinggreen.earth/",
+          "blurb": "Evidence-based recommendations for climate giving, and more recently biodiversity too. Updated every year.",
+          "region": ["Global"],
+          "bestFor": "Climate and nature",
+          "lastChecked": "2026-10-19"
+        },
+        {
+          "name": "Giving What We Can",
+          "url": "https://www.givingwhatwecan.org/",
+          "blurb": "A friendly starting point for giving more thoughtfully, pulling together recommendations from several evaluators in one place.",
+          "region": ["Global"],
+          "bestFor": "Getting started",
+          "lastChecked": null,
+          "_note": "Well-established; quick live check before shipping."
+        },
+        {
+          "name": "The Life You Can Save",
+          "url": "https://www.thelifeyoucansave.org/",
+          "blurb": "A short, approachable list of vetted charities working on extreme poverty, plus a free book on why it matters.",
+          "region": ["Global"],
+          "lastChecked": null,
+          "_note": "Well-established; quick live check before shipping."
+        }
+      ]
+    },
+    {
+      "id": "newsletters",
+      "title": "Newsletters Worth Reading",
+      "intro": "A few inboxes that leave me a bit more hopeful (and a bit more curious) than before I opened them.",
+      "items": [
+        {
+          "name": "Reasons to be Cheerful",
+          "url": "https://reasonstobecheerful.world/newsletters/",
+          "blurb": "Weekly solutions journalism about problems people are actually solving. Their monthly Spark email focuses on how to get involved.",
+          "region": ["Global"],
+          "lastChecked": "2026-10-19"
+        },
+        {
+          "name": "Dense Discovery",
+          "url": "https://www.densediscovery.com/",
+          "blurb": "A beautifully put-together weekly on design, tech, sustainability and living more considerately. Human-curated every issue.",
+          "region": ["Global"],
+          "lastChecked": "2026-10-19"
+        },
+        {
+          "name": "Recomendo",
+          "url": "https://www.recomendo.com/",
+          "blurb": "Six tiny recommendations every Sunday morning. Not about generosity, but generous in spirit, and the most reliably good email I get.",
+          "region": ["Global"],
+          "lastChecked": null,
+          "_note": "Newsletter confirmed active (Kevin Kelly, weekly). URL NOT confirmed — find the current signup link before shipping."
+        },
+        {
+          "name": "Positive News",
+          "url": "https://www.positive.news/",
+          "blurb": "UK-based constructive journalism about what's going right, from climate to community. A good antidote to doomscrolling.",
+          "region": ["UK", "Global"],
+          "lastChecked": null,
+          "_note": "Not re-verified this round."
+        },
+        {
+          "name": "Good News Network",
+          "url": "https://www.goodnewsnetwork.org/",
+          "blurb": "A long-running daily dose of good news from around the world. Light, quick and reliably uplifting.",
+          "region": ["Global"],
+          "lastChecked": null,
+          "_note": "Not re-verified this round. Lighter in tone than the others — keep only if you genuinely read it."
+        }
+      ]
+    }
+  ]
+}
