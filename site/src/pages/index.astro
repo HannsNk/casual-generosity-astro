@@ -1,6 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
 import Card from '../components/Card.astro';
+import StarterPack from '../components/StarterPack.astro';
+import StarterNotices from '../components/StarterNotices.astro';
+import PlanNudge from '../components/PlanNudge.astro';
+import ActivityOfTheWeek from '../components/ActivityOfTheWeek.astro';
 import activities from '../data/activities.json';
 import { getCollection, type CollectionEntry } from 'astro:content';
 
@@ -57,7 +61,16 @@ const latestNotes = (await getCollection('notes'))
   title="CasuallyGenerous. Make your plans a little better."
   description="Doing a little good rarely takes a lot. Next time you make plans, add something generous to them."
 >
-  <section class="fold">
+  <!-- JS visitors get a hero picked by visitor state (scripts/landing.js);
+       .fold--fallback is the no-JS landing hero, hidden once JS is known to
+       run. Everything below the hero is the same in every state. -->
+  <div class="hero-slot is-routing" data-hero>
+    <StarterNotices />
+    <PlanNudge />
+    <StarterPack />
+    <ActivityOfTheWeek />
+  </div>
+  <section class="fold fold--fallback">
     <div class="wrap">
       <p class="fold-eyebrow">Welcome to CasuallyGenerous</p>
       <h1 class="fold-title">Make your plans a little better.</h1>
@@ -129,3 +142,7 @@ const latestNotes = (await getCollection('notes'))
     </div>
   </section>
 </Base>
+
+<script>
+  import '../scripts/landing.js';
+</script>

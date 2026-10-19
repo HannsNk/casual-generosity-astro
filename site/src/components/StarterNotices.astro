@@ -1,0 +1,96 @@
+---
+// Slim starter-pack notices above the Activity of the Week hero
+// (docs/starter-pack-build-brief.md §4), both shown by scripts/landing.js:
+//   L3 strip  — "STARTER PACK · 3 SMALL THINGS →", restores the get-started screen
+//   L5 banner — "Your starter pack's done. Keep it?", Save it / ✕
+---
+<button class="sn-strip" type="button" data-sn-strip hidden>
+  <span class="wrap sn-strip-inner">Starter pack · 3 small things <span aria-hidden="true">→</span></span>
+</button>
+
+<div class="sn-banner" role="region" aria-label="Your starter pack" data-sn-banner hidden>
+  <div class="wrap sn-banner-inner">
+    <span class="sn-badge">Done</span>
+    <p class="sn-text">Your starter pack's done. Keep it?</p>
+    <button class="chip sn-save" type="button" data-sn-save>Save it</button>
+    <button class="sn-close" type="button" aria-label="Hide this for good" data-sn-close>✕</button>
+  </div>
+</div>
+
+<style>
+  .sn-strip,
+  .sn-banner { display: none; }
+  :global(.js) .sn-strip:not([hidden]) { display: block; }
+  :global(.js) .sn-banner:not([hidden]) { display: block; }
+
+  .sn-strip {
+    width: 100%;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    border-bottom: var(--edge) solid var(--ink);
+    background: var(--paper-deep);
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+  }
+  .sn-strip-inner {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 44px;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .sn-strip:hover .sn-strip-inner { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 2px; }
+  .sn-strip:focus-visible { outline: 3px solid var(--blue); outline-offset: -3px; }
+
+  .sn-banner {
+    border-bottom: var(--edge) solid var(--ink);
+    background: var(--card);
+  }
+  .sn-banner-inner {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 56px;
+    padding-block: .375rem;
+  }
+  .sn-badge {
+    flex: none;
+    font-family: var(--mono);
+    font-size: .59rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    background: var(--green);
+    color: #fff;
+    padding: 3px 6px;
+  }
+  .sn-text { flex: 1; min-width: 0; margin: 0; font-size: .97rem; line-height: 1.3; }
+  .sn-save {
+    flex: none;
+    min-height: 44px;
+    padding: 0 1rem;
+    font-size: .8125rem;
+    font-weight: 700;
+  }
+  .sn-close {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .sn-close:hover { color: var(--ink); }
+  .sn-close:focus-visible { outline: 3px solid var(--blue); outline-offset: -3px; }
+</style>

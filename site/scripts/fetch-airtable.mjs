@@ -161,6 +161,9 @@ function mapRecord(record, seenSlugs) {
     instructions: asString(f["Instructions"]),
     link: asString(f["Org / Link"]),
     timeBucket: time ? timeBucketFor(time) : "",
+    // ISO week(s) this is Activity of the Week, e.g. "2026-W42" (or "42",
+    // or several comma-separated). Blank = rotation fallback only.
+    featuredWeek: asString(f["Featured Week"]).trim(),
   };
 }
 

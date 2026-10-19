@@ -1,0 +1,802 @@
+---
+// Starter pack — the landing hero for first-time visitors (design file
+// "Starter Pack Frames v2", F1–F9; behaviour per docs/starter-pack-build-brief.md).
+//
+// Everything is server-rendered here; scripts/starter-pack.js only shows,
+// hides and moves these pieces and fills in the visitor's own choices.
+// scripts/landing.js decides whether (and in which mode) it's shown, so it
+// ships hidden. Without JS the landing page keeps its original .fold hero.
+import { Image } from 'astro:assets';
+import pack from '../data/starter-pack.json';
+import activities from '../data/activities.json';
+import { resizeImageUrl } from '../lib/pexels.js';
+
+const base = import.meta.env.BASE_URL;
+const { tasks } = pack;
+const panelIds = Object.keys(tasks).filter((id) => id !== 'send-a-plan');
+const intro = (['1', '2', '3'] as const).map((slot) => tasks[pack.slots[slot].default as keyof typeof tasks]);
+
+// Thumbnails render at 72px wide; request a 2x square crop.
+const thumb = (url: string) => resizeImageUrl(url, 144, 144);
+
+const picks = pack.plan.activities
+  .map((slug) => activities.find((a) => a.slug === slug))
+  .filter((a): a is typeof activities[number] => Boolean(a));
+---
+<section class="sp-hero" data-starter aria-labelledby="sp-title" hidden>
+  <div class="wrap sp-grid">
+    <div class="sp-intro">
+      <span class="sp-new" data-sp-new>New here</span>
+      <h1 id="sp-title" class="sp-title">Not sure where to start? Here are three small things.</h1>
+      <p class="sp-deck">
+        Small, free, generous things to do with people you already know.
+        <span class="sp-deck-wide">These three take about ten minutes, all from your phone.</span>
+        No account needed.
+      </p>
+    </div>
+
+    <div class="sp-col">
+      <div class="sp-card" data-sp-card>
+        <div class="sp-head">
+          <div class="sp-head-row">
+            <span class="sp-label" data-sp-label>Starter pack · 3 small things</span>
+            <span class="sp-count" data-sp-count>0 of 3</span>
+          </div>
+          <div class="sp-bar" aria-hidden="true">
+            <span data-sp-seg="1"></span><span data-sp-seg="2"></span><span data-sp-seg="3"></span>
+          </div>
+        </div>
+
+        <!-- F1 / F9: not started -->
+        <div class="sp-view-intro" data-sp-view="intro">
+          <h2 class="sp-prompt">Wondering how to get started? Take small actions now.</h2>
+          <ol class="sp-list">
+            {intro.map((t, i) => (
+              <li><span class="sp-num">{i + 1}</span><span class="sp-list-title">{t.listTitle}</span><span class="sp-min">{t.minutes} min</span></li>
+            ))}
+          </ol>
+          <button class="sp-btn sp-btn--start" type="button" data-sp-start>Start task 1</button>
+        </div>
+
+        <!-- F8: started, not finished, new visit -->
+        <div class="sp-view-intro" data-sp-view="resume" hidden>
+          <h2 class="sp-prompt sp-resume-title" data-sp-resume-title>Welcome back</h2>
+          <button class="sp-btn sp-btn--start" type="button" data-sp-resume>Pick up where you left off</button>
+        </div>
+
+        <!-- F2–F5: in progress (rows built by the script) -->
+        <ol class="sp-rows" data-sp-view="pack" data-sp-rows hidden></ol>
+
+        <!-- F6 + F7: all three done -->
+        <div class="sp-view-complete" data-sp-view="complete" hidden>
+          <div class="sp-celebrate">
+            <div class="sp-stamp" data-sp-stamp aria-hidden="true">
+              <span class="sp-mis sp-mis--pink"></span>
+              <span class="sp-mis sp-mis--blue"></span>
+              <span class="sp-mis sp-mis--green"></span>
+              <span class="sp-stamp-ink">Starter pack — done</span>
+            </div>
+            <h2 class="sp-celebrate-title" tabindex="-1" data-sp-celebrate-title>That's the starter pack.</h2>
+            <ul class="sp-receipts" data-sp-receipts></ul>
+            <p class="sp-outcome" data-sp-outcome></p>
+          </div>
+
+          <div class="sp-signup" data-sp-signup>
+            <hr class="sp-rule" />
+            <ol class="sp-ladder" aria-label="What comes next">
+              <li class="sp-rung sp-rung--done"><span>Starter</span> <span>pack</span></li>
+              <li class="sp-rung-link" aria-hidden="true"></li>
+              <li class="sp-rung sp-rung--next"><span data-sp-rung-a>Do it</span> <span data-sp-rung-b>together</span></li>
+              <li class="sp-rung-link" aria-hidden="true"></li>
+              <li class="sp-rung"><span>Everything</span> <span>else</span></li>
+            </ol>
+            <h2 class="sp-signup-title" data-sp-signup-title>Keep these, and your plan.</h2>
+            <p class="sp-signup-body" data-sp-signup-body></p>
+
+            <button class="sp-btn" type="button" data-sp-google>Continue with Google</button>
+            <button class="sp-link sp-center" type="button" data-sp-email-toggle aria-expanded="false" aria-controls="sp-email-form">Use email instead</button>
+
+            <form id="sp-email-form" class="sp-email" novalidate hidden data-sp-email-form>
+              <label class="sp-field-label" for="sp-email">Email</label>
+              <input class="sp-input" id="sp-email" type="email" required autocomplete="email" placeholder="you@example.com" />
+              <label class="sp-field-label" for="sp-password">Password</label>
+              <input class="sp-input" id="sp-password" type="password" required minlength="6" autocomplete="new-password" />
+              <button class="sp-btn" type="submit" data-sp-email-submit>Create account</button>
+              <button class="sp-link sp-center" type="button" data-sp-email-mode>Already have an account? Sign in</button>
+            </form>
+
+            <p class="sp-error" role="alert" data-sp-error hidden></p>
+            <p class="sp-reassure">No newsletter. No spam. Just your saved stuff.</p>
+            <hr class="sp-rule sp-rule--tight" />
+            <a class="sp-link sp-center" href={`${base}activities.html`}>Not now — show me all the activities →</a>
+          </div>
+
+          <div class="sp-signedin" data-sp-signedin hidden>
+            <hr class="sp-rule" />
+            <p class="sp-signup-body">You're signed in.</p>
+            <a class="sp-link" href={`${base}activities.html`}>Show me all the activities →</a>
+          </div>
+        </div>
+
+        <div class="sp-undo" data-sp-undo hidden>
+          <span data-sp-undo-text></span>
+          <span class="sp-undo-dot" aria-hidden="true">·</span>
+          <button class="sp-link" type="button" data-sp-undo-btn>Undo</button>
+        </div>
+      </div>
+
+      <div class="sp-after" data-sp-after>
+        <a class="sp-link" href={`${base}activities.html`} data-sp-browse>or just browse all activities →</a>
+        <p class="sp-signin" data-sp-signin-wrap>Been here before? <button class="sp-link" type="button" data-sp-signin>Sign in</button></p>
+      </div>
+    </div>
+  </div>
+
+  <p class="sp-sr" aria-live="polite" data-sp-live></p>
+
+  <!-- Task panels: parked here, moved into the card by the script. -->
+  <div hidden data-sp-store>
+    {panelIds.map((id) => {
+      const t = tasks[id as keyof typeof tasks] as any;
+      return (
+        <section class="sp-task" data-sp-task={id} aria-labelledby={`sp-h-${id}`}>
+          <span class="sp-done-stamp">Done</span>
+          <span class="sp-tag" data-sp-tag></span>
+          <p class="sp-reoffer" data-sp-reoffer hidden>Want to finish this one? Or leave it for later.</p>
+          <h3 class="sp-task-title" id={`sp-h-${id}`} tabindex="-1">{t.title}</h3>
+          <div class="sp-task-body">
+            <p class="sp-why">{t.why}</p>
+            {t.platforms ? (
+              <>
+                <div class="sp-toggle" role="group" aria-label="Your phone">
+                  {Object.keys(t.platforms).map((p) => (
+                    <button class="chip sp-chip" type="button" data-sp-platform={p} aria-pressed="false">{p}</button>
+                  ))}
+                </div>
+                {Object.entries(t.platforms).map(([p, steps]) => (
+                  <ol class="sp-steps" data-sp-platform-steps={p} hidden>
+                    {(steps as string[]).map((s, i) => <li><span class="sp-step-num">{String(i + 1).padStart(2, '0')}</span><span>{s}</span></li>)}
+                  </ol>
+                ))}
+              </>
+            ) : (
+              <ol class="sp-steps">
+                {t.steps.map((s: string, i: number) => <li><span class="sp-step-num">{String(i + 1).padStart(2, '0')}</span><span>{s}</span></li>)}
+              </ol>
+            )}
+            {t.helper && (
+              <details class="sp-helper">
+                <summary class="sp-link">{t.helperLabel}</summary>
+                <p>{t.helper}</p>
+              </details>
+            )}
+            <button class="sp-btn" type="button" data-sp-done>{t.button}</button>
+            {t.subline && <p class="sp-subline">{t.subline}</p>}
+            <div class="sp-task-links">
+              <button class="sp-link" type="button" data-sp-swap>Swap for another</button>
+              <button class="sp-link" type="button" data-sp-skip>Skip for now</button>
+            </div>
+          </div>
+          <p class="sp-feedback">{t.feedback}</p>
+        </section>
+      );
+    })}
+
+    <section class="sp-task" data-sp-task="send-a-plan" aria-labelledby="sp-h-send-a-plan">
+      <span class="sp-done-stamp">Done</span>
+      <span class="sp-tag" data-sp-tag></span>
+      <p class="sp-reoffer" data-sp-reoffer hidden>Want to finish this one? Or leave it for later.</p>
+      <h3 class="sp-task-title" id="sp-h-send-a-plan" tabindex="-1">{tasks['send-a-plan'].title}</h3>
+      <div class="sp-task-body">
+        <fieldset class="sp-picks">
+          <legend class="sp-sr">Pick one activity</legend>
+          {picks.map((a, i) => (
+            <label class:list={['sp-pick', `t-${a.tier}`]} data-sp-set={i < 3 ? 'a' : 'b'} hidden={i >= 3}>
+              <input class="sp-sr" type="radio" name="sp-pick" value={a.slug} data-title={a.title}
+                data-url={new URL(`${base}${a.slug}.html`, Astro.site).href} />
+              <span class="sp-pick-img">
+                {a.image
+                  ? <Image src={thumb(a.image)} inferSize alt="" loading="lazy" />
+                  : null}
+              </span>
+              <span class="sp-pick-body">
+                <span class="sp-pick-title">{a.title}</span>
+                <span class="sp-pick-meta"><span class="stamp">{a.tier}</span><span class="sp-min">{a.time}</span></span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+        {picks.length > 3 && <button class="sp-link" type="button" data-sp-more>Show me three different ones</button>}
+
+        <div class="sp-compose">
+          <div class="sp-who">
+            <label class="sp-field-label" for="sp-name">Who's it for?</label>
+            <input class="sp-input" id="sp-name" type="text" maxlength="40" autocomplete="off" autocapitalize="words" placeholder="First name (optional)" />
+          </div>
+          <p class="sp-caption" data-sp-caption aria-live="polite"></p>
+        </div>
+
+        <button class="sp-btn" type="button" data-sp-send>Send it</button>
+        <div class="sp-confirm" data-sp-confirm hidden>
+          <button class="sp-btn" type="button" data-sp-done>{tasks['send-a-plan'].button}</button>
+          <button class="sp-link sp-center" type="button" data-sp-notyet>Not yet</button>
+        </div>
+        <div class="sp-share-row">
+          <button class="chip sp-chip" type="button" data-sp-whatsapp>WhatsApp</button>
+          <button class="chip sp-chip" type="button" data-sp-copy>Copy message</button>
+        </div>
+        <div class="sp-task-links">
+          <button class="sp-link" type="button" data-sp-skip>Skip for now</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- Global, not scoped: the pack's rows and receipts are created by the
+     script at runtime, and Astro's scoped styles never reach those nodes.
+     Every selector is sp- prefixed instead. -->
+<style is:global>
+  /* JS-only, and only once scripts/landing.js has routed to it. */
+  .sp-hero { display: none; }
+  .js .sp-hero:not([hidden]) { display: block; }
+
+  .sp-hero {
+    border-bottom: var(--edge) solid var(--ink);
+    padding-block: .875rem clamp(2.5rem, 7vw, 6rem);
+  }
+  .sp-grid { display: flex; flex-direction: column; }
+  @media (min-width: 900px) {
+    .sp-hero { padding-top: 4rem; }
+    .sp-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 520px;
+      gap: 4rem;
+      align-items: start;
+    }
+    .sp-intro { padding-top: .5rem; }
+  }
+
+  .sp-sr {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ---------- intro column ---------- */
+  .sp-intro { display: flex; flex-direction: column; }
+  .sp-new {
+    align-self: flex-start;
+    font-family: var(--mono);
+    font-size: .65625rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 4px 8px;
+  }
+  .sp-hero.is-returning .sp-new { display: none; }
+  .sp-title {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.875rem;
+    line-height: 1;
+    letter-spacing: -.02em;
+    margin: .625rem 0 0;
+    text-wrap: balance;
+  }
+  .sp-deck {
+    font-size: 1.03rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
+    margin: .5rem 0 0;
+    text-wrap: pretty;
+  }
+  .sp-deck-wide { display: none; }
+  @media (min-width: 900px) {
+    .sp-new { font-size: .72rem; padding: 5px 9px; }
+    .sp-title { font-size: 3.625rem; line-height: .96; letter-spacing: -.025em; margin-top: 1.125rem; }
+    .sp-deck { font-size: 1.1875rem; line-height: 1.5; margin-top: 1.25rem; max-width: 30em; }
+    .sp-deck-wide { display: inline; }
+  }
+
+  /* F8 resume card */
+  .sp-resume-title { font-size: 1.375rem; margin-top: .875rem; }
+  .sp-hero.is-resuming .sp-head { padding: .875rem 1rem 0; }
+  .sp-count[hidden] { display: none; }
+  @media (min-width: 900px) {
+    .sp-hero.is-resuming .sp-head { padding: 1.375rem 1.375rem 0; }
+  }
+
+  /* L5 "Save it": the signup ask on its own, no celebration above it. */
+  .sp-hero.is-signup-only .sp-celebrate,
+  .sp-hero.is-signup-only .sp-signup > .sp-rule:first-child,
+  .sp-hero.is-signup-only .sp-signedin > .sp-rule:first-child,
+  .sp-hero.is-signup-only .sp-undo { display: none; }
+  .sp-hero.is-signup-only .sp-view-complete { padding-top: 1.25rem; }
+  .sp-hero.is-signup-only .sp-signup-title { margin-top: 1.125rem; }
+  .sp-hero.is-signup-only { border-bottom: 0; padding-bottom: 1.5rem; }
+
+  /* Finished: the celebration takes the whole hero. */
+  .sp-hero.is-complete .sp-intro { display: none; }
+  .sp-hero.is-complete .sp-grid { display: flex; }
+  .sp-hero.is-complete .sp-col { width: 100%; max-width: 560px; }
+
+  /* ---------- the card ---------- */
+  .sp-card {
+    position: relative;
+    margin: 1rem 6px 0 0;
+    background: var(--card);
+    border: var(--edge) solid var(--ink);
+    box-shadow: 6px 6px 0 var(--pink);
+    scroll-margin-top: calc(var(--nav-h, 58px) + 1rem);
+    transition: transform .14s ease, box-shadow .14s ease;
+  }
+  /* A task just marked done: the card presses into its own shadow. */
+  .sp-card.is-pressed { transform: translate(4px, 4px); box-shadow: 2px 2px 0 var(--pink); }
+  @media (min-width: 900px) {
+    .sp-card { margin: 0 8px 0 0; box-shadow: 8px 8px 0 var(--pink); }
+  }
+
+  .sp-head { padding: .75rem 1rem; }
+  .sp-hero:not(.is-started) .sp-head { padding: .875rem 1rem 0; }
+  .sp-head-row { display: flex; justify-content: space-between; align-items: baseline; gap: .625rem; }
+  .sp-label {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: .65625rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .sp-count { font-family: var(--mono); font-size: .72rem; white-space: nowrap; }
+  .sp-count.is-last { font-size: .8125rem; font-weight: 700; }
+  .sp-bar { display: flex; gap: 4px; margin-top: .5rem; }
+  .sp-bar span { flex: 1; height: 10px; border: 2px solid var(--ink); }
+  .sp-bar span.is-done { background: var(--green); }
+  .sp-hero.is-complete .sp-head { display: none; }
+
+  /* ---------- intro view (F1 / F9) ---------- */
+  .sp-view-intro { padding: 0 1rem 1rem; display: flex; flex-direction: column; }
+  .sp-view-intro[hidden], .sp-rows[hidden] { display: none; }
+  .sp-prompt {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.1875rem;
+    line-height: 1.15;
+    margin: .75rem 0 0;
+    text-wrap: balance;
+  }
+  .sp-list { list-style: none; margin: .625rem 0 0; padding: 0; border-top: 2px solid var(--rule); }
+  .sp-list li { display: flex; align-items: baseline; gap: .625rem; padding: 6px 0; }
+  .sp-list li + li { border-top: 1px solid var(--rule); }
+  .sp-list-title { flex: 1; font-size: .97rem; }
+  .sp-num, .sp-min { font-family: var(--mono); font-size: .6875rem; color: var(--ink-soft); }
+  @media (min-width: 900px) {
+    .sp-hero:not(.is-started) .sp-head { padding: 1.375rem 1.375rem 0; }
+    .sp-view-intro { padding: 0 1.375rem 1.375rem; }
+    .sp-label { font-size: .6875rem; }
+    .sp-count { font-size: .75rem; }
+    .sp-bar { gap: 5px; margin-top: .625rem; }
+    .sp-bar span { height: 12px; }
+    .sp-prompt { font-size: 1.5rem; margin-top: 1.125rem; }
+    .sp-list { margin-top: .875rem; }
+    .sp-list li { padding: 8px 0; gap: .75rem; }
+    .sp-list-title { font-size: 1.0625rem; }
+    .sp-view-intro .sp-btn--start { align-self: flex-start; width: auto; min-width: 240px; padding: 0 1.75rem; }
+  }
+
+  /* ---------- buttons and links ---------- */
+  .sp-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(100% - 4px);
+    min-height: 52px;
+    margin-top: .75rem;
+    padding: .5rem 1rem;
+    background: var(--ink);
+    color: var(--paper);
+    border: var(--edge) solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink-soft);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: .8125rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: pointer;
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .sp-btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--ink-soft); }
+  .sp-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+  .sp-btn:disabled { opacity: .45; cursor: default; transform: none; box-shadow: 4px 4px 0 var(--ink-soft); }
+  /* Demoted: while the email form is open, Google drops to an outline so
+     "Create account" is the one filled button. */
+  .sp-btn--outline { background: transparent; color: var(--ink); box-shadow: none; }
+  .sp-btn--outline:active { transform: none; }
+
+  .sp-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: .78rem;
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+    cursor: pointer;
+  }
+  .sp-link:hover { color: var(--ink-soft); }
+  .sp-link:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .sp-center { align-self: center; }
+
+  /* .chip at tap-target size (the site's default chip is ~26px tall). */
+  .sp-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 1rem;
+    font-size: .8125rem;
+  }
+
+  .sp-after { display: flex; flex-wrap: wrap; align-items: center; gap: 0 1.25rem; margin-top: .25rem; }
+  .sp-signin { margin: 0; font-family: var(--mono); font-size: .75rem; color: var(--ink-soft); }
+  .sp-signin .sp-link { font-size: .75rem; }
+  .sp-hero.is-started .sp-signin,
+  .sp-hero.is-complete .sp-after { display: none; }
+  @media (min-width: 900px) {
+    .sp-after { margin-top: 1rem; }
+    .sp-after > .sp-link { font-size: .8125rem; }
+  }
+
+  /* ---------- rows (collapsed tasks) ---------- */
+  .sp-rows { list-style: none; margin: 0; padding: 0; }
+  .sp-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    min-height: 46px;
+    padding: .5rem 1rem;
+    border: 0;
+    border-top: 2px solid var(--rule);
+    background: none;
+    color: var(--ink);
+    text-align: left;
+    font: inherit;
+  }
+  button.sp-row { cursor: pointer; }
+  button.sp-row:hover { background: var(--paper-deep); }
+  button.sp-row:focus-visible { outline: 3px solid var(--blue); outline-offset: -3px; }
+  .sp-row-title {
+    flex: 1;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: .97rem;
+    line-height: 1.2;
+  }
+  .sp-row.is-done .sp-row-title { color: var(--ink-soft); }
+  .sp-badge {
+    flex: none;
+    font-family: var(--mono);
+    font-size: .59rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    background: var(--green);
+    color: #fff;
+    padding: 3px 6px;
+  }
+
+  /* ---------- expanded task (F2, F4, F5) ---------- */
+  .sp-task {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-top: var(--edge) solid var(--ink);
+    padding: 1rem 1rem .75rem;
+    scroll-margin-top: calc(var(--nav-h, 58px) + 1rem);
+  }
+  .sp-tag {
+    align-self: flex-start;
+    font-family: var(--mono);
+    font-size: .625rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 4px 7px;
+  }
+  .sp-reoffer { margin: .625rem 0 0; font-style: italic; color: var(--ink-soft); font-size: .97rem; }
+  .sp-task-title {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.375rem;
+    line-height: 1.1;
+    margin: .625rem 0 0;
+  }
+  .sp-task-title:focus { outline: none; }
+  .sp-task-title:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+  .sp-task-body { display: flex; flex-direction: column; }
+  .sp-why { font-size: .97rem; line-height: 1.42; margin: .5rem 0 0; text-wrap: pretty; }
+
+  .sp-toggle { display: flex; gap: .5rem; margin-top: .75rem; }
+  /* Selected platform: heavy bottom edge + bold, not an ink fill — Done
+     stays the only filled block in the task. */
+  .sp-toggle .sp-chip[aria-pressed="true"] {
+    background: var(--paper-deep);
+    color: var(--ink);
+    border-bottom-width: 5px;
+    font-weight: 700;
+  }
+
+  .sp-steps {
+    list-style: none;
+    margin: .75rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: .97rem;
+    line-height: 1.35;
+  }
+  .sp-steps[hidden] { display: none; }
+  .sp-steps li { display: flex; gap: .75rem; }
+  .sp-step-num {
+    flex: none;
+    width: 18px;
+    padding-top: 2px;
+    font-family: var(--mono);
+    font-size: .72rem;
+    color: var(--ink-soft);
+  }
+
+  .sp-helper { margin-top: .25rem; }
+  .sp-helper summary { list-style: none; }
+  .sp-helper summary::-webkit-details-marker { display: none; }
+  .sp-helper p {
+    margin: .25rem 0 0;
+    padding: .5625rem .75rem;
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    font-size: .9rem;
+    line-height: 1.4;
+  }
+
+  .sp-task-body > .sp-btn[data-sp-done] { margin-top: 1rem; }
+  .sp-subline { margin: .5rem 0 0; font-size: .9rem; font-style: italic; color: var(--ink-soft); text-align: center; }
+  .sp-task-links { display: flex; justify-content: center; gap: 1.75rem; }
+
+  /* Just done (F3): body swaps for the feedback line, DONE stamp lands. */
+  .sp-done-stamp, .sp-feedback { display: none; }
+  .sp-task.is-done { padding-bottom: 1.375rem; }
+  .sp-task.is-done .sp-task-body,
+  .sp-task.is-done .sp-reoffer { display: none; }
+  .sp-task.is-done .sp-task-title { padding-right: 92px; }
+  .sp-task.is-done .sp-feedback:not(:empty) {
+    display: block;
+    margin: .875rem 0 0;
+    font-size: 1.1875rem;
+    line-height: 1.4;
+    text-wrap: pretty;
+  }
+  .sp-task.is-done .sp-done-stamp {
+    display: block;
+    position: absolute;
+    top: 48px;
+    right: 12px;
+    transform: rotate(-7deg);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    background: var(--green);
+    color: #fff;
+    padding: 7px 12px 7px 14px;
+    border: var(--edge) solid var(--ink);
+    outline: 2px solid #fff;
+    outline-offset: -7px;
+  }
+
+  /* ---------- task 3: pick, name, send (F5) ---------- */
+  .sp-picks { border: 0; margin: .625rem 5px 0 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
+  .sp-pick {
+    display: flex;
+    border: var(--edge) solid var(--ink);
+    background: var(--card);
+    cursor: pointer;
+    transition: box-shadow .12s ease;
+  }
+  .sp-pick[hidden] { display: none; }
+  .sp-pick:hover { background: var(--paper); }
+  .sp-pick:has(input:checked) { box-shadow: 5px 5px 0 var(--tier); }
+  .sp-pick:has(input:focus-visible) { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .sp-pick-img {
+    flex: none;
+    width: 72px;
+    border-right: var(--edge) solid var(--ink);
+    background: var(--paper-deep);
+  }
+  .sp-pick-img img { width: 100%; height: 100%; object-fit: cover; }
+  .sp-pick-body { display: flex; flex-direction: column; gap: 5px; min-width: 0; padding: 7px 10px; }
+  .sp-pick-title { font-family: var(--display); font-weight: 700; font-size: .906rem; line-height: 1.15; }
+  .sp-pick-meta { display: flex; align-items: center; gap: .5rem; }
+  .sp-pick-meta .stamp { margin: 0; font-size: .59rem; letter-spacing: .14em; padding: 3px 6px; }
+  .sp-picks + .sp-link { align-self: flex-start; margin-top: 2px; }
+
+  .sp-compose {
+    display: flex;
+    flex-direction: column;
+    gap: .625rem;
+    margin-top: 2px;
+    padding-top: .625rem;
+    border-top: 2px solid var(--rule);
+  }
+  .sp-who { display: flex; align-items: center; gap: .75rem; }
+  .sp-field-label { flex: none; font-family: var(--mono); font-weight: 700; font-size: .75rem; }
+  .sp-input {
+    flex: 1;
+    min-width: 0;
+    min-height: 46px;
+    padding: 0 .75rem;
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 1.0625rem;
+  }
+  .sp-input:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .sp-caption {
+    margin: 0;
+    padding: 9px 12px;
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    font-size: .906rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+  .sp-caption.is-empty { color: var(--ink-soft); font-style: italic; }
+  .sp-compose + .sp-btn { margin-top: .625rem; }
+  .sp-confirm { display: flex; flex-direction: column; }
+  .sp-confirm[hidden] { display: none; }
+  .sp-confirm .sp-btn { margin-top: .625rem; }
+  .sp-share-row { display: flex; gap: .5rem; margin-top: .875rem; }
+  .sp-share-row .sp-chip { flex: 1; padding: 0 .75rem; }
+  .sp-share-row .sp-chip[hidden] { display: none; }
+
+  /* ---------- celebration (F6) ---------- */
+  .sp-view-complete { display: flex; flex-direction: column; padding: 2.25rem 1.125rem 1.5rem; }
+  .sp-view-complete[hidden] { display: none; }
+  .sp-celebrate { display: flex; flex-direction: column; }
+
+  /* Misregistered stamp: three spot-colour copies land offset and close in
+     under the ink, ~400ms. Without .is-landing (reload, or reduced motion)
+     it's just the settled ink stamp. */
+  .sp-stamp { position: relative; align-self: center; transform: rotate(-4deg); }
+  .sp-mis { position: absolute; inset: 0; }
+  .sp-mis--pink  { background: var(--pink); }
+  .sp-mis--blue  { background: var(--blue); }
+  .sp-mis--green { background: var(--green); }
+  .sp-stamp-ink {
+    position: relative;
+    display: block;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 1.0625rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 16px 20px;
+    outline: 2px solid var(--paper);
+    outline-offset: -8px;
+  }
+  @media (max-width: 360px) {
+    .sp-stamp-ink { font-size: .9rem; padding: 14px 16px; }
+  }
+  .sp-stamp.is-landing .sp-mis--pink  { animation: sp-mis-pink .4s ease-out both; }
+  .sp-stamp.is-landing .sp-mis--blue  { animation: sp-mis-blue .4s ease-out both; }
+  .sp-stamp.is-landing .sp-mis--green { animation: sp-mis-green .4s ease-out both; }
+  .sp-stamp.is-landing .sp-stamp-ink  { animation: sp-ink-land .4s ease-out both; }
+  @keyframes sp-mis-pink  { 0% { transform: translate(-18px, -14px); } 50% { transform: translate(-8px, -6px); } 100% { transform: none; } }
+  @keyframes sp-mis-blue  { 0% { transform: translate(16px, 10px); }  50% { transform: translate(7px, 5px); }   100% { transform: none; } }
+  @keyframes sp-mis-green { 0% { transform: translate(-6px, 18px); }  50% { transform: translate(-3px, 8px); }  100% { transform: none; } }
+  @keyframes sp-ink-land {
+    0%   { background: transparent; color: transparent; outline-color: transparent; box-shadow: inset 0 0 0 3px var(--ink); }
+    45%  { background: var(--ink); color: var(--paper); outline-color: var(--paper); box-shadow: none; }
+    100% { background: var(--ink); color: var(--paper); outline-color: var(--paper); box-shadow: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sp-stamp.is-landing .sp-mis,
+    .sp-stamp.is-landing .sp-stamp-ink { animation: none; }
+  }
+
+  .sp-celebrate-title {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 2.125rem;
+    line-height: 1;
+    letter-spacing: -.02em;
+    margin: 2.125rem 0 0;
+  }
+  .sp-celebrate-title:focus { outline: none; }
+  .sp-receipts { list-style: none; margin: 1.25rem 0 0; padding: 0; border-top: 2px solid var(--ink); }
+  .sp-receipts li { display: flex; align-items: center; gap: .75rem; padding: .75rem 0; border-bottom: 1px dashed var(--ink); font-size: 1.03rem; line-height: 1.3; }
+  .sp-receipts li:last-child { border-bottom: 2px solid var(--ink); }
+  .sp-outcome { margin: 1.125rem 0 0; font-size: 1.1875rem; line-height: 1.4; text-wrap: pretty; }
+
+  /* ---------- signup ask (F7) ---------- */
+  .sp-signup, .sp-signedin { display: flex; flex-direction: column; }
+  .sp-signup[hidden], .sp-signedin[hidden] { display: none; }
+  .sp-rule { width: 100%; height: 0; border: 0; border-top: 1px solid var(--rule); margin: 1.375rem 0; }
+  .sp-rule--tight { margin: 1rem 0 .25rem; }
+  .sp-ladder { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; }
+  .sp-rung {
+    flex: 1;
+    min-width: 0;
+    padding: 6px;
+    border: 2px solid var(--ink);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: .625rem;
+    letter-spacing: .1em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  .sp-rung span { display: block; }
+  .sp-rung--done { background: var(--green); border-color: var(--green); color: #fff; }
+  .sp-rung--next { border-color: var(--blue); color: var(--blue); }
+  .sp-rung-link { flex: none; width: 12px; border-top: 2px solid var(--ink); }
+  .sp-signup-title {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.6875rem;
+    line-height: 1.05;
+    letter-spacing: -.015em;
+    margin: 1.375rem 0 0;
+    text-wrap: balance;
+  }
+  .sp-signup-body { margin: .625rem 0 0; font-size: 1.03rem; line-height: 1.45; text-wrap: pretty; }
+  .sp-signup > .sp-btn { margin-top: 1.125rem; }
+  .sp-signup > .sp-link { margin-top: .5rem; }
+
+  .sp-email { display: flex; flex-direction: column; gap: .5rem; margin-top: 1.125rem; }
+  .sp-email[hidden] { display: none; }
+  .sp-email .sp-input { flex: none; min-height: 48px; font-size: 1rem; }
+  .sp-email .sp-btn { margin-top: .375rem; }
+  .sp-error { margin: .5rem 0 0; font-family: var(--mono); font-size: .72rem; color: var(--ink); background: var(--paper-deep); border-left: 3px solid var(--pink); padding: .5rem .625rem; }
+  .sp-error[hidden] { display: none; }
+  .sp-reassure { margin: .25rem 0 0; font-family: var(--mono); font-size: .6875rem; line-height: 1.5; color: var(--ink-soft); text-align: center; }
+  .sp-email:not([hidden]) ~ .sp-reassure { margin-top: .875rem; }
+
+  /* ---------- undo bar (in-card, ~5s) ---------- */
+  .sp-undo {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 50px;
+    padding: 0 1rem;
+    border-top: var(--edge) solid var(--ink);
+    background: var(--paper-deep);
+    font-family: var(--mono);
+    font-size: .78rem;
+  }
+  .sp-undo[hidden] { display: none; }
+  .sp-undo-dot { color: var(--ink-soft); }
+</style>

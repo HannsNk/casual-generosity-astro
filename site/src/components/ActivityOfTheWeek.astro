@@ -1,0 +1,249 @@
+---
+// Activity of the Week — landing hero for returning visitors and members
+// (design file "Activity of the Week Hero", option 1A: image beside the
+// billboard on desktop, stacked on mobile; behaviour per
+// docs/starter-pack-build-brief.md §2 and §4).
+//
+// The site is static but the week is the visitor's, so the pick happens in
+// the browser (scripts/activity-of-the-week.js) from the small data block
+// embedded below. Shown only when scripts/landing.js routes to it.
+import activities from '../data/activities.json';
+import pack from '../data/starter-pack.json';
+import { resizeImageUrl } from '../lib/pexels.js';
+
+const base = import.meta.env.BASE_URL;
+
+type Activity = typeof activities[number] & { featuredWeek?: string };
+const all = activities as Activity[];
+
+// Fallback rotation and Surprise Me both draw from activities with photos,
+// sorted by slug so the weekly fallback is deterministic.
+const withImages = all.filter((a) => a.image).sort((a, b) => a.slug.localeCompare(b.slug));
+const pool = withImages.length ? withImages : [...all].sort((a, b) => a.slug.localeCompare(b.slug));
+
+// Also embed anything scheduled via Featured Week, and the starter pack's
+// plan suggestions (the member hero's "did you do it yet?" nudge needs them).
+const extra = all.filter((a) => a.featuredWeek || pack.plan.activities.includes(a.slug));
+const embedded = [...new Map([...pool, ...extra].map((a) => [a.slug, a])).values()];
+
+const data = {
+  pool: pool.map((a) => a.slug),
+  activities: embedded.map((a) => ({
+    slug: a.slug,
+    title: a.title,
+    hook: a.hook,
+    tier: a.tier,
+    cost: a.cost.join(' / '),
+    time: a.time,
+    group: a.groupSize.join(', '),
+    url: `${base}${a.slug}.html`,
+    img: a.image ? resizeImageUrl(a.image, 640, 427) : '',
+    img2x: a.image ? resizeImageUrl(a.image, 1200, 800) : '',
+    thumb: a.image ? resizeImageUrl(a.image, 144, 144) : '',
+    featuredWeek: a.featuredWeek ?? '',
+  })),
+};
+// Escape "<" so no value can close the <script> data block early.
+const json = JSON.stringify(data).replace(/</g, '\\u003c');
+---
+<section class="aotw" data-aotw hidden aria-labelledby="aotw-h1">
+  <script is:inline type="application/json" data-aotw-data set:html={json} />
+  <div class="wrap">
+    <h1 id="aotw-h1" class="aotw-h1 is-sr" data-aotw-h1>Activity of the week</h1>
+
+    <div class="aotw-tags">
+      <span class="aotw-label" data-aotw-label>This week's pick</span>
+      <span class="aotw-tier" data-aotw-tier></span>
+    </div>
+
+    <article class="aotw-card">
+      <a class="aotw-media" data-aotw-media tabindex="-1" aria-hidden="true">
+        <img data-aotw-img alt="" width="1200" height="800" sizes="(min-width: 900px) 560px, 100vw" />
+      </a>
+      <div class="aotw-body">
+        <div class="aotw-meta">
+          <span data-aotw-cost></span>
+          <span data-aotw-time></span>
+          <span data-aotw-group></span>
+        </div>
+        <h2 class="aotw-title" data-aotw-title></h2>
+        <p class="aotw-hook" data-aotw-hook></p>
+        <div class="aotw-actions">
+          <a class="aotw-view" data-aotw-view>View the activity →</a>
+          <button class="aotw-surprise" type="button" data-aotw-surprise>↻ Surprise me</button>
+        </div>
+      </div>
+    </article>
+  </div>
+  <p class="is-sr" aria-live="polite" data-aotw-live></p>
+</section>
+
+<style>
+  .aotw { display: none; }
+  :global(.js) .aotw:not([hidden]) { display: block; }
+
+  .aotw {
+    border-bottom: var(--edge) solid var(--ink);
+    padding-block: 1.5rem 2.75rem;
+  }
+  @media (min-width: 900px) {
+    .aotw { padding-block: 3.5rem 4.5rem; }
+  }
+
+  .is-sr {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* L6: "Welcome back." sits above the module as the page heading. */
+  .aotw-h1:not(.is-sr) {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.875rem;
+    line-height: 1;
+    letter-spacing: -.02em;
+    margin: 0 0 1.125rem;
+  }
+  @media (min-width: 900px) {
+    .aotw-h1:not(.is-sr) { font-size: 2.75rem; margin-bottom: 1.5rem; }
+  }
+
+  .aotw-tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.125rem; }
+  .aotw-label,
+  .aotw-tier {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: .6875rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    padding: 7px 10px;
+  }
+  .aotw-label { background: var(--ink); color: var(--card); }
+  .aotw-tier { background: var(--tier); color: #fff; }
+  .t-Spontaneous .aotw-tier { color: var(--ink); } /* pink contrast, see global.css */
+  @media (min-width: 900px) {
+    .aotw-tags { gap: .625rem; margin-bottom: 1.75rem; }
+    .aotw-label, .aotw-tier { font-size: .75rem; padding: 8px 12px; }
+  }
+
+  .aotw-card {
+    margin-right: 10px;
+    background: var(--card);
+    border: var(--edge) solid var(--ink);
+    box-shadow: 10px 10px 0 var(--tier);
+  }
+  @media (min-width: 900px) {
+    .aotw-card {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      margin-right: 16px;
+      box-shadow: 16px 16px 0 var(--tier);
+    }
+  }
+
+  .aotw-media {
+    display: block;
+    border-bottom: var(--edge) solid var(--ink);
+    background: repeating-linear-gradient(45deg, var(--paper-deep) 0 10px, var(--paper) 10px 20px);
+  }
+  .aotw-media img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+  .aotw-media img:not([src]) { visibility: hidden; }
+  /* Desktop: the photo fills its column at whatever height the text sets,
+     but never shorter than 3:2 (the ::before strut). */
+  @media (min-width: 900px) {
+    .aotw-media { position: relative; border-bottom: 0; border-right: var(--edge) solid var(--ink); }
+    .aotw-media::before { content: ""; display: block; padding-top: 66.667%; }
+    .aotw-media img { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; }
+  }
+
+  .aotw-body { display: flex; flex-direction: column; padding: 1.125rem 1.125rem 1.375rem; min-width: 0; }
+  @media (min-width: 900px) {
+    .aotw-body { padding: 2.25rem 2.5rem 2rem; }
+  }
+  .aotw-meta {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--mono);
+    font-size: .75rem;
+    line-height: 1.85;
+    color: var(--ink-soft);
+  }
+  .aotw-meta span:empty { display: none; }
+  .aotw-title {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.875rem;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    margin: .875rem 0 .625rem;
+    text-wrap: balance;
+  }
+  .aotw-hook {
+    font-family: var(--body);
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin: 0 0 1.375rem;
+    text-wrap: pretty;
+  }
+  @media (min-width: 900px) {
+    .aotw-meta { font-size: .8125rem; line-height: 1.9; }
+    .aotw-title { font-size: clamp(2.25rem, 3.6vw, 3.25rem); line-height: 1.02; letter-spacing: -.025em; margin: 1.375rem 0 1rem; }
+    .aotw-hook { font-size: 1.3125rem; margin-bottom: 2rem; max-width: 44ch; }
+  }
+
+  .aotw-actions {
+    margin-top: auto;
+    padding-top: 1.125rem;
+    border-top: var(--edge) solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: .875rem;
+  }
+  .aotw-view,
+  .aotw-surprise {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    text-decoration: none;
+    border: var(--edge) solid var(--ink);
+    cursor: pointer;
+  }
+  .aotw-view {
+    min-height: 60px;
+    padding: 0 1.875rem;
+    background: var(--ink);
+    color: var(--card);
+    font-weight: 700;
+    font-size: .875rem;
+    letter-spacing: .14em;
+    box-shadow: 6px 6px 0 var(--tier);
+    transition: transform .14s ease, box-shadow .14s ease;
+  }
+  .aotw-view:hover,
+  .aotw-view:focus-visible { transform: translate(5px, 5px); box-shadow: 1px 1px 0 var(--tier); }
+  .aotw-surprise {
+    min-height: 52px;
+    padding: 0 1.125rem;
+    background: transparent;
+    color: var(--ink);
+    border-bottom: 5px solid var(--tier);
+    font-size: .8125rem;
+    letter-spacing: .12em;
+  }
+  .aotw-surprise:hover { background: var(--paper-deep); }
+  .aotw-view:focus-visible,
+  .aotw-surprise:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+  @media (min-width: 900px) {
+    .aotw-actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 1rem; padding-top: 1.625rem; }
+    .aotw-view { padding: 0 1.5rem; letter-spacing: .12em; box-shadow: 7px 7px 0 var(--tier); }
+    .aotw-surprise { min-height: 48px; padding: 0 1rem; }
+  }
+</style>

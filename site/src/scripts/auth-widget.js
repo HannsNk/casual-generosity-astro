@@ -1,13 +1,7 @@
-import { auth, googleProvider, db } from '../lib/firebase.js';
-import {
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-} from 'firebase/auth';
+import { auth, db } from '../lib/firebase.js';
+import { signInWithGoogle, signInWithEmail, emailAuthErrorMessage } from '../lib/auth-actions.js';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { openOnboarding } from './onboarding.js';
 
 const trigger = document.getElementById('auth-signin');
 const panel = document.getElementById('auth-panel');
@@ -68,11 +62,11 @@ document.addEventListener('keydown', (e) => {
 googleBtn.addEventListener('click', async () => {
   clearError();
   try {
-    await signInWithPopup(auth, googleProvider);
+    await signInWithGoogle();
     closePanel();
   } catch (err) {
     console.error('Google sign-in failed', err);
-    showError('Google sign-in failed. Try again.');
+    showError('Google sign-in failed — try again.');
   }
 });
 
@@ -83,23 +77,6 @@ createBtn.addEventListener('click', () => {
   clearError();
 });
 
-const emailAuthErrorMessage = (code) => {
-  switch (code) {
-    case 'auth/invalid-email':
-      return "That email doesn't look right.";
-    case 'auth/user-not-found':
-    case 'auth/wrong-password':
-    case 'auth/invalid-credential':
-      return 'Incorrect email or password.';
-    case 'auth/email-already-in-use':
-      return 'An account already exists for that email.';
-    case 'auth/weak-password':
-      return 'Password should be at least 6 characters.';
-    default:
-      return 'Something went wrong. Try again.';
-  }
-};
-
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   clearError();
@@ -109,11 +86,7 @@ form.addEventListener('submit', async (e) => {
 
   submitBtn.disabled = true;
   try {
-    if (mode === 'signup') {
-      await createUserWithEmailAndPassword(auth, email, password);
-    } else {
-      await signInWithEmailAndPassword(auth, email, password);
-    }
+    await signInWithEmail(mode, email, password);
     form.reset();
     closePanel();
   } catch (err) {
@@ -150,13 +123,8 @@ onAuthStateChanged(auth, async (user) => {
         email: user.email ?? '',
         photoURL: user.photoURL ?? '',
         bio: '',
-        onboardingSeen: false,
         createdAt: serverTimestamp(),
       });
-      // Trigger it directly rather than relying on onboarding.js's own
-      // shouldShowOnboarding() re-check — that reads this same doc, and
-      // could race the write above and see the doc as not-yet-existing.
-      openOnboarding();
     }
   } else {
     trigger.hidden = false;

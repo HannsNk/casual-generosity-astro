@@ -23,3 +23,21 @@ export function resizePexelsUrl(url, width, height) {
   parsed.searchParams.set("h", String(height));
   return parsed.toString();
 }
+
+// Same idea for any activity photo: Pexels via the helper above, Unsplash
+// via its own equivalent crop params; other hosts are passed through.
+export function resizeImageUrl(url, width, height) {
+  const pexels = resizePexelsUrl(url, width, height);
+  if (pexels !== url) return pexels;
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return url;
+  }
+  if (!parsed.hostname.endsWith("unsplash.com")) return url;
+  parsed.searchParams.set("w", String(width));
+  parsed.searchParams.set("h", String(height));
+  parsed.searchParams.set("fit", "crop");
+  return parsed.toString();
+}

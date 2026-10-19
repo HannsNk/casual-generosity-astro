@@ -188,6 +188,19 @@ a { color: inherit; }
 .fold {
   border-bottom: var(--edge) solid var(--ink);
 }
+
+/* JS-routed landing hero (scripts/landing.js). Until auth resolves, the
+   slot holds roughly a hero's height so the bands below don't jump. */
+.hero-slot { display: none; }
+.js .hero-slot { display: block; }
+.js .fold--fallback { display: none; }
+.hero-slot.is-routing {
+  min-height: 640px;
+  border-bottom: var(--edge) solid var(--ink);
+}
+@media (min-width: 900px) {
+  .hero-slot.is-routing { min-height: 600px; }
+}
 .fold .wrap {
   display: flex;
   flex-direction: column;
@@ -469,7 +482,7 @@ a { color: inherit; }
   padding-bottom: 1px;
 }
 
-/* ---------- chip (shared: profile, onboarding, share window, auth widget,
+/* ---------- chip (shared: profile, starter pack, share window, auth widget,
    and the view-density toggle below — keep generic) ---------- */
 .chip {
   font-family: var(--mono);

@@ -1,0 +1,107 @@
+{
+  "slots": {
+    "1": { "default": "emergency-info", "swaps": ["thank-you", "local-review"] },
+    "2": { "default": "first-aid-app", "swaps": ["thank-you", "local-review"] },
+    "3": { "default": "send-a-plan", "swaps": [] }
+  },
+
+  "tasks": {
+    "emergency-info": {
+      "title": "Set Up Your Phone's Emergency Info",
+      "listTitle": "Set up your emergency info",
+      "minutes": 2,
+      "category": "Preparedness",
+      "why": "If you're ever hurt and can't speak, a paramedic or passer-by can see who to call and anything they need to know, without unlocking your phone.",
+      "platforms": {
+        "iPhone": [
+          "Open Health, tap your photo, then Medical ID.",
+          "Tap Edit and add an emergency contact.",
+          "Turn on Show When Locked."
+        ],
+        "Android": [
+          "Open Settings and find Safety & emergency.",
+          "Add your medical information and an emergency contact.",
+          "Menu names vary by phone maker, so search Settings for \"emergency\" if you can't see it."
+        ]
+      },
+      "button": "Done",
+      "subline": "Already set up? That counts.",
+      "feedback": "Nice. That's the kind of thing nobody thinks about until it matters.",
+      "receipt": "Emergency info set up",
+      "outcome": "you're easier to help"
+    },
+
+    "first-aid-app": {
+      "title": "Download A First Aid App",
+      "listTitle": "Get a first aid app",
+      "minutes": 3,
+      "category": "Preparedness",
+      "why": "If someone near you collapses, is badly cut or starts choking, step-by-step instructions on your phone can help you act instead of freeze. The Red Cross app works offline, so it's there even with no signal.",
+      "steps": [
+        "Open your app store and search \"Red Cross First Aid\".",
+        "Pick the version from your country's Red Cross or Red Crescent. Most countries have their own, and it's free.",
+        "Open it once and skim one guide, so you know where things are."
+      ],
+      "button": "Done — it's on my phone",
+      "subline": "Already have one? That counts.",
+      "feedback": "Next time someone near you needs help, the steps are in your pocket.",
+      "receipt": "First aid app on your phone",
+      "outcome": "you're ready to help someone else"
+    },
+
+    "thank-you": {
+      "title": "Send A Specific Thank-You To Someone",
+      "listTitle": "Send a specific thank-you",
+      "minutes": 3,
+      "category": "Gratitude",
+      "why": "People tend to underestimate how much a specific thank-you means to the person getting it.",
+      "steps": [
+        "Think of one person who did something for you this year.",
+        "Message them: what they did, and what difference it made.",
+        "Be specific."
+      ],
+      "helperLabel": "Not sure how to start?",
+      "helper": "\"Random, but I've been meaning to say thanks for ___. It honestly made ___ easier.\"",
+      "button": "Done — sent it",
+      "feedback": "Someone's going to read that and have a better day.",
+      "receipt": "Sent a specific thank-you",
+      "outcome": "someone's having a better day"
+    },
+
+    "local-review": {
+      "title": "Leave A Real Review For A Small Local Business",
+      "listTitle": "Review a small local business",
+      "minutes": 3,
+      "category": "Local Business",
+      "why": "For a small business, one specific review from a real customer can matter more than any ad.",
+      "steps": [
+        "Think of a small local place you like.",
+        "Leave a review on whichever map or review app you use.",
+        "Mention one specific thing you liked."
+      ],
+      "button": "Done — posted it",
+      "feedback": "That'll help someone find them.",
+      "receipt": "Reviewed a small local business",
+      "outcome": "a small business is easier to find"
+    },
+
+    "send-a-plan": {
+      "title": "Pick An Activity And Send It To One Person",
+      "listTitle": "Send one plan to one person",
+      "minutes": 2,
+      "category": "Your First Plan",
+      "button": "Done — I sent it"
+    }
+  },
+
+  "plan": {
+    "activities": [
+      "learn-basic-sign-language",
+      "teach-each-other-a-new-skill",
+      "write-an-appreciation-email-to-an-old-teacher",
+      "clean-up-trash-in-a-local-park",
+      "donate-blood-together",
+      "buy-out-a-food-truck-at-the-end-of-a-shift"
+    ]
+  }
+}

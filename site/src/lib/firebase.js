@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp,
+  getFirestore, doc, setDoc, deleteDoc, serverTimestamp,
   collection, query, where, getDocs,
 } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
@@ -81,22 +81,4 @@ export const patchDoneDetails = async (uid, slug, fields) => {
 export const deleteAccountData = async (uid) => {
   const snap = await getDocs(query(collection(db, 'doneDetails'), where('uid', '==', uid)));
   await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)));
-};
-
-// Returns true if the current user is signed in AND has not yet
-// seen onboarding. False if signed out (nothing to show) or already seen.
-export const shouldShowOnboarding = async () => {
-  const user = auth.currentUser;
-  if (!user) return false;
-  const snap = await getDoc(doc(db, 'users', user.uid));
-  if (!snap.exists()) return false;
-  return snap.data().onboardingSeen !== true;
-};
-
-// Marks onboarding as seen. Called on skip, close, or completion —
-// all three count as "seen," none of them should re-trigger it.
-export const markOnboardingSeen = async () => {
-  const user = auth.currentUser;
-  if (!user) return;
-  await setDoc(doc(db, 'users', user.uid), { onboardingSeen: true }, { merge: true });
 };

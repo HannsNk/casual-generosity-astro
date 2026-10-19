@@ -1,0 +1,131 @@
+---
+// L6 member hero when this device holds a starter-pack plan that isn't
+// done yet and isn't snoozed: "Did you and {Name} do "{Title}" yet?".
+// "Mark it done" is a plain [data-done] button, so scripts/done.js runs the
+// site's existing Done flow on it; scripts/landing.js fills it and swaps to
+// Activity of the Week once it's done or snoozed ("Not yet", 7 days).
+---
+<section class="pn" data-pn hidden aria-labelledby="pn-title">
+  <div class="wrap">
+    <div class="pn-card" data-pn-card>
+      <span class="pn-label">Your plan</span>
+      <h1 id="pn-title" class="pn-title" data-pn-title tabindex="-1"></h1>
+      <a class="pn-activity" data-pn-link>
+        <span class="pn-thumb"><img data-pn-img alt="" width="144" height="144" /></span>
+        <span class="pn-activity-body">
+          <span class="pn-activity-title" data-pn-activity-title></span>
+          <span class="stamp" data-pn-tier></span>
+        </span>
+      </a>
+      <button class="pn-done" type="button" data-done data-pn-done>Mark it done</button>
+      <button class="pn-later" type="button" data-pn-later>Not yet</button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .pn { display: none; }
+  :global(.js) .pn:not([hidden]) { display: block; }
+
+  .pn {
+    border-bottom: var(--edge) solid var(--ink);
+    padding-block: 1.5rem 2.75rem;
+  }
+  @media (min-width: 900px) {
+    .pn { padding-block: 3.5rem 4.5rem; }
+  }
+
+  .pn-card {
+    max-width: 560px;
+    margin-right: 6px;
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+    border: var(--edge) solid var(--ink);
+    box-shadow: 6px 6px 0 var(--tier, var(--pink));
+    padding: 1rem 1rem 1.125rem;
+  }
+  @media (min-width: 900px) {
+    .pn-card { padding: 1.375rem 1.375rem 1.25rem; box-shadow: 8px 8px 0 var(--tier, var(--pink)); }
+  }
+  .pn-label {
+    align-self: flex-start;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: .65625rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .pn-title {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.75rem;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    margin: .625rem 0 0;
+    text-wrap: balance;
+  }
+  .pn-title:focus { outline: none; }
+  @media (min-width: 900px) {
+    .pn-title { font-size: 2.375rem; }
+  }
+
+  .pn-activity {
+    display: flex;
+    margin-top: 1rem;
+    border: var(--edge) solid var(--ink);
+    background: var(--card);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .pn-activity:hover { background: var(--paper); }
+  .pn-activity:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .pn-thumb {
+    flex: none;
+    width: 72px;
+    border-right: var(--edge) solid var(--ink);
+    background: var(--paper-deep);
+  }
+  .pn-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .pn-thumb img:not([src]) { visibility: hidden; }
+  .pn-activity-body { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 8px 10px; min-width: 0; }
+  .pn-activity-title { font-family: var(--display); font-weight: 700; font-size: 1rem; line-height: 1.15; }
+  .pn-activity-body .stamp { margin: 0; font-size: .59rem; letter-spacing: .14em; padding: 3px 6px; }
+
+  .pn-done {
+    width: calc(100% - 4px);
+    min-height: 52px;
+    margin-top: 1rem;
+    background: var(--ink);
+    color: var(--paper);
+    border: var(--edge) solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink-soft);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: .8125rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .pn-done:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--ink-soft); }
+  .pn-done:disabled { opacity: .6; cursor: default; }
+  .pn-later {
+    align-self: center;
+    min-height: 44px;
+    margin-top: .25rem;
+    padding: 0;
+    background: none;
+    border: 0;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: .78rem;
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+    cursor: pointer;
+  }
+  .pn-done:focus-visible,
+  .pn-later:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+</style>
