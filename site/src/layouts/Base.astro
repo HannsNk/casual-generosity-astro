@@ -119,6 +119,10 @@ const isCurrent = (match: string) =>
 </html>
 
 <script>
+  import '../scripts/arrival.js';
+</script>
+
+<script>
   // One delegated listener handles every [data-share] button on the page —
   // there can be dozens on the index grid, so we avoid per-button listeners.
   const timers = new WeakMap<HTMLButtonElement, number>();

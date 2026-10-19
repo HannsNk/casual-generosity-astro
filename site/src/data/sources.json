@@ -1,0 +1,10 @@
+[
+  { "slug": "ig", "target": "/" },
+  { "slug": "ig-bio", "target": "/" },
+  { "slug": "wa", "target": "/" },
+  { "slug": "reddit", "target": "/" },
+  { "slug": "li", "target": "/" },
+  { "slug": "x", "target": "/" },
+  { "slug": "pin", "target": "/" },
+  { "slug": "news", "target": "/" }
+]

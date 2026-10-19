@@ -54,5 +54,20 @@ service cloud.firestore {
 
       allow delete: if isOwner(resource.data.uid);
     }
+
+    // Anonymous traffic-source counts, written by arrival.js over REST with
+    // no auth. Create-only from clients — read via the console or the Admin
+    // SDK, which bypasses these rules.
+    match /arrivals/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['source', 'path', 'ts'])
+        && request.resource.data.keys().hasAll(['source', 'path', 'ts'])
+        && request.resource.data.source is string
+        && request.resource.data.source.size() <= 32
+        && request.resource.data.path is string
+        && request.resource.data.path.size() <= 120
+        && request.resource.data.ts == request.time;
+
+      allow read, update, delete: if false;
+    }
   }
 }

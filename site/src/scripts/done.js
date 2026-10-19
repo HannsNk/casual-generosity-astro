@@ -148,6 +148,18 @@ const openCapture = async (slug, title, url) => {
   win.hidden = false;
 };
 
+// Tags the activity link with the share channel (?ref=share-wa etc.) so
+// arrival.js can tell which share button brought a visitor in.
+const shareUrl = (ref) => {
+  const url = new URL(currentUrl);
+  url.searchParams.set('ref', ref);
+  return url.href;
+};
+
+// The caption textarea holds the ?ref=share link; WhatsApp and X swap in
+// their own ref at click time, keeping any edits the user made around it.
+const captionFor = (ref) => captionInput.value.replace(shareUrl('share'), shareUrl(ref));
+
 const buildCaption = (title, url, highlight, withWho) => {
   let text = `Just tried "${title}"`;
   if (withWho) text += ` with ${withWho}`;
@@ -171,7 +183,7 @@ const proceedToShare = async () => {
     }
   }
 
-  captionInput.value = buildCaption(currentTitle, currentUrl, highlight, selection.withWho);
+  captionInput.value = buildCaption(currentTitle, shareUrl('share'), highlight, selection.withWho);
   captureStep.hidden = true;
   shareStep.hidden = false;
 };
@@ -189,11 +201,11 @@ nativeBtn.addEventListener('click', async () => {
 });
 
 whatsappBtn.addEventListener('click', () => {
-  window.open(`https://wa.me/?text=${encodeURIComponent(captionInput.value)}`, '_blank', 'noopener');
+  window.open(`https://wa.me/?text=${encodeURIComponent(captionFor('share-wa'))}`, '_blank', 'noopener');
 });
 
 xBtn.addEventListener('click', () => {
-  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(captionInput.value)}`, '_blank', 'noopener');
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(captionFor('share-x'))}`, '_blank', 'noopener');
 });
 
 const flash = (btn, message) => {
@@ -217,7 +229,7 @@ copyCaptionBtn.addEventListener('click', async () => {
 
 copyLinkBtn.addEventListener('click', async () => {
   try {
-    await navigator.clipboard.writeText(currentUrl);
+    await navigator.clipboard.writeText(shareUrl('share'));
     flash(copyLinkBtn, 'Copied!');
   } catch {
     flash(copyLinkBtn, 'Copy failed');
