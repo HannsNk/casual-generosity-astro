@@ -1,9 +1,9 @@
 {
   "page": {
     "title": "Bigger Ways To Help",
-    "description": "Volunteering, effective giving, kindred sites and newsletters worth your time — the places I'd point a friend to.",
+    "description": "Volunteering, effective giving, kindred sites and newsletters worth your time. The places I'd point a friend to.",
     "intro": [
-      "Casually generous is meant to sit alongside the big stuff, not replace it. Regular volunteering and well-chosen giving can do things a free afternoon can't — and if something on this site sparks that, brilliant.",
+      "CasuallyGenerous sits alongside the bigger stuff. Regular volunteering and well-chosen giving can do things a free afternoon can't, and if something on this site sparks that, brilliant.",
       "These are the places I'd point a friend to. Nobody's paying to be here, and I've kept each list short on purpose."
     ]
   },
@@ -11,7 +11,7 @@
     {
       "id": "kindred",
       "title": "Sites Like This One",
-      "intro": "Other people working on the same idea — making everyday kindness easier to start.",
+      "intro": "Other people working on the same idea: making everyday kindness easier to start.",
       "items": [
         {
           "name": "Doing Good Together",
@@ -46,7 +46,7 @@
         {
           "name": "Reach Volunteering",
           "url": "https://reachvolunteering.org.uk/",
-          "blurb": "Skills-based volunteering for UK charities — handy if you'd rather offer what you do at work than a Saturday morning.",
+          "blurb": "Skills-based volunteering for UK charities. Handy if you'd rather offer what you do at work than a Saturday morning.",
           "region": ["UK"],
           "bestFor": "Professional skills",
           "lastChecked": null,

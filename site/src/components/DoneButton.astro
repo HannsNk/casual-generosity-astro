@@ -9,7 +9,7 @@ const { a, url, compact = false } = Astro.props;
   data-title={a.title}
   data-url={url}
   aria-pressed="false"
-  aria-label={compact ? `Mark as done — 0 done` : undefined}
+  aria-label={compact ? `Mark as done, 0 done` : undefined}
 >
   <svg viewBox="0 0 24 24" width={compact ? 17 : 17} height={compact ? 17 : 17} aria-hidden="true" fill="none" stroke="currentColor" stroke-width={compact ? 2.6 : 2.4} stroke-linecap="round" stroke-linejoin="round">
     <polyline points="20 6 9 17 4 12"></polyline>

@@ -1,8 +1,6 @@
 {
   "defaultTags": [
-    "#CasuallyGenerous",
-    "#thingstodowithfriends",
-    "#smallkindness"
+    "#CasuallyGenerous"
   ],
   "posts": [
     {
@@ -11,8 +9,8 @@
       "day": "Thu",
       "time": "18:00",
       "type": "intro",
-      "label": "Intro carousel — pin to top of grid",
-      "caption": "Hello 👋\n\nThis is CasuallyGenerous: a collection of small, mostly free, generous things to do with people you're already spending time with — friends, family, a partner, colleagues.\n\nNot volunteering. Not donations. The bit in between.\n\nEvery idea is sorted by effort: Spontaneous (do it today), Planned (needs a date in the diary), Committed (sign up once, then it's yours).\n\nBuilt by one person, for fun, no ads. Browse them all at the link in bio.\n\nDid one? Tag #CasuallyGenerous — we'll share it."
+      "label": "Intro carousel: pin to top of grid",
+      "caption": "Helping the people around you rarely takes money or days of your time. Most generosity is free, and it tends to feel good too. People do small, generous things every day, and CasuallyGenerous collects ideas for doing them. Whether you've got a few minutes on your commute, dinner with friends or a hike coming up, adding one small generous act makes your plans a little better. Better for you, and better for the people whose day you brighten.\n\nCooking for friends? Set one more place for the neighbour who lives alone. Meeting in the park? Bring a few bin bags and clear it up before lunch.\n\nEvery idea is sorted by effort: Spontaneous (do it today), Planned (needs a date in the diary), Committed (sign up once, then it's yours).\n\nBuilt by one person, for fun, no ads. Pick one, bring someone. Everything's at the link in bio.\n\nDid one? Tag #CasuallyGenerous and we'll share it."
     },
     {
       "id": "stories",
@@ -27,7 +25,7 @@
           "page": "1/3",
           "tier": "Spontaneous",
           "title": "What is this?",
-          "body": "Small, mostly free, generous things to do with people you already see. Not volunteering. Not donations. The bit in between.",
+          "body": "Doing a little good rarely takes a lot. Next time you make plans, add something generous to them.",
           "footRight": "Tap →"
         },
         {
@@ -42,7 +40,7 @@
           "stamp": "Start here",
           "page": "3/3",
           "tier": "Committed",
-          "title": "Pick one. Do it with someone.",
+          "title": "Pick one, bring someone.",
           "body": "Browse every idea at casuallygenerous.com.",
           "cta": "Did one? Tag #CasuallyGenerous and we'll share it here.",
           "footRight": "Link ↓"
@@ -83,14 +81,11 @@
       "steps": [
         "Next time you're having people round, think of the neighbour you nod at but never really talk to.",
         "Knock and ask a few days ahead. A note through the door works too.",
-        "Keep it a normal dinner, not a rescue mission. Same food, same chat.",
+        "Keep it a normal dinner. Same food, same chat.",
         "If it goes well, there's a standing extra seat from now on."
       ],
       "why": "Plenty of people eat alone most nights. An invitation costs you one plate, and can give someone an evening they'll still be thinking about next week.",
-      "caption": "You're having people round anyway. Lay one more place.\n\nThe neighbour who lives on their own probably eats alone most nights — and a knock on the door with a dinner invite is about the easiest generous thing there is.\n\nSwipe for how to ask without it being awkward. Full how-to at the link in bio.\n\nWho's the neighbour you'd ask? Send this to whoever you're cooking with.",
-      "tags": [
-        "#neighbours"
-      ]
+      "caption": "You're having people round anyway. Lay one more place.\n\nThe neighbour who lives on their own probably eats alone most nights. A knock on the door with a dinner invite is about the easiest generous thing there is.\n\nSwipe for how to ask without it being awkward. Full how-to at the link in bio.\n\nWho's the neighbour you'd ask? Send this to whoever you're cooking with."
     },
     {
       "id": "w1-thu",
@@ -100,10 +95,7 @@
       "type": "card",
       "label": "Refill empty Halloween sweet bowls",
       "slug": "refill-empty-halloween-sweet-bowls",
-      "caption": "Halloween this Saturday. Small idea for whoever's doing the rounds with kids:\n\nCarry a spare bag of sweets and top up the empty bowls on doorsteps as you go — so the last trick-or-treaters of the night don't walk away with nothing.\n\nCosts a couple of quid. Link in bio for more like this.",
-      "tags": [
-        "#halloween"
-      ]
+      "caption": "Halloween this Saturday. Small idea for whoever's doing the rounds with kids:\n\nCarry a spare bag of sweets and top up the empty bowls on doorsteps as you go, so the last trick-or-treaters of the night don't walk away with nothing.\n\nCosts a couple of quid. Link in bio for more like this."
     },
     {
       "id": "w1-sat",
@@ -111,12 +103,12 @@
       "day": "Sat",
       "time": "11:00",
       "type": "instead",
-      "label": "Instead of the pub → teach each other a skill",
+      "label": "Pub night + teach each other a skill",
       "slug": "teach-each-other-a-new-skill",
-      "x": "Another night at the pub",
+      "x": "Pub night with friends",
       "y": "Teach each other a new skill",
-      "note": "One of you teaches the rest something you're genuinely good at — knitting, chess, investing, whatever. Rotate who hosts.",
-      "caption": "Nothing against the pub. But every so often, swap it for this:\n\nOne person teaches everyone else something they're properly good at. Bread, chess, budgeting, a card trick. Next time someone else hosts.\n\nYou learn something, and the person teaching gets to be good at something out loud. Link in bio.\n\nWhat would you teach? 👇"
+      "note": "One of you teaches the rest something you're good at: chess, a card trick, budgeting, whatever. Rotate who teaches.",
+      "caption": "Next pub night, add this:\n\nOne person teaches everyone else something they're properly good at. Chess, budgeting, a card trick. Next time someone else teaches.\n\nYou learn something, and the person teaching gets to be good at something out loud. Link in bio.\n\nWhat would you teach? 👇"
     },
     {
       "id": "w2-tue",
@@ -130,15 +122,12 @@
       "hook": "Your next park catch-up, with bin bags.",
       "steps": [
         "Pick your usual park and message whoever you'd meet there anyway.",
-        "Bring gloves and a few bin bags — a litter picker if anyone has one.",
+        "Bring gloves and a few bin bags, plus a litter picker if anyone has one.",
         "Set a 60-minute timer and split up the area.",
         "Bag it, leave it by a park bin, then go and get tacos."
       ],
       "why": "Litter tends to attract more litter, so a cleaner patch is less likely to get dumped on. And you get an hour of easy company with something to show for it.",
-      "caption": "Same park. Same people. One hour. A few bin bags.\n\nThen tacos — that part's not optional.\n\nSwipe for the 4-step version, and send this to the friend you'd drag along. Full how-to at the link in bio.",
-      "tags": [
-        "#litterpicking"
-      ]
+      "caption": "Same park. Same people. One hour. A few bin bags.\n\nThen tacos. That part's not optional.\n\nSwipe for the 4-step version, and send this to the friend you'd drag along. Full how-to at the link in bio."
     },
     {
       "id": "w2-thu",
@@ -148,10 +137,7 @@
       "type": "card",
       "label": "Clear a neighbour's path or garden",
       "slug": "clear-a-neighbour-s-path-or-garden",
-      "caption": "Leaf season. If you're already out there with the rake, do next door's bit too.\n\nTen more minutes for you. For a neighbour who struggles with it, one less thing to worry about.\n\nMore small ones like this at the link in bio.",
-      "tags": [
-        "#neighbours"
-      ]
+      "caption": "Leaf season. If you're already out there with the rake, do next door's bit too.\n\nTen more minutes for you. For a neighbour who struggles with it, one less thing to worry about.\n\nMore small ones like this at the link in bio."
     },
     {
       "id": "w2-sat",
@@ -167,7 +153,7 @@
         "run-a-clothes-and-style-exchange",
         "do-a-first-aid-course-together"
       ],
-      "caption": "Cold weekend plans, one for every level of effort:\n\n🩷 Spontaneous — write cards to people who won't expect one\n💙 Planned — run a clothes and style exchange\n💚 Committed — book a first aid course together\n\nPick one. All three are at the link in bio.\n\nSend this to whoever you're spending the weekend with."
+      "caption": "Cold weekend plans, one for every level of effort:\n\nSpontaneous: write cards to people who won't expect one\nPlanned: run a clothes and style exchange\nCommitted: book a first aid course together\n\nPick one. All three are at the link in bio.\n\nSend this to whoever you're spending the weekend with."
     },
     {
       "id": "w3-tue",
@@ -180,16 +166,13 @@
       "kicker": "Free · 15 minutes · do it together",
       "hook": "Which teacher changed something for you?",
       "steps": [
-        "Over a drink, each of you names the teacher who mattered — and why.",
+        "Over a drink, each of you names the teacher who mattered, and why.",
         "Find their school's contact email. Most schools will pass a message on.",
         "Write three sentences: what they did, what it changed, thank you.",
         "Hit send together, before anyone overthinks it."
       ],
       "why": "Most teachers rarely find out how things turned out for their students. A short, specific thank-you tends to land far harder than the fifteen minutes it takes to write.",
-      "caption": "Most teachers never find out.\n\nThe one who noticed you, pushed you, or just made a subject click — they probably have no idea.\n\nSwipe for how to do it in 15 minutes with friends. Link in bio.\n\nWho's yours? Tag a friend who'd know theirs.",
-      "tags": [
-        "#teachers"
-      ]
+      "caption": "Most teachers never find out.\n\nThe one who noticed you, pushed you, or just made a subject click. They probably have no idea.\n\nSwipe for how to do it in 15 minutes with friends. Link in bio.\n\nWho's yours? Tag a friend who'd know theirs."
     },
     {
       "id": "w3-thu",
@@ -199,7 +182,7 @@
       "type": "card",
       "label": "Leave real comments for small online creators",
       "slug": "leave-real-comments-for-small-online-creators",
-      "caption": "Find someone making something good for an audience of forty people. Tell them specifically what you liked.\n\nNot a 🔥. An actual sentence.\n\nFor a small creator, one thoughtful comment can be the reason they post again next week. Link in bio for more."
+      "caption": "Find someone making something good for an audience of forty people. Tell them specifically what you liked, in a sentence or two.\n\nFor a small creator, one thoughtful comment can be the reason they post again next week. Link in bio for more."
     },
     {
       "id": "w3-fri",
@@ -215,10 +198,7 @@
         "throw-a-thank-you-party-for-someone-who-deserves-one",
         "take-a-mental-health-first-aid-course"
       ],
-      "caption": "It's World Kindness Day. Three ways to mark it, from five minutes to a weekend:\n\n🩷 Email a company to praise one of their staff — compliments almost never get sent\n💙 Throw a thank-you party for someone who's never been properly thanked\n💚 Book a mental health first aid course together\n\nAll at the link in bio. Which one are you doing?",
-      "tags": [
-        "#worldkindnessday"
-      ]
+      "caption": "It's World Kindness Day. Three ways to mark it with your people, from five minutes to a weekend:\n\nSpontaneous: email a company to praise one of their staff. Compliments almost never get sent.\nPlanned: throw a thank-you party for someone who's never been properly thanked.\nCommitted: book a mental health first aid course together.\n\nAll at the link in bio. Which one are you doing?"
     },
     {
       "id": "w4-tue",
@@ -232,15 +212,12 @@
       "hook": "Where is your heating actually going?",
       "steps": [
         "Pick a cold, windy afternoon and get a friend round.",
-        "Go room by room with the back of a damp hand — you'll feel the draughts.",
+        "Go room by room with the back of a damp hand, and you'll feel the draughts.",
         "Note gaps around doors, windows, letterboxes and the loft hatch.",
         "Next weekend, swap houses and do theirs."
       ],
       "why": "Draughts are among the cheapest things to fix in a home and among the most noticeable on a cold day. Fewer leaks generally means lower bills and less energy used.",
-      "caption": "Heating on, still cold? An afternoon with a friend finds most of the reason.\n\nRoom by room, hunting draughts. Then swap and do their place next weekend.\n\nSwipe for the 4 steps. Full how-to (and the cheap fixes) at the link in bio.",
-      "tags": [
-        "#energysaving"
-      ]
+      "caption": "Heating on, still cold? An afternoon with a friend finds most of the reason.\n\nRoom by room, hunting draughts. Then swap and do their place next weekend.\n\nSwipe for the 4 steps. Full how-to (and the cheap fixes) at the link in bio."
     },
     {
       "id": "w4-thu",
@@ -250,10 +227,7 @@
       "type": "card",
       "label": "Write reviews for local independent businesses",
       "slug": "write-reviews-for-local-independent-businesses",
-      "caption": "That café you keep going back to? Half an hour and your phone.\n\nFor a small independent, a handful of honest reviews can change who finds them. Do it over the coffee itself.\n\nLink in bio for more small ones.",
-      "tags": [
-        "#shoplocal"
-      ]
+      "caption": "That café you keep going back to? Half an hour and your phone.\n\nFor a small independent, a handful of honest reviews can change who finds them. Do it over the coffee itself.\n\nLink in bio for more small ones."
     },
     {
       "id": "w4-sat",
@@ -261,12 +235,12 @@
       "day": "Sat",
       "time": "11:00",
       "type": "instead",
-      "label": "Instead of a takeaway → farmers market + cook",
+      "label": "Saturday dinner + farmers market",
       "slug": "shop-at-a-farmers-market-and-cook-together",
-      "x": "Another takeaway night",
-      "y": "Shop at a farmers market and cook together",
-      "note": "Buy dinner from the people who grew it, then cook it together. Better food, actual conversation.",
-      "caption": "Saturday swap: skip the takeaway.\n\nGo to the market together, buy dinner from whoever grew it, and cook it that evening. You'll talk more in the kitchen than you would over a delivery bag.\n\nLink in bio. Who are you cooking with tonight?"
+      "x": "Saturday dinner together",
+      "y": "Shop at a farmers market and cook it together",
+      "note": "Buy dinner from the people who grew it, then cook it together. Good food, and plenty to talk about.",
+      "caption": "Saturday dinner with your people? Start it at the farmers market.\n\nGo together, buy dinner from whoever grew it, and cook it that evening. You'll talk more in the kitchen than you expect.\n\nLink in bio. Who are you cooking with tonight?"
     }
   ]
 }

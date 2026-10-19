@@ -72,7 +72,7 @@ googleBtn.addEventListener('click', async () => {
     closePanel();
   } catch (err) {
     console.error('Google sign-in failed', err);
-    showError('Google sign-in failed — try again.');
+    showError('Google sign-in failed. Try again.');
   }
 });
 
@@ -96,7 +96,7 @@ const emailAuthErrorMessage = (code) => {
     case 'auth/weak-password':
       return 'Password should be at least 6 characters.';
     default:
-      return 'Something went wrong — try again.';
+      return 'Something went wrong. Try again.';
   }
 };
 

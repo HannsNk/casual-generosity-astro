@@ -17,7 +17,7 @@ const TIERS = [
     key: 'Planned',
     index: '02',
     headline: 'Worth putting in the diary.',
-    body: "A bit of coordinating — an evening, a weekend morning — with someone it's worth making time for.",
+    body: "A bit of coordinating, an evening or a weekend morning, with someone it's worth making time for.",
   },
   {
     key: 'Committed',
@@ -54,17 +54,16 @@ const latestNotes = (await getCollection('notes'))
   .slice(0, 3);
 ---
 <Base
-  title="CasuallyGenerous — easy, good things to do with people you're already seeing"
-  description="A directory of low-effort, mostly free ways to do something meaningful while hanging out with friends or a partner."
+  title="CasuallyGenerous. Make your plans a little better."
+  description="Doing a little good rarely takes a lot. Next time you make plans, add something generous to them."
 >
   <section class="fold">
     <div class="wrap">
       <p class="fold-eyebrow">Welcome to CasuallyGenerous</p>
-      <h1 class="fold-title">Be generous in your every day social plans.</h1>
+      <h1 class="fold-title">Make your plans a little better.</h1>
       <p class="fold-deck">
-        Free, or nearly free. Small enough to fit into a life you're already
-        living, not a separate slot for "doing good." Sorted below by how
-        much you've got to give this week.
+        Doing a little good rarely takes a lot. Next time you make plans, add
+        something generous to them.
       </p>
     </div>
   </section>
@@ -72,7 +71,7 @@ const latestNotes = (await getCollection('notes'))
   {bands.map((band, i) => (
     <section class:list={['tier-band', `t-${band.key}`, i === 1 && 'tier-band--right']}>
       <div class="tier-panel">
-        <p class="tier-index">{band.index} — {band.key.toUpperCase()}</p>
+        <p class="tier-index">{band.index} · {band.key.toUpperCase()}</p>
         <h2 class="tier-headline">{band.headline}</h2>
         <p class="tier-body">{band.body}</p>
         <a class="tier-link" href={`${base}activities.html?tier=${band.key}`}>
@@ -102,15 +101,15 @@ const latestNotes = (await getCollection('notes'))
     <div class="wrap">
       <p class="generous-eyebrow">Feeling generous toward this project?</p>
       <p class="generous-intro">
-        This is a small side project, not a business — if you want to help it
-        grow, here's what actually helps.
+        This is a small side project. If you want to help it grow, here's what
+        actually helps.
       </p>
       <div class="generous-grid">
         <div class="generous-item t-Spontaneous">
           <p class="generous-item-label">Share it</p>
           <p>
             Pass the whole page along, or send someone the one activity that
-            made you think of them. That's genuinely the whole model working.
+            made you think of them. That's how this spreads.
           </p>
         </div>
         <div class="generous-item t-Planned">

@@ -65,7 +65,7 @@ function slidesFor(p) {
   }
   if (p.type === 'intro') {
     const n = 4, pg = i => `${i}/${n}`;
-    return [['introCover', {}], ['introNot', { page: pg(2) }], ['introTiers', { page: pg(3) }], ['introCta', { page: pg(4) }]];
+    return [['introCover', {}], ['introPlans', { page: pg(2) }], ['introTiers', { page: pg(3) }], ['introCta', { page: pg(4) }]];
   }
   if (p.type === 'stories') {
     return [...p.frames.map(f => ['story', f]), ...(p.covers ?? []).map(c => ['cover', c])];
@@ -73,7 +73,10 @@ function slidesFor(p) {
   throw new Error(`Unknown post type "${p.type}"`);
 }
 
-const tags = p => [...(plan.defaultTags ?? []), ...(p.tags ?? [])].join(' ');
+// Skips any tag the caption already uses inline, so #CasuallyGenerous never appears twice.
+const tags = p => [...(plan.defaultTags ?? []), ...(p.tags ?? [])]
+  .filter(t => !(p.caption ?? '').includes(t))
+  .join(' ');
 const posts = plan.posts.filter(p => !ONLY || p.date.startsWith(ONLY) || p.id === ONLY);
 await fs.mkdir(OUT, { recursive: true });
 

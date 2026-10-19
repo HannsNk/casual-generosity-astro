@@ -21,7 +21,7 @@ const applyDoneState = (btn, active, date) => {
   btn.classList.toggle('is-done', active);
   btn.setAttribute('aria-pressed', String(active));
   const label = btn.querySelector('.done-label');
-  if (label) label.textContent = active && date ? `Done — ${dateFmt.format(date)}` : 'Mark as done';
+  if (label) label.textContent = active && date ? `Done · ${dateFmt.format(date)}` : 'Mark as done';
 };
 
 // Save and Done are mutually exclusive, so every [data-fav] button also
@@ -250,7 +250,7 @@ const applyCardStats = (stats) => {
     const { saveCount } = stats.get(slug) ?? { saveCount: 0 };
     countEl.textContent = String(saveCount);
     countEl.hidden = saveCount === 0;
-    btn.setAttribute('aria-label', `${btn.classList.contains('is-fav') ? 'Saved' : 'Save'} — ${saveCount} saved`);
+    btn.setAttribute('aria-label', `${btn.classList.contains('is-fav') ? 'Saved' : 'Save'}, ${saveCount} saved`);
   });
   document.querySelectorAll('[data-done]').forEach((btn) => {
     const countEl = btn.querySelector('[data-stat-done]');
@@ -259,7 +259,7 @@ const applyCardStats = (stats) => {
     const { doneCount } = stats.get(slug) ?? { doneCount: 0 };
     countEl.textContent = String(doneCount);
     countEl.hidden = doneCount === 0;
-    btn.setAttribute('aria-label', `${btn.classList.contains('is-done') ? 'Done' : 'Mark as done'} — ${doneCount} done`);
+    btn.setAttribute('aria-label', `${btn.classList.contains('is-done') ? 'Done' : 'Mark as done'}, ${doneCount} done`);
   });
 };
 

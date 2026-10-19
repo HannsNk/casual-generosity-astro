@@ -53,7 +53,7 @@ const lastCheckedLabel = oldestChecked
   ? new Date(oldestChecked).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
   : null;
 ---
-<Base title={`${page.title} — CasuallyGenerous`} description={page.description}>
+<Base title={`${page.title} · CasuallyGenerous`} description={page.description}>
   <div class="wrap detail resources">
     <div class="detail-top">
       <a class="back" href={base}>← Home</a>
@@ -92,7 +92,7 @@ const lastCheckedLabel = oldestChecked
           subject="Resources page: broken link or suggestion"
           messageLabel="Which link, or what should be added?"
           messagePlaceholder="The broken link, or the site you'd recommend and why it belongs here"
-          successText="Thanks — I'll take a look."
+          successText="Thanks. I'll take a look."
         />
       </details>
     </section>

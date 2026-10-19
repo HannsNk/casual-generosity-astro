@@ -1,17 +1,16 @@
 # CasuallyGenerous
 
-A directory of small, mostly free things worth doing with the people you're
-already seeing — inspired by Chris Anderson's *Infectious Generosity*. Not a
-volunteering platform, not a donation platform: the space in between, for
-things that fit into a life you're already living rather than a formal
-commitment.
+CasuallyGenerous. Make your plans a little better.
+
+Ideas for small, generous things to do with your people, inspired by Chris
+Anderson's *Infectious Generosity*.
 
 Live at **[casuallygenerous](https://hannsnk.github.io/casual-generosity-astro/)**.
 
 ## What's here
 
 - **`/`** — a landing page with a few intent-based entry points
-- **`/activities/`** — the full directory, filterable by effort, cost, time
+- **`/activities/`** — the full list, filterable by effort, cost, time
   and group size, with a client-side filter bar (~1KB of JS, no framework)
 - **`/[slug]`** — one static page per activity, each with a "have you done
   this?" story feed

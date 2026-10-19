@@ -62,14 +62,15 @@ export const templates = {
     <div style="text-align:right">${pager(d.page)}</div>
     <div class="card" style="margin:auto 0;padding:70px 60px">
       <h2 class="disp" style="font-size:96px">Send this to the person you'd do it with.</h2>
-      <p style="font-size:40px;line-height:1.3;margin-top:36px;color:var(--ink-soft)">Then pick a day. More ideas like this — mostly free, all done together — at the link in bio.</p>
+      <p style="font-size:40px;line-height:1.3;margin-top:36px;color:var(--ink-soft)">Then pick a day. More ideas like this at the link in bio. Most of them are free.</p>
     </div>${foot('casuallygenerous.com')}</div>`,
 
+  // Takes a plan people already have (x) and adds one generous thing to it (y)
   instead: d => `<div class="frame t-${d.tier}">
-    <span class="mono" style="font-size:28px;color:var(--ink-soft)">Instead of</span>
-    <h2 class="disp" data-fit style="font-size:96px;margin-top:20px;color:var(--ink-soft);text-decoration:line-through;text-decoration-thickness:10px;text-decoration-color:var(--tier)">${esc(d.x)}</h2>
+    <span class="mono" style="font-size:28px;color:var(--ink-soft)">Your plan</span>
+    <h2 class="disp" data-fit style="font-size:96px;margin-top:20px;color:var(--ink-soft)">${esc(d.x)}</h2>
     <div class="rule" style="margin:70px 0"></div>
-    <span class="mono" style="font-size:28px">Try</span>
+    <span class="mono" style="font-size:28px">Add</span>
     <h1 class="disp" data-fit style="font-size:104px;margin-top:20px;text-shadow:5px 5px 0 var(--tier)">${esc(d.y)}</h1>
     <p data-fit style="font-size:38px;line-height:1.3;margin-top:44px;color:var(--ink-soft)">${esc(d.note)}</p>
     ${foot()}</div>`,
@@ -83,18 +84,18 @@ export const templates = {
     ${foot()}</div>`,
   // ---------- Intro carousel (pinned first post) ----------
   introCover: d => `<div class="frame t-Spontaneous" style="background:var(--tier);color:var(--card)">
-    <span class="mono" style="font-size:28px">Hello — new here</span>
-    <h1 class="disp" data-fit style="font-size:124px;margin-top:auto">Doing good, without giving up your Saturday.</h1>
-    <p style="font-size:42px;line-height:1.3;margin-top:44px">Small, mostly free, generous things to do with people you already see.</p>
+    <span class="mono" style="font-size:28px">Hello, new here</span>
+    <h1 class="disp" data-fit style="font-size:124px;margin-top:auto">Make your plans a little better.</h1>
+    <p style="font-size:42px;line-height:1.3;margin-top:44px">Doing a little good rarely takes a lot. Next time you make plans, add something generous to them.</p>
     <div class="mono" style="margin-top:60px;display:flex;justify-content:space-between;font-size:26px"><span>Swipe →</span><span>CasuallyGenerous</span></div></div>`,
 
-  introNot: d => `<div class="frame t-Planned">
-    <div style="text-align:right">${pager(d.page)}</div>
-    <span class="mono" style="font-size:28px;color:var(--ink-soft)">It's not</span>
-    ${['Volunteering', 'Donations'].map(w => `<h2 class="disp" style="font-size:112px;margin-top:16px;color:var(--ink-soft);text-decoration:line-through;text-decoration-thickness:12px;text-decoration-color:var(--tier)">${w}</h2>`).join('')}
-    <div class="rule" style="margin:70px 0"></div>
-    <span class="mono" style="font-size:28px">It's the bit in between</span>
-    <p data-fit style="font-size:54px;line-height:1.3;margin-top:28px">Thoughtful things you fold into time you're already spending with friends, family or a partner. No sign-up sheet. No donate button.</p>
+  introPlans: d => `<div class="frame t-Planned">
+    <div style="display:flex;justify-content:space-between;align-items:start"><span class="mono" style="font-size:28px;color:var(--ink-soft)">You've got plans anyway</span>${pager(d.page)}</div>
+    <h1 class="disp" style="font-size:88px;margin:20px 0 50px">Add one small, generous thing.</h1>
+    ${PLANS.map(([plan, add]) => `<div style="padding:26px 0;border-top:3px solid var(--ink)">
+      <span class="mono" style="font-size:24px;color:var(--ink-soft)">${plan}</span>
+      <p data-fit style="font-size:44px;line-height:1.25;margin-top:10px"><span class="disp" style="color:var(--tier)">+</span> ${add}</p></div>`).join('')}
+    <p style="font-size:36px;line-height:1.3;margin-top:24px;color:var(--ink-soft)">Most of it is free.</p>
     ${foot('')}</div>`,
 
   introTiers: d => `<div class="frame">
@@ -108,8 +109,8 @@ export const templates = {
   introCta: d => `<div class="frame t-Committed">
     <div style="text-align:right">${pager(d.page)}</div>
     <div class="card" style="margin:auto 0;padding:70px 60px">
-      <h2 class="disp" style="font-size:104px">Pick one this week.</h2>
-      <p style="font-size:40px;line-height:1.3;margin-top:36px;color:var(--ink-soft)">Browse them all at casuallygenerous.com — link in bio. Did one? Tag <b style="font-family:Mono;font-weight:700;color:var(--ink)">#CasuallyGenerous</b> and we'll share it.</p>
+      <h2 class="disp" style="font-size:104px">Pick one, bring someone.</h2>
+      <p style="font-size:40px;line-height:1.3;margin-top:36px;color:var(--ink-soft)">Browse them all at casuallygenerous.com (link in bio). Did one? Tag <b style="font-family:Mono;font-weight:700;color:var(--ink)">#CasuallyGenerous</b> and we'll share it.</p>
     </div>${foot('casuallygenerous.com')}</div>`,
 
   // ---------- Story frames 1080×1920 (content kept clear of the top/bottom app UI) ----------
@@ -132,7 +133,13 @@ export const templates = {
 const TIERS = [
   ['Spontaneous', 'Do it today. Nothing to book, nothing to arrange.'],
   ['Planned', 'Needs a date in the diary and a bit of coordinating.'],
-  ['Committed', 'Sign up, apply or train first — then it stays available to you.'],
+  ['Committed', 'Sign up, apply or train first. Then it stays available to you.'],
+];
+// Intro carousel: a plan people already have, and the one generous thing to add to it.
+const PLANS = [
+  ['Dinner with friends', 'Set a place for the neighbour who lives alone'],
+  ['Sunday walk in the park', 'Bring a few bin bags and clear up as you go'],
+  ['Your commute', 'Leave a real comment for a small creator you like'],
 ];
 const ICONS = {
   arrow: '<path d="M14 50h66M56 24l26 26-26 26"/>',

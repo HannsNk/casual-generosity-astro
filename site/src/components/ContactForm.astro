@@ -8,7 +8,7 @@ const {
   subject,
   messageLabel = 'Message',
   messagePlaceholder = "What's on your mind?",
-  successText = "Thanks — I'll get back to you.",
+  successText = "Thanks. I'll get back to you.",
 } = Astro.props;
 
 const base = import.meta.env.BASE_URL;
@@ -41,7 +41,7 @@ const base = import.meta.env.BASE_URL;
       style="position:absolute; left:-9999px; width:1px; height:1px;"
     />
 
-    <p class="story-error" data-contact-error hidden>Couldn't send that — try again, or nothing's lost, just retry in a moment.</p>
+    <p class="story-error" data-contact-error hidden>Couldn't send that. Nothing's lost, so try again in a moment.</p>
 
     <button type="submit" class="story-submit" data-contact-submit>Send</button>
     <p class="form-hint">By submitting, this goes to me to respond to your message. See the <a href={`${base}privacy.html`}>privacy policy</a> for details.</p>
