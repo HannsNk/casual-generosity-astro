@@ -1,0 +1,100 @@
+---
+import Base from '../../layouts/Base.astro';
+import ResourceItem from '../../components/ResourceItem.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import data from '../../content/additional_resources.json';
+
+type Resource = {
+  name: string;
+  url: string;
+  blurb: string;
+  region: string[];
+  bestFor?: string;
+  lastChecked: string | null;
+  hidden?: boolean;
+};
+type Section = { id: string; title: string; intro: string; items: Resource[] };
+
+const TIER_INKS = ['t-Spontaneous', 't-Planned', 't-Committed'];
+
+const base = import.meta.env.BASE_URL;
+const { page } = data;
+
+// JSON order is the curated order — no sorting. Hidden items are dropped
+// here so they never reach the HTML; `_`-prefixed keys are internal notes
+// and are simply never read by ResourceItem.
+const sections = (data.sections as Section[])
+  .map((s) => ({ ...s, items: s.items.filter((item) => !item.hidden) }))
+  .filter((s) => s.items.length > 0)
+  // Each section borrows one of the site's three inks, in rotation, purely
+  // for colour — the tier names carry no meaning on this page.
+  .map((s, i) => ({ ...s, tier: TIER_INKS[i % TIER_INKS.length] }));
+const visibleItems = sections.flatMap((s) => s.items);
+
+// Build-time link hygiene: warn, never fail. Runs once per build (and on
+// each request in dev).
+const staleBefore = new Date();
+staleBefore.setFullYear(staleBefore.getFullYear() - 1);
+for (const item of visibleItems) {
+  const reasons = [];
+  if (item.lastChecked === null) reasons.push('never checked');
+  else if (new Date(item.lastChecked) < staleBefore) reasons.push(`last checked ${item.lastChecked}`);
+  if (!item.url.startsWith('https://')) reasons.push('not https');
+  for (const reason of reasons) console.warn(`[resources] Check link: ${item.name} (${reason})`);
+}
+
+// The footer line is only as honest as the stalest link, so show the
+// oldest date. ISO date strings sort lexically.
+const oldestChecked = visibleItems
+  .map((item) => item.lastChecked)
+  .filter((d): d is string => d !== null)
+  .sort()[0];
+const lastCheckedLabel = oldestChecked
+  ? new Date(oldestChecked).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+  : null;
+---
+<Base title={`${page.title} — CasuallyGenerous`} description={page.description}>
+  <div class="wrap detail resources">
+    <div class="detail-top">
+      <a class="back" href={base}>← Home</a>
+    </div>
+
+    <div class="detail-head">
+      <h1>{page.title}</h1>
+    </div>
+
+    <nav class="resources-jump" aria-label="Sections on this page">
+      {sections.map((s) => <a class:list={['chip', s.tier]} href={`#${s.id}`}>{s.title}</a>)}
+    </nav>
+
+    {sections.map((s) => (
+      <section class:list={['resources-section', s.tier]} id={s.id} aria-labelledby={`${s.id}-title`}>
+        <h2 class="tier-headline" id={`${s.id}-title`}>{s.title}</h2>
+        <div class="howto">
+          <p>{s.intro}</p>
+        </div>
+        <div class="grid resources-grid">
+          {s.items.map((item) => <ResourceItem item={item} />)}
+        </div>
+      </section>
+    ))}
+
+    <section class="resources-suggest t-Planned" aria-labelledby="suggest-title">
+      <h2 class="tier-headline" id="suggest-title">Broken link? Missing a gem?</h2>
+      <div class="howto">
+        <p>If a link here has stopped working, or you know a place that belongs on this list, let me know.</p>
+      </div>
+      {lastCheckedLabel && <p class="resources-checked">Links last checked {lastCheckedLabel}</p>}
+      <details class="resources-suggest-toggle">
+        <summary class="story-submit">Report a link or suggest a resource</summary>
+        <ContactForm
+          id="suggest"
+          subject="Resources page: broken link or suggestion"
+          messageLabel="Which link, or what should be added?"
+          messagePlaceholder="The broken link, or the site you'd recommend and why it belongs here"
+          successText="Thanks — I'll take a look."
+        />
+      </details>
+    </section>
+  </div>
+</Base>

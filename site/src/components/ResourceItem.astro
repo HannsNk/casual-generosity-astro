@@ -1,0 +1,23 @@
+---
+// One outside resource on the /resources page. The whole card is the link
+// (one tab stop); it reuses .card's offset-shadow device with --tier pinned
+// to ink, since resources sit outside the tier system.
+//
+// rel="noopener" only — no "noreferrer", on purpose: these organisations
+// should be able to see CasuallyGenerous traffic in their own analytics.
+const { item } = Astro.props;
+---
+<a class="card resource-card" href={item.url} target="_blank" rel="noopener">
+  <div class="card-body">
+    <h3>
+      {item.name}<span class="resource-ext" aria-hidden="true">↗</span>
+      <span class="visually-hidden">(opens in a new tab)</span>
+    </h3>
+    <p>{item.blurb}</p>
+
+    <div class="card-foot resource-meta">
+      <span class="stamp">{item.region.join(' · ')}</span>
+      {item.bestFor && <span class="stamp">{item.bestFor}</span>}
+    </div>
+  </div>
+</a>

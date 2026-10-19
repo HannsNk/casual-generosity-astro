@@ -1,0 +1,272 @@
+{
+  "defaultTags": [
+    "#CasuallyGenerous",
+    "#thingstodowithfriends",
+    "#smallkindness"
+  ],
+  "posts": [
+    {
+      "id": "intro",
+      "date": "2026-10-22",
+      "day": "Thu",
+      "time": "18:00",
+      "type": "intro",
+      "label": "Intro carousel — pin to top of grid",
+      "caption": "Hello 👋\n\nThis is CasuallyGenerous: a collection of small, mostly free, generous things to do with people you're already spending time with — friends, family, a partner, colleagues.\n\nNot volunteering. Not donations. The bit in between.\n\nEvery idea is sorted by effort: Spontaneous (do it today), Planned (needs a date in the diary), Committed (sign up once, then it's yours).\n\nBuilt by one person, for fun, no ads. Browse them all at the link in bio.\n\nDid one? Tag #CasuallyGenerous — we'll share it."
+    },
+    {
+      "id": "stories",
+      "date": "2026-10-22",
+      "day": "Thu",
+      "time": "any",
+      "type": "stories",
+      "label": "Story frames + highlight covers (not a feed post)",
+      "frames": [
+        {
+          "stamp": "Start here",
+          "page": "1/3",
+          "tier": "Spontaneous",
+          "title": "What is this?",
+          "body": "Small, mostly free, generous things to do with people you already see. Not volunteering. Not donations. The bit in between.",
+          "footRight": "Tap →"
+        },
+        {
+          "stamp": "Start here",
+          "page": "2/3",
+          "tier": "Planned",
+          "title": "Pick by effort",
+          "tiers": true,
+          "footRight": "Tap →"
+        },
+        {
+          "stamp": "Start here",
+          "page": "3/3",
+          "tier": "Committed",
+          "title": "Pick one. Do it with someone.",
+          "body": "Browse every idea at casuallygenerous.com.",
+          "cta": "Did one? Tag #CasuallyGenerous and we'll share it here.",
+          "footRight": "Link ↓"
+        },
+        {
+          "stamp": "Done this",
+          "tier": "Committed",
+          "title": "Your posts live here.",
+          "body": "Tried something from the site? Post it, tag @casuallygenerous and #CasuallyGenerous, and we'll add it to this highlight.",
+          "footRight": ""
+        }
+      ],
+      "covers": [
+        {
+          "tier": "Spontaneous",
+          "icon": "arrow"
+        },
+        {
+          "tier": "Committed",
+          "icon": "check"
+        },
+        {
+          "tier": "Planned",
+          "icon": "plus"
+        }
+      ]
+    },
+    {
+      "id": "w1-tue",
+      "date": "2026-10-27",
+      "day": "Tue",
+      "time": "18:00",
+      "type": "carousel",
+      "label": "Invite a neighbour who lives alone to dinner",
+      "slug": "invite-a-neighbour-who-lives-alone-to-dinner",
+      "kicker": "Costs one extra plate",
+      "hook": "Cooking for four? Make it five.",
+      "steps": [
+        "Next time you're having people round, think of the neighbour you nod at but never really talk to.",
+        "Knock and ask a few days ahead. A note through the door works too.",
+        "Keep it a normal dinner, not a rescue mission. Same food, same chat.",
+        "If it goes well, there's a standing extra seat from now on."
+      ],
+      "why": "Plenty of people eat alone most nights. An invitation costs you one plate, and can give someone an evening they'll still be thinking about next week.",
+      "caption": "You're having people round anyway. Lay one more place.\n\nThe neighbour who lives on their own probably eats alone most nights — and a knock on the door with a dinner invite is about the easiest generous thing there is.\n\nSwipe for how to ask without it being awkward. Full how-to at the link in bio.\n\nWho's the neighbour you'd ask? Send this to whoever you're cooking with.",
+      "tags": [
+        "#neighbours"
+      ]
+    },
+    {
+      "id": "w1-thu",
+      "date": "2026-10-29",
+      "day": "Thu",
+      "time": "18:00",
+      "type": "card",
+      "label": "Refill empty Halloween sweet bowls",
+      "slug": "refill-empty-halloween-sweet-bowls",
+      "caption": "Halloween this Saturday. Small idea for whoever's doing the rounds with kids:\n\nCarry a spare bag of sweets and top up the empty bowls on doorsteps as you go — so the last trick-or-treaters of the night don't walk away with nothing.\n\nCosts a couple of quid. Link in bio for more like this.",
+      "tags": [
+        "#halloween"
+      ]
+    },
+    {
+      "id": "w1-sat",
+      "date": "2026-10-31",
+      "day": "Sat",
+      "time": "11:00",
+      "type": "instead",
+      "label": "Instead of the pub → teach each other a skill",
+      "slug": "teach-each-other-a-new-skill",
+      "x": "Another night at the pub",
+      "y": "Teach each other a new skill",
+      "note": "One of you teaches the rest something you're genuinely good at — knitting, chess, investing, whatever. Rotate who hosts.",
+      "caption": "Nothing against the pub. But every so often, swap it for this:\n\nOne person teaches everyone else something they're properly good at. Bread, chess, budgeting, a card trick. Next time someone else hosts.\n\nYou learn something, and the person teaching gets to be good at something out loud. Link in bio.\n\nWhat would you teach? 👇"
+    },
+    {
+      "id": "w2-tue",
+      "date": "2026-11-03",
+      "day": "Tue",
+      "time": "18:00",
+      "type": "carousel",
+      "label": "Clean up trash in a local park",
+      "slug": "clean-up-trash-in-a-local-park",
+      "kicker": "Free · 60 minutes · bring friends",
+      "hook": "Your next park catch-up, with bin bags.",
+      "steps": [
+        "Pick your usual park and message whoever you'd meet there anyway.",
+        "Bring gloves and a few bin bags — a litter picker if anyone has one.",
+        "Set a 60-minute timer and split up the area.",
+        "Bag it, leave it by a park bin, then go and get tacos."
+      ],
+      "why": "Litter tends to attract more litter, so a cleaner patch is less likely to get dumped on. And you get an hour of easy company with something to show for it.",
+      "caption": "Same park. Same people. One hour. A few bin bags.\n\nThen tacos — that part's not optional.\n\nSwipe for the 4-step version, and send this to the friend you'd drag along. Full how-to at the link in bio.",
+      "tags": [
+        "#litterpicking"
+      ]
+    },
+    {
+      "id": "w2-thu",
+      "date": "2026-11-05",
+      "day": "Thu",
+      "time": "18:00",
+      "type": "card",
+      "label": "Clear a neighbour's path or garden",
+      "slug": "clear-a-neighbour-s-path-or-garden",
+      "caption": "Leaf season. If you're already out there with the rake, do next door's bit too.\n\nTen more minutes for you. For a neighbour who struggles with it, one less thing to worry about.\n\nMore small ones like this at the link in bio.",
+      "tags": [
+        "#neighbours"
+      ]
+    },
+    {
+      "id": "w2-sat",
+      "date": "2026-11-07",
+      "day": "Sat",
+      "time": "11:00",
+      "type": "roundup",
+      "label": "Roundup: three things for a cold weekend",
+      "kicker": "This weekend",
+      "title": "Three small things for a cold weekend",
+      "slugs": [
+        "write-cards-to-people-who-won-t-expect-one",
+        "run-a-clothes-and-style-exchange",
+        "do-a-first-aid-course-together"
+      ],
+      "caption": "Cold weekend plans, one for every level of effort:\n\n🩷 Spontaneous — write cards to people who won't expect one\n💙 Planned — run a clothes and style exchange\n💚 Committed — book a first aid course together\n\nPick one. All three are at the link in bio.\n\nSend this to whoever you're spending the weekend with."
+    },
+    {
+      "id": "w3-tue",
+      "date": "2026-11-10",
+      "day": "Tue",
+      "time": "18:00",
+      "type": "carousel",
+      "label": "Write an appreciation email to an old teacher",
+      "slug": "write-an-appreciation-email-to-an-old-teacher",
+      "kicker": "Free · 15 minutes · do it together",
+      "hook": "Which teacher changed something for you?",
+      "steps": [
+        "Over a drink, each of you names the teacher who mattered — and why.",
+        "Find their school's contact email. Most schools will pass a message on.",
+        "Write three sentences: what they did, what it changed, thank you.",
+        "Hit send together, before anyone overthinks it."
+      ],
+      "why": "Most teachers rarely find out how things turned out for their students. A short, specific thank-you tends to land far harder than the fifteen minutes it takes to write.",
+      "caption": "Most teachers never find out.\n\nThe one who noticed you, pushed you, or just made a subject click — they probably have no idea.\n\nSwipe for how to do it in 15 minutes with friends. Link in bio.\n\nWho's yours? Tag a friend who'd know theirs.",
+      "tags": [
+        "#teachers"
+      ]
+    },
+    {
+      "id": "w3-thu",
+      "date": "2026-11-12",
+      "day": "Thu",
+      "time": "18:00",
+      "type": "card",
+      "label": "Leave real comments for small online creators",
+      "slug": "leave-real-comments-for-small-online-creators",
+      "caption": "Find someone making something good for an audience of forty people. Tell them specifically what you liked.\n\nNot a 🔥. An actual sentence.\n\nFor a small creator, one thoughtful comment can be the reason they post again next week. Link in bio for more."
+    },
+    {
+      "id": "w3-fri",
+      "date": "2026-11-13",
+      "day": "Fri",
+      "time": "08:00",
+      "type": "roundup",
+      "label": "World Kindness Day roundup",
+      "kicker": "World Kindness Day",
+      "title": "Three ways to mark it with someone",
+      "slugs": [
+        "email-a-company-to-praise-one-of-their-staff",
+        "throw-a-thank-you-party-for-someone-who-deserves-one",
+        "take-a-mental-health-first-aid-course"
+      ],
+      "caption": "It's World Kindness Day. Three ways to mark it, from five minutes to a weekend:\n\n🩷 Email a company to praise one of their staff — compliments almost never get sent\n💙 Throw a thank-you party for someone who's never been properly thanked\n💚 Book a mental health first aid course together\n\nAll at the link in bio. Which one are you doing?",
+      "tags": [
+        "#worldkindnessday"
+      ]
+    },
+    {
+      "id": "w4-tue",
+      "date": "2026-11-17",
+      "day": "Tue",
+      "time": "18:00",
+      "type": "carousel",
+      "label": "Do a home energy audit together",
+      "slug": "do-a-home-energy-audit-together",
+      "kicker": "Free · an afternoon · 2–4 people",
+      "hook": "Where is your heating actually going?",
+      "steps": [
+        "Pick a cold, windy afternoon and get a friend round.",
+        "Go room by room with the back of a damp hand — you'll feel the draughts.",
+        "Note gaps around doors, windows, letterboxes and the loft hatch.",
+        "Next weekend, swap houses and do theirs."
+      ],
+      "why": "Draughts are among the cheapest things to fix in a home and among the most noticeable on a cold day. Fewer leaks generally means lower bills and less energy used.",
+      "caption": "Heating on, still cold? An afternoon with a friend finds most of the reason.\n\nRoom by room, hunting draughts. Then swap and do their place next weekend.\n\nSwipe for the 4 steps. Full how-to (and the cheap fixes) at the link in bio.",
+      "tags": [
+        "#energysaving"
+      ]
+    },
+    {
+      "id": "w4-thu",
+      "date": "2026-11-19",
+      "day": "Thu",
+      "time": "18:00",
+      "type": "card",
+      "label": "Write reviews for local independent businesses",
+      "slug": "write-reviews-for-local-independent-businesses",
+      "caption": "That café you keep going back to? Half an hour and your phone.\n\nFor a small independent, a handful of honest reviews can change who finds them. Do it over the coffee itself.\n\nLink in bio for more small ones.",
+      "tags": [
+        "#shoplocal"
+      ]
+    },
+    {
+      "id": "w4-sat",
+      "date": "2026-11-21",
+      "day": "Sat",
+      "time": "11:00",
+      "type": "instead",
+      "label": "Instead of a takeaway → farmers market + cook",
+      "slug": "shop-at-a-farmers-market-and-cook-together",
+      "x": "Another takeaway night",
+      "y": "Shop at a farmers market and cook together",
+      "note": "Buy dinner from the people who grew it, then cook it together. Better food, actual conversation.",
+      "caption": "Saturday swap: skip the takeaway.\n\nGo to the market together, buy dinner from whoever grew it, and cook it that evening. You'll talk more in the kitchen than you would over a delivery bag.\n\nLink in bio. Who are you cooking with tonight?"
+    }
+  ]
+}

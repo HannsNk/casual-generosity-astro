@@ -1,0 +1,81 @@
+---
+// Formspree contact form, shared by the About page and the resources page's
+// "report a broken link / suggest a resource" panel. `subject` becomes the
+// email subject (Formspree's `_subject` field) so messages from each place
+// are easy to tell apart in the inbox.
+const {
+  id = 'contact',
+  subject,
+  messageLabel = 'Message',
+  messagePlaceholder = "What's on your mind?",
+  successText = "Thanks — I'll get back to you.",
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+---
+<div data-contact>
+  <form class="story-form" data-contact-form>
+    {subject && <input type="hidden" name="_subject" value={subject} />}
+
+    <div class="story-field">
+      <label for={`${id}-name`}>Name <span>(optional)</span></label>
+      <input id={`${id}-name`} name="name" type="text" maxlength="80" placeholder="Your name" />
+    </div>
+
+    <div class="story-field">
+      <label for={`${id}-email`}>Email</label>
+      <input id={`${id}-email`} name="email" type="email" required maxlength="120" placeholder="you@example.com" />
+    </div>
+
+    <div class="story-field">
+      <label for={`${id}-message`}>{messageLabel}</label>
+      <textarea id={`${id}-message`} name="message" rows="4" required maxlength="2000" placeholder={messagePlaceholder}></textarea>
+    </div>
+
+    <input
+      type="text"
+      name="_gotcha"
+      tabindex="-1"
+      autocomplete="off"
+      aria-hidden="true"
+      style="position:absolute; left:-9999px; width:1px; height:1px;"
+    />
+
+    <p class="story-error" data-contact-error hidden>Couldn't send that — try again, or nothing's lost, just retry in a moment.</p>
+
+    <button type="submit" class="story-submit" data-contact-submit>Send</button>
+    <p class="form-hint">By submitting, this goes to me to respond to your message. See the <a href={`${base}privacy.html`}>privacy policy</a> for details.</p>
+  </form>
+  <p class="story-empty" data-contact-success hidden>{successText}</p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-contact]').forEach((root) => {
+    const form = root.querySelector<HTMLFormElement>('[data-contact-form]')!;
+    const submitBtn = root.querySelector<HTMLButtonElement>('[data-contact-submit]')!;
+    const errorMsg = root.querySelector<HTMLElement>('[data-contact-error]')!;
+    const success = root.querySelector<HTMLElement>('[data-contact-success]')!;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.hidden = true;
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch('https://formspree.io/f/mbdnejwy', {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: new FormData(form),
+        });
+
+        if (!res.ok) throw new Error('Request failed');
+
+        form.hidden = true;
+        success.hidden = false;
+      } catch {
+        errorMsg.hidden = false;
+        submitBtn.disabled = false;
+      }
+    });
+  });
+</script>
