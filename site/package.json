@@ -10,6 +10,7 @@
     "social": "node scripts/social/generate.mjs"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
     "astro": "^5.0.0",
     "firebase": "^11.10.0",
     "fuse.js": "^7.5.0"
