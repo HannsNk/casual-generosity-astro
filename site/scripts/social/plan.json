@@ -10,7 +10,8 @@
       "time": "18:00",
       "type": "intro",
       "label": "Intro carousel: pin to top of grid",
-      "caption": "Helping the people around you rarely takes money or days of your time. Most generosity is free, and it tends to feel good too. People do small, generous things every day, and CasuallyGenerous collects ideas for doing them. Whether you've got a few minutes on your commute, dinner with friends or a hike coming up, adding one small generous act makes your plans a little better. Better for you, and better for the people whose day you brighten.\n\nCooking for friends? Set one more place for the neighbour who lives alone. Meeting in the park? Bring a few bin bags and clear it up before lunch.\n\nEvery idea is sorted by effort: Spontaneous (do it today), Planned (needs a date in the diary), Committed (sign up once, then it's yours).\n\nBuilt by one person, for fun, no ads. Pick one, bring someone. Everything's at the link in bio.\n\nDid one? Tag #CasuallyGenerous and we'll share it."
+      "slugs": ["donate-blood-together", "write-an-appreciation-email-to-an-old-teacher", "clean-up-trash-in-a-local-park"],
+      "caption": "Helping the people around you rarely takes money or days of your time. Most generosity is free, and it tends to feel good too. People do small, generous things every day, and CasuallyGenerous collects ideas for doing them. Whether you've got a few minutes on your commute, dinner with friends or a hike coming up, adding one small generous act makes your plans a little better. Better for you, and better for the people whose day you brighten.\n\nThree to start with:\nDonate Blood Together\nWrite An Appreciation Email To An Old Teacher\nClean Up Trash In A Local Park\n\nEvery idea is sorted by effort: Spontaneous (do it today), Planned (needs a date in the diary), Committed (sign up once, then do it whenever it suits you).\n\nBuilt by one person, for fun, no ads. Make a plan, bring a friend. Browse all activities at the link in bio.\n\nDid one? Tag #CasuallyGenerous and we'll share it."
     },
     {
       "id": "stories",
@@ -40,8 +41,8 @@
           "stamp": "Start here",
           "page": "3/3",
           "tier": "Committed",
-          "title": "Pick one, bring someone.",
-          "body": "Browse every idea at casuallygenerous.com.",
+          "title": "Make a plan, bring a friend.",
+          "body": "Browse all activities at casuallygenerous.com.",
           "cta": "Did one? Tag #CasuallyGenerous and we'll share it here.",
           "footRight": "Link ↓"
         },

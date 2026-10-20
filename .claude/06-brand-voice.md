@@ -68,7 +68,7 @@ These words carry the idea. Lean on them, but don't stack them all in one line.
 | **free** | True for most activities and a real reason to try | Say it plainly ("most of it is free"). Never lead with it. |
 | **people / friends / your people** | It's done with others | Name real relationships: friends, family, colleagues, neighbours. |
 | **ideas** | What the site actually offers | "Ideas for..." beats "a platform for" or "a directory of". |
-| **pick one, bring someone** | The simplest call to action | Use as a CTA on the site and in posts. |
+| **make a plan, bring a friend** | The simplest call to action | Use as a CTA on the site and in posts. |
 | **brighten someone's day** | A concrete outcome for the other person | Use sparingly, once per long piece. |
 
 ## Words to avoid
@@ -82,7 +82,7 @@ These make copy sound like a charity appeal, a startup, or AI. If one slips in, 
 | elevate, unlock, empower, transform, journey | Startup and AI clichés | better, try, do |
 | curated, platform, directory, community-driven, hub | Corporate and product-speak | a list, ideas, a collection |
 | simple acts of kindness, random acts of kindness, giving back | Generic. Any charity could say them | small, generous things to do |
-| volunteer, donate, charity, fundraise | Not what we do. These belong only on the Resources page | help, do, bring someone |
+| volunteer, donate, charity, fundraise | Not what we do. These belong only on the Resources page | help, do, bring a friend |
 | selfless, good person, hero, do-gooder | Makes it about virtue. We frame people as hosts and connectors | friend, someone, your people |
 | mostly free, nearly free, small, mostly free | Double hedges that lead with a disclaimer | "Most of it is free", said once and later in the copy |
 | a separate slot for "doing good" | Explains the idea defensively | Show a real plan instead |

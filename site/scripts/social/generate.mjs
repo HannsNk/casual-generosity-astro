@@ -65,7 +65,8 @@ function slidesFor(p) {
   }
   if (p.type === 'intro') {
     const n = 4, pg = i => `${i}/${n}`;
-    return [['introCover', {}], ['introPlans', { page: pg(2) }], ['introTiers', { page: pg(3) }], ['introCta', { page: pg(4) }]];
+    const items = p.slugs.map(s => { const a = get(s); return { tier: a.tier, title: a.title, hook: a.hook }; });
+    return [['introCover', {}], ['introPlans', { items, page: pg(2) }], ['introTiers', { page: pg(3) }], ['introCta', { page: pg(4) }]];
   }
   if (p.type === 'stories') {
     return [...p.frames.map(f => ['story', f]), ...(p.covers ?? []).map(c => ['cover', c])];

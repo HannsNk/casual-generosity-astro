@@ -91,16 +91,17 @@ export const templates = {
 
   introPlans: d => `<div class="frame t-Planned">
     <div style="display:flex;justify-content:space-between;align-items:start"><span class="mono" style="font-size:28px;color:var(--ink-soft)">You've got plans anyway</span>${pager(d.page)}</div>
-    <h1 class="disp" style="font-size:88px;margin:20px 0 50px">Add one small, generous thing.</h1>
-    ${PLANS.map(([plan, add]) => `<div style="padding:26px 0;border-top:3px solid var(--ink)">
-      <span class="mono" style="font-size:24px;color:var(--ink-soft)">${plan}</span>
-      <p data-fit style="font-size:44px;line-height:1.25;margin-top:10px"><span class="disp" style="color:var(--tier)">+</span> ${add}</p></div>`).join('')}
-    <p style="font-size:36px;line-height:1.3;margin-top:24px;color:var(--ink-soft)">Most of it is free.</p>
+    <h1 class="disp" style="font-size:88px;margin:20px 0 50px">Make them generous.</h1>
+    ${d.items.map(it => `<div class="t-${it.tier}" style="padding:26px 0;border-top:3px solid var(--ink)">
+      <span class="mono" style="font-size:24px;color:var(--ink-soft)">${it.tier}</span>
+      <p data-fit style="font-size:44px;line-height:1.25;margin-top:10px"><span class="disp" style="color:var(--tier)">+</span> ${esc(it.title)}</p>
+      <p data-fit style="font-size:30px;line-height:1.3;margin-top:8px;color:var(--ink-soft)">${esc(it.hook)}</p></div>`).join('')}
+    <p style="font-size:36px;line-height:1.3;margin-top:24px;color:var(--ink-soft)">All of it is free.</p>
     ${foot('')}</div>`,
 
   introTiers: d => `<div class="frame">
     <div style="display:flex;justify-content:space-between;align-items:start"><span class="mono" style="font-size:28px;color:var(--ink-soft)">Every idea has a tier</span>${pager(d.page)}</div>
-    <h1 class="disp" style="font-size:88px;margin:20px 0 54px">Pick by how much effort you've got.</h1>
+    <h1 class="disp" style="font-size:88px;margin:20px 0 54px">Pick by effort.</h1>
     ${TIERS.map(([t, line]) => `<div class="card t-${t}" style="padding:30px 38px;margin-bottom:44px;box-shadow:14px 14px 0 var(--tier)">
       <span class="stamp" style="font-size:22px">${t}</span>
       <p style="font-size:38px;line-height:1.28;margin-top:16px">${line}</p></div>`).join('')}
@@ -109,8 +110,8 @@ export const templates = {
   introCta: d => `<div class="frame t-Committed">
     <div style="text-align:right">${pager(d.page)}</div>
     <div class="card" style="margin:auto 0;padding:70px 60px">
-      <h2 class="disp" style="font-size:104px">Pick one, bring someone.</h2>
-      <p style="font-size:40px;line-height:1.3;margin-top:36px;color:var(--ink-soft)">Browse them all at casuallygenerous.com (link in bio). Did one? Tag <b style="font-family:Mono;font-weight:700;color:var(--ink)">#CasuallyGenerous</b> and we'll share it.</p>
+      <h2 class="disp" style="font-size:104px">Make a plan, bring a friend.</h2>
+      <p style="font-size:40px;line-height:1.3;margin-top:36px;color:var(--ink-soft)">Browse all activities at casuallygenerous.com (link in bio). Did one? Tag <b style="font-family:Mono;font-weight:700;color:var(--ink)">#CasuallyGenerous</b> and we'll share it.</p>
     </div>${foot('casuallygenerous.com')}</div>`,
 
   // ---------- Story frames 1080×1920 (content kept clear of the top/bottom app UI) ----------
@@ -133,13 +134,7 @@ export const templates = {
 const TIERS = [
   ['Spontaneous', 'Do it today. Nothing to book, nothing to arrange.'],
   ['Planned', 'Needs a date in the diary and a bit of coordinating.'],
-  ['Committed', 'Sign up, apply or train first. Then it stays available to you.'],
-];
-// Intro carousel: a plan people already have, and the one generous thing to add to it.
-const PLANS = [
-  ['Dinner with friends', 'Set a place for the neighbour who lives alone'],
-  ['Sunday walk in the park', 'Bring a few bin bags and clear up as you go'],
-  ['Your commute', 'Leave a real comment for a small creator you like'],
+  ['Committed', 'Sign up, apply or train first. Then do it whenever it suits you.'],
 ];
 const ICONS = {
   arrow: '<path d="M14 50h66M56 24l26 26-26 26"/>',
